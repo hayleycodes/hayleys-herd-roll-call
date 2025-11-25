@@ -1,0 +1,75 @@
+// --------------------
+// --- variables ------
+// --------------------
+$primaryColor: #d59bf6;
+$secondaryColor: #edb1f1;
+$backgroundColor: #9896f1;
+$accentColor: #8ef6e4;
+
+// --------------------
+// --- base styles ----
+// --------------------
+
+html {
+    background-color: $backgroundColor;
+    font-family: 'Fuzzy Bubbles', system-ui;
+}
+
+h1 {
+    // color: $primaryColor;
+    color: $accentColor;
+    font-size: 48px;
+}
+
+h2 {
+    color: $secondaryColor;
+}
+
+h1,
+h2 {
+    text-shadow: 1px 1px 2px black;
+}
+
+// --------------------
+// --- layout ---------
+// --------------------
+
+h1,
+h2 {
+    text-align: center;
+}
+
+h1 {
+    margin: 20px 0px 10px;
+}
+h2 {
+    margin: 0px;
+}
+
+section {
+    ul {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 10px;
+        padding: 10px;
+        margin: 0px;
+    }
+    .pig {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: center;
+        min-height: 40px;
+
+        .innerPig {
+            display: flex;
+
+            input[type='checkbox'] {
+                transform: scale(2);
+                accent-color: $accentColor;
+            }
+            label {
+                padding-left: 10px;
+            }
+        }
+    }
+}

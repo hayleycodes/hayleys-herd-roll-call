@@ -1,0 +1,20 @@
+{
+  "name": "guinea-pig-roll-call",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sass": "sass --watch scss:css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "sass": "^1.94.2"
+  },
+  "dependencies": {
+    "live-server": "^1.2.2"
+  }
+}

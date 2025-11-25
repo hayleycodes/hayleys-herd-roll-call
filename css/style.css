@@ -1,0 +1,57 @@
+html {
+  background-color: #9896f1;
+  font-family: "Fuzzy Bubbles", system-ui;
+}
+
+h1 {
+  color: #8ef6e4;
+  font-size: 48px;
+}
+
+h2 {
+  color: #edb1f1;
+}
+
+h1,
+h2 {
+  text-shadow: 1px 1px 2px black;
+}
+
+h1,
+h2 {
+  text-align: center;
+}
+
+h1 {
+  margin: 20px 0px 10px;
+}
+
+h2 {
+  margin: 0px;
+}
+
+section ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 10px;
+  padding: 10px;
+  margin: 0px;
+}
+section .pig {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  min-height: 40px;
+}
+section .pig .innerPig {
+  display: flex;
+}
+section .pig .innerPig input[type=checkbox] {
+  transform: scale(2);
+  accent-color: #8ef6e4;
+}
+section .pig .innerPig label {
+  padding-left: 10px;
+}
+
+/*# sourceMappingURL=style.css.map */
