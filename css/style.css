@@ -30,31 +30,31 @@ h2 {
   margin: 0px;
 }
 
-section ul {
+ul {
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: 10px;
   padding: 10px;
   margin: 0px;
 }
-section .pig {
+ul li {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
   min-height: 50px;
   font-size: 24px;
 }
-section .pig .innerPig {
+ul li div {
   display: flex;
 }
-section .pig .innerPig input[type=checkbox] {
+ul li div input[type=checkbox] {
   transform: scale(2);
   accent-color: #8ef6e4;
 }
-section .pig .innerPig input[type=checkbox]:checked + label {
+ul li div input[type=checkbox]:checked + label {
   color: #8ef6e4;
 }
-section .pig .innerPig label {
+ul li div label {
   padding-left: 10px;
 }
 

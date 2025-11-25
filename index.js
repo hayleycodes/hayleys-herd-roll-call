@@ -37,10 +37,8 @@ const generatePigListElements = (pigs) => {
     return pigs.map((pig) => {
         // Create the wrapper li
         const li = document.createElement('li');
-        li.className = 'pig';
 
         const innerDiv = document.createElement('div');
-        innerDiv.className = 'innerPig';
 
         // Create the input
         const input = document.createElement('input');
