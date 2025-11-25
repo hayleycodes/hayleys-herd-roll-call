@@ -41,7 +41,8 @@ section .pig {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
-  min-height: 40px;
+  min-height: 50px;
+  font-size: 24px;
 }
 section .pig .innerPig {
   display: flex;
@@ -49,6 +50,9 @@ section .pig .innerPig {
 section .pig .innerPig input[type=checkbox] {
   transform: scale(2);
   accent-color: #8ef6e4;
+}
+section .pig .innerPig input[type=checkbox]:checked + label {
+  color: #8ef6e4;
 }
 section .pig .innerPig label {
   padding-left: 10px;

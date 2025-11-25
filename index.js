@@ -39,7 +39,7 @@ const generatePigListElements = (pigs) => {
         const li = document.createElement('li');
         li.className = 'pig';
 
-        const innerDiv = document.createElement('li');
+        const innerDiv = document.createElement('div');
         innerDiv.className = 'innerPig';
 
         // Create the input
@@ -57,8 +57,6 @@ const generatePigListElements = (pigs) => {
         innerDiv.appendChild(input);
         innerDiv.appendChild(label);
         li.appendChild(innerDiv);
-        // li.appendChild(input);
-        // li.appendChild(label);
         return li;
     });
 };
@@ -72,3 +70,25 @@ const generatePigList = (listId, pigs) => {
 
 generatePigList('girls-list', girls);
 generatePigList('boys-list', boys);
+
+document.addEventListener('change', (event) => {
+    if (event.target.type !== 'checkbox') return;
+    const li = event.target.closest('li');
+    const ul = li.parentNode;
+
+    const items = [...ul.children];
+    const checkedItems = items.filter(
+        (item) => item.querySelector('input').checked
+    );
+
+    if (event.target.checked) {
+        ul.appendChild(li);
+    } else {
+        const firstChecked = checkedItems[0];
+        if (firstChecked) {
+            ul.insertBefore(li, firstChecked);
+        } else {
+            ul.insertBefore(li, ul.firstChild);
+        }
+    }
+});

@@ -1,10 +1,9 @@
 // --------------------
 // --- variables ------
 // --------------------
-$primaryColor: #d59bf6;
+$primaryColor: #8ef6e4;
 $secondaryColor: #edb1f1;
 $backgroundColor: #9896f1;
-$accentColor: #8ef6e4;
 
 // --------------------
 // --- base styles ----
@@ -16,8 +15,7 @@ html {
 }
 
 h1 {
-    // color: $primaryColor;
-    color: $accentColor;
+    color: $primaryColor;
     font-size: 48px;
 }
 
@@ -58,14 +56,19 @@ section {
         display: flex;
         flex-wrap: wrap;
         align-content: center;
-        min-height: 40px;
+        min-height: 50px;
+        font-size: 24px;
 
         .innerPig {
             display: flex;
 
             input[type='checkbox'] {
                 transform: scale(2);
-                accent-color: $accentColor;
+                accent-color: $primaryColor;
+
+                &:checked + label {
+                    color: $primaryColor;
+                }
             }
             label {
                 padding-left: 10px;
