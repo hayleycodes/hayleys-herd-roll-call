@@ -1,42 +1,66 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&display=swap');
+
+:root {
+    --primaryColor: #8ef6e4;
+    --secondaryColor: #edb1f1;
+    --backgroundColor: #9896f1;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+html {
+    background-color: var(--backgroundColor);
+    font-family: 'Fuzzy Bubbles', system-ui;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+h1 {
+    color: var(--primaryColor);
+    font-size: 48px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+h2 {
+    color: var(--secondaryColor);
 }
 
-.card {
-  padding: 2em;
+h1,
+h2 {
+    text-shadow: 1px 1px 2px black;
+    text-align: center;
 }
 
-.read-the-docs {
-  color: #888;
+h1 {
+    margin: 20px 0px 10px;
+}
+h2 {
+    margin: 0px;
+}
+
+ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 10px;
+    padding: 10px;
+    margin: 0px;
+
+    li {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: center;
+        min-height: 50px;
+        font-size: 24px;
+
+        div {
+            display: flex;
+
+            input[type='checkbox'] {
+                transform: scale(2);
+                accent-color: var(--primaryColor);
+
+                &:checked + label {
+                    color: var(--primaryColor);
+                }
+            }
+            label {
+                padding-left: 10px;
+            }
+        }
+    }
 }
