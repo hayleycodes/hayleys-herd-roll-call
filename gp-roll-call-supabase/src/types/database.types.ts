@@ -42,29 +42,71 @@ export type Database = {
       health_data: {
         Row: {
           created_at: string
+          dob: string | null
           id: number
           notes: string | null
-          pig: number | null
+          passed_away: string | null
+          pig_id: number
           updated_at: string | null
         }
         Insert: {
           created_at?: string
+          dob?: string | null
           id?: number
           notes?: string | null
-          pig?: number | null
+          passed_away?: string | null
+          pig_id: number
           updated_at?: string | null
         }
         Update: {
           created_at?: string
+          dob?: string | null
           id?: number
           notes?: string | null
-          pig?: number | null
+          passed_away?: string | null
+          pig_id?: number
           updated_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "health_data_pig_fkey"
-            columns: ["pig"]
+            columns: ["pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pig_relationships: {
+        Row: {
+          id: number
+          pig_id: number | null
+          related_pig_id: number | null
+          relationship_type: Database["public"]["Enums"]["relationship_types"]
+        }
+        Insert: {
+          id?: number
+          pig_id?: number | null
+          related_pig_id?: number | null
+          relationship_type: Database["public"]["Enums"]["relationship_types"]
+        }
+        Update: {
+          id?: number
+          pig_id?: number | null
+          related_pig_id?: number | null
+          relationship_type?: Database["public"]["Enums"]["relationship_types"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pig_relationships_pig_id_fkey"
+            columns: ["pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pig_relationships_related_pig_id_fkey"
+            columns: ["related_pig_id"]
             isOneToOne: false
             referencedRelation: "pigs"
             referencedColumns: ["id"]
@@ -74,44 +116,23 @@ export type Database = {
       pigs: {
         Row: {
           created_at: string
-          dad: number | null
           description: string | null
           id: number
-          mum: number | null
-          name: string | null
+          name: string
         }
         Insert: {
           created_at?: string
-          dad?: number | null
           description?: string | null
           id?: number
-          mum?: number | null
-          name?: string | null
+          name: string
         }
         Update: {
           created_at?: string
-          dad?: number | null
           description?: string | null
           id?: number
-          mum?: number | null
-          name?: string | null
+          name?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "pigs_dad_fkey"
-            columns: ["dad"]
-            isOneToOne: false
-            referencedRelation: "pigs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pigs_mum_fkey"
-            columns: ["mum"]
-            isOneToOne: false
-            referencedRelation: "pigs"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -121,7 +142,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      relationship_types: "parent" | "sibling"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -251,6 +272,8 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      relationship_types: ["parent", "sibling"],
+    },
   },
 } as const

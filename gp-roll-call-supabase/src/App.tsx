@@ -1,34 +1,43 @@
-import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { supabase } from "../utils/supabase-client";
+import { useEffect, useState } from "react";
+import Login from "./Login";
+import Button from "./components/ui/Button/Button";
 
-function App() {
-  const [error, setError] = useState("");
-  const [pigList, setPigList] = useState<{ name: string | null }[]>([]);
-
-  const getPigList = useCallback(async () => {
-    const { data, error } = await supabase.from("pigs").select("name");
-    console.log(data);
-    console.log(error);
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setPigList(data);
-    }
-  }, []);
+const App = () => {
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
-    getPigList();
-  }, [getPigList]);
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
 
-  return (
-    <div>
-      {pigList.map((pig) => (
-        <h2 key={pig.name}>{pig.name}</h2>
-      ))}
-    </div>
-  );
-}
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      },
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  // ✅ logged in state derived from Supabase
+  if (session) {
+    return (
+      <div className="welcome">
+        <h1>Welcome!</h1>
+        <Button onClick={handleLogout}>Sign Out</Button>
+      </div>
+    );
+  }
+
+  return <Login />;
+};
 
 export default App;

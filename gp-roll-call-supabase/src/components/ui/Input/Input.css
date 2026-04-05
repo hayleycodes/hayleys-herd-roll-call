@@ -1,0 +1,19 @@
+
+.input {
+  padding: var(--spacing-md);
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.15);
+}
+
+.input:disabled {
+  background: var(--color-surface);
+  cursor: not-allowed;
+  opacity: 0.7;
+}

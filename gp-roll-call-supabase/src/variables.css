@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&display=swap');
+
+
+:root {
+  /* =========================
+     COLORS
+  ========================== */
+
+  --primaryColor: #8ef6e4;
+  --secondaryColor: #edb1f1;
+  --backgroundColor: #9896f1;
+
+
+  /* =========================
+     SPACING
+  ========================== */
+  --spacing-sm: 2px;
+  --spacing-md: 4px;
+  --spacing-lg: 6px;
+
+
+  /* =========================
+     TYPOGRAPHY
+  ========================== */
+
+    font-family: 'Fuzzy Bubbles', system-ui;
+
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+}
