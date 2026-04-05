@@ -1,43 +1,26 @@
-import "./App.css";
 import { supabase } from "../utils/supabase-client";
-import { useEffect, useState } from "react";
-import Login from "./Login";
+import { useAuth } from "./hooks/useAuth";
+import "./App.css";
 import Button from "./components/ui/Button/Button";
+import Login from "./components/Login/Login";
 
-const App = () => {
-  const [session, setSession] = useState<any>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-      },
-    );
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+function App() {
+  const { session, loading } = useAuth();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
 
-  // ✅ logged in state derived from Supabase
-  if (session) {
-    return (
-      <div className="welcome">
-        <h1>Welcome!</h1>
-        <Button onClick={handleLogout}>Sign Out</Button>
-      </div>
-    );
-  }
+  if (loading) return <div>Loading...</div>;
 
-  return <Login />;
-};
+  return session ? (
+    <div>
+      <h1>Welcome, {session.user.email}</h1>
+      <Button onClick={handleLogout}>Logout</Button>
+    </div>
+  ) : (
+    <Login />
+  );
+}
 
 export default App;

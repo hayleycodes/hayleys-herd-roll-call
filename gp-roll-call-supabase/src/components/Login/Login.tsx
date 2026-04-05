@@ -1,0 +1,52 @@
+import { useState } from "react";
+import { supabase } from "../../../utils/supabase-client";
+import "./Login.css";
+import Input from "../ui/Input/Input";
+
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) setError(error.message);
+  };
+
+  return (
+    <div className="loginPage">
+      <form onSubmit={handleLogin} className="loginForm">
+        <Input
+          type="email"
+          placeholder="email"
+          value={email}
+          onChange={setEmail}
+          required
+          name="email"
+        />
+
+        <Input
+          type="password"
+          placeholder="password"
+          value={password}
+          onChange={setPassword}
+          required
+          name="password"
+        />
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        <button type="submit">login</button>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
