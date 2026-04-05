@@ -22,6 +22,7 @@
   word-break: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+  text-decoration: none;
 }
 
 .pigCard:hover {

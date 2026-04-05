@@ -42,7 +42,6 @@ export type Database = {
       health_data: {
         Row: {
           created_at: string
-          dob: string | null
           id: number
           notes: string | null
           passed_away: string | null
@@ -51,7 +50,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          dob?: string | null
           id?: number
           notes?: string | null
           passed_away?: string | null
@@ -60,7 +58,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          dob?: string | null
           id?: number
           notes?: string | null
           passed_away?: string | null
@@ -117,18 +114,21 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          dob: string | null
           id: number
           name: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          dob?: string | null
           id?: number
           name: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          dob?: string | null
           id?: number
           name?: string
         }

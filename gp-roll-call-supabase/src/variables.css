@@ -16,7 +16,7 @@
 
   /* Accent colours */
   --accent-pink: #ff4d8d; /* fun hot pink */
-  --accent-yellow: #ffd166; /* warm sunny yellow */
+  --accent-yellow: #ffe3b0; /* warm sunny yellow */
   --accent-mint: #2ee6a6; /* fresh mint green */
   --accent-blue: #3abeff; /* bright sky blue */
 
@@ -30,6 +30,7 @@
   /* =========================
      SPACING
   ========================== */
+  --spacing-xs: 8px;
   --spacing-sm: 16px;
   --spacing-md: 24px;
   --spacing-lg: 32px;
