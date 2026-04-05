@@ -5,7 +5,7 @@ button {
   border-width: var(--border-width);
   border-style: var(--border-style);
 
-  color: var(--secondaryColor);
+  color: var(--text);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
 

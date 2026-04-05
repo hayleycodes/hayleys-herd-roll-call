@@ -1,0 +1,38 @@
+.pigCard {
+  border-width: 3px;
+  border-style: solid;
+  border-color: var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  background-color: var(--surface);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 6px 12px grey;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  color: var(--text);
+
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.pigCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+}
+
+.pigCard:nth-child(odd) {
+  transform: rotate(-1deg);
+}
+
+.pigCard:nth-child(even) {
+  transform: rotate(1deg);
+}

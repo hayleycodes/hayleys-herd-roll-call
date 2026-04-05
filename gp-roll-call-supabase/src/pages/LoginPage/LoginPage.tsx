@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { supabase } from "../../../utils/supabase-client";
-import "./Login.css";
-import Input from "../ui/Input/Input";
+import "./LoginPage.css";
+import Input from "../../components/ui/Input/Input";
 
-const Login = () => {
+const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -49,4 +49,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;

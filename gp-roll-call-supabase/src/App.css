@@ -1,8 +1,12 @@
+* {
+  box-sizing: border-box;
+}
+
 html {
   width: 100vw;
   height: 100vh;
 
-  background-color: var(--backgroundColor);
+  background-color: var(--bg);
   transition: 0.2s ease;
 }
 
@@ -13,9 +17,38 @@ body {
   padding: 0px;
 }
 
-main {
-  width: 100%;
-  height: 100%;
+.wrapper {
+  padding: 10px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+header h1 {
+  font-size: var(--font-size-xl);
+  margin: 0px;
+}
+
+header button {
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+  padding: 4px 10px;
+
+  font-family: var(--primary-font);
+  color: var(--text);
+  font-size: 10px;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+header button:hover {
+  background: var(--bg);
+  color: var(--text);
 }
 
 input {

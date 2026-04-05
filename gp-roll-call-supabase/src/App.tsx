@@ -2,7 +2,8 @@ import { supabase } from "../utils/supabase-client";
 import { useAuth } from "./hooks/useAuth";
 import "./App.css";
 import Button from "./components/ui/Button/Button";
-import Login from "./components/Login/Login";
+import LoginPage from "./pages/LoginPage/LoginPage";
+import HomePage from "./pages/HomePage/HomePage";
 
 function App() {
   const { session, loading } = useAuth();
@@ -14,12 +15,15 @@ function App() {
   if (loading) return <div>Loading...</div>;
 
   return session ? (
-    <div>
-      <h1>Welcome, {session.user.email}</h1>
-      <Button onClick={handleLogout}>Logout</Button>
+    <div className="wrapper">
+      <header>
+        <h1>Hayley's Herd</h1>
+        <Button onClick={handleLogout}>Logout</Button>
+      </header>
+      <HomePage />
     </div>
   ) : (
-    <Login />
+    <LoginPage />
   );
 }
 
