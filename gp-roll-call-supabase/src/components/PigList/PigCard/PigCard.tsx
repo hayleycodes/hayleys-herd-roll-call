@@ -4,12 +4,14 @@ import "./PigCard.css";
 
 type PigCardProps = {
   pig: Pig;
+  relationship?: String;
 };
 
-const PigCard = ({ pig }: PigCardProps) => {
+const PigCard = ({ pig, relationship }: PigCardProps) => {
   return (
     <Link to={`/pigs/${pig.id}`} className="pigCard">
-      {pig.name}
+      <h3>{pig.name}</h3>
+      {relationship ? <span>{relationship}</span> : ""}
     </Link>
   );
 };

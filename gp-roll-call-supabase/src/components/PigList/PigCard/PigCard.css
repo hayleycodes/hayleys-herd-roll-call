@@ -6,6 +6,8 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  flex-direction: column;
+  height: 100%;
 
   background-color: var(--surface);
   border-radius: var(--border-radius-sm);
@@ -36,4 +38,14 @@
 
 .pigCard:nth-child(even) {
   transform: rotate(1deg);
+}
+
+.pigCard h3 {
+  margin: 0px;
+}
+
+.pigCard span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 10px;
 }

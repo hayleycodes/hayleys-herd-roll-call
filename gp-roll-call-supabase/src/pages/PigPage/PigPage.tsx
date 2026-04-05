@@ -2,18 +2,23 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   getPig,
+  getPigChildren,
   getPigHealth,
-  getPigRelationships,
+  getPigParents,
+  getPigSiblings,
   type Pig,
 } from "../../services/pigs.service";
 import "./PigPage.css";
+import PigCard from "../../components/PigList/PigCard/PigCard";
 
 const PigPage = () => {
   const { id } = useParams();
 
   const [pig, setPig] = useState<Pig | null>(null);
   const [health, setHealth] = useState<any[]>([]);
-  const [relationships, setRelationships] = useState<any[]>([]);
+  const [parents, setParents] = useState<any[]>([]);
+  const [children, setChildren] = useState<any[]>([]);
+  const [siblings, setSiblings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,15 +30,19 @@ const PigPage = () => {
         const pigId = Number(id);
         if (isNaN(pigId)) throw new Error("Invalid pig id");
 
-        const [pigData, healthData, relData] = await Promise.all([
-          getPig(pigId),
-          getPigHealth(pigId),
-          getPigRelationships(pigId),
-        ]);
+        const [pigData, healthData, parentsData, childrenData, siblingsData] =
+          await Promise.all([
+            getPig(pigId),
+            getPigHealth(pigId),
+            getPigParents(pigId),
+            getPigChildren(pigId),
+            getPigSiblings(pigId),
+          ]);
 
         setPig(pigData);
         setHealth(healthData);
-        setRelationships(relData);
+        setParents(parentsData);
+        setChildren(childrenData);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -117,18 +126,51 @@ const PigPage = () => {
       </div>
       <div className="pigCardDetail">
         {/* 👥 RELATIONSHIPS */}
+        {/* 👥 FAMILY */}
         <section className="section">
           <h2>Family 👥</h2>
 
-          {relationships.length === 0 ? (
-            <p className="muted">No relationships yet</p>
+          {/* Parents */}
+          <h3>Parents 🐖⬆️</h3>
+          {parents.length === 0 ? (
+            <p className="muted">No parents recorded</p>
           ) : (
-            relationships.map((r) => (
-              <div key={r.id} className="row">
-                <strong>{r.relationship_type}</strong> →{" "}
-                {r.pigs?.name ?? "Unknown pig"}
-              </div>
-            ))
+            <div className="family">
+              {parents.map((r) => (
+                <div key={r.id} className="relationshipCard">
+                  <PigCard pig={r.pigs} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Children */}
+          <h3>Children 🐷⬇️</h3>
+          {children.length === 0 ? (
+            <p className="muted">No children recorded</p>
+          ) : (
+            <div className="family">
+              {children.map((r) => (
+                <div key={r.id} className="relationshipCard">
+                  <PigCard pig={r.pigs} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* SIBLINGS */}
+          <h3>Siblings 🐖🤝🐖</h3>
+
+          {siblings.length === 0 ? (
+            <p className="muted">No siblings recorded</p>
+          ) : (
+            <div className="family">
+              {siblings.map((r) => (
+                <div key={r.id} className="relationshipCard">
+                  <PigCard pig={r.pigs} />
+                </div>
+              ))}
+            </div>
           )}
         </section>
       </div>

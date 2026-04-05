@@ -54,6 +54,17 @@
   margin-top: 20px;
 }
 
+.family {
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+}
+
+.relationshipCard {
+  height: 70px;
+}
+
 .row {
   padding: 8px 0;
   border-bottom: 1px solid var(--border);

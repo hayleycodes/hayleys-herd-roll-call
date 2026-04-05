@@ -76,34 +76,34 @@ export type Database = {
       }
       pig_relationships: {
         Row: {
+          child_id: number
+          created_at: string | null
           id: number
-          pig_id: number | null
-          related_pig_id: number | null
-          relationship_type: Database["public"]["Enums"]["relationship_types"]
+          parent_id: number
         }
         Insert: {
+          child_id: number
+          created_at?: string | null
           id?: number
-          pig_id?: number | null
-          related_pig_id?: number | null
-          relationship_type: Database["public"]["Enums"]["relationship_types"]
+          parent_id: number
         }
         Update: {
+          child_id?: number
+          created_at?: string | null
           id?: number
-          pig_id?: number | null
-          related_pig_id?: number | null
-          relationship_type?: Database["public"]["Enums"]["relationship_types"]
+          parent_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "pig_relationships_pig_id_fkey"
-            columns: ["pig_id"]
+            foreignKeyName: "pig_relationships_child_id_fkey"
+            columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "pigs"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "pig_relationships_related_pig_id_fkey"
-            columns: ["related_pig_id"]
+            foreignKeyName: "pig_relationships_parent_id_fkey"
+            columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "pigs"
             referencedColumns: ["id"]
