@@ -8,6 +8,7 @@ import Button from "./components/ui/Button/Button";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import HomePage from "./pages/HomePage/HomePage";
 import PigPage from "./pages/PigPage/PigPage";
+import FamilyTreePage from "./pages/FamilyTreePage/FamilyTreePage.tsx";
 
 function App() {
   const { session, loading } = useAuth();
@@ -32,6 +33,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/pigs/:id" element={<PigPage />} />
+        <Route path="/tree" element={<FamilyTreePage />} />
       </Routes>
     </div>
   );

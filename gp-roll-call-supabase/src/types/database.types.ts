@@ -114,21 +114,27 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          desexed: boolean | null
           dob: string | null
+          gender: Database["public"]["Enums"]["gender"] | null
           id: number
           name: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          desexed?: boolean | null
           dob?: string | null
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: number
           name: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          desexed?: boolean | null
           dob?: string | null
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: number
           name?: string
         }
@@ -142,6 +148,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      gender: "female" | "male"
       relationship_types: "parent" | "sibling"
     }
     CompositeTypes: {
@@ -273,6 +280,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      gender: ["female", "male"],
       relationship_types: ["parent", "sibling"],
     },
   },
