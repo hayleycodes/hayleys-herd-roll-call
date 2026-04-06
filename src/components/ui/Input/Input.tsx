@@ -1,4 +1,4 @@
-import "./input.css";
+import "./Input.css";
 
 type InputProps = {
   value: string;
