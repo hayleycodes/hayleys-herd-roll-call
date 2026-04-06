@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png"],
       manifest: {
-        name: "Pig Tracker",
-        short_name: "Pigs",
+        name: "Hayley's Herd",
+        short_name: "Hayley's Herd",
         description: "Track your pigs 🐷",
         theme_color: "#ffffff",
         background_color: "#ffffff",
