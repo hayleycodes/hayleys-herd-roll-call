@@ -6,7 +6,9 @@ import {
   getPigHealth,
   getPigParents,
   getPigSiblings,
+  createPigHealth,
   type Pig,
+  type HealthRecord,
 } from "../../services/pigs.service";
 import "./PigPage.css";
 import PigCard from "../../components/PigList/PigCard/PigCard";
@@ -21,6 +23,10 @@ const PigPage = () => {
   const [siblings, setSiblings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notes, setNotes] = useState("");
+  const [nailClip, setNailClip] = useState(false);
+  const [haircut, setHaircut] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -43,6 +49,7 @@ const PigPage = () => {
         setHealth(healthData);
         setParents(parentsData);
         setChildren(childrenData);
+        setSiblings(siblingsData);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -52,6 +59,34 @@ const PigPage = () => {
 
     load();
   }, [id]);
+
+  const handleAddHealth = async () => {
+    if (!pig) return;
+
+    try {
+      setSubmitting(true);
+
+      await createPigHealth({
+        pig_id: pig.id,
+        notes,
+        nail_clip: nailClip,
+        haircut,
+      } as any);
+
+      // refresh health list
+      const updatedHealth = await getPigHealth(pig.id);
+      setHealth(updatedHealth);
+
+      // reset form
+      setNotes("");
+      setNailClip(false);
+      setHaircut(false);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -99,28 +134,71 @@ const PigPage = () => {
         <section className="section">
           <h2>Health 🏥</h2>
 
+          <div className="healthForm">
+            <h3>Add health record</h3>
+
+            <textarea
+              placeholder="Notes..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+
+            <div className="checkboxes">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={nailClip}
+                  onChange={(e) => setNailClip(e.target.checked)}
+                />
+                Nail clip
+              </label>
+
+              <label>
+                <input
+                  type="checkbox"
+                  checked={haircut}
+                  onChange={(e) => setHaircut(e.target.checked)}
+                />
+                Haircut
+              </label>
+            </div>
+
+            <button onClick={handleAddHealth} disabled={submitting}>
+              {submitting ? "Saving..." : "Add record"}
+            </button>
+          </div>
+
           {health.length === 0 ? (
             <p className="muted">No health records yet</p>
           ) : (
-            health.map((healthEntry) => (
-              <div key={healthEntry.id} className="healthCard">
-                {healthEntry.notes ? (
+            <div>
+              {health.map((healthRecord: HealthRecord) => (
+                <div
+                  key={healthRecord.id}
+                  className={`healthCard ${healthRecord.passed_away ? "passedAway" : ""}`}
+                >
+                  <div className="cardHeader">
+                    {!healthRecord.passed_away && (
+                      <span className="muted">
+                        {new Date(healthRecord.created_at).toLocaleDateString()}
+                      </span>
+                    )}
+                    <div className="icons">
+                      {healthRecord.nail_clip && <p>💅 Nail clip</p>}
+                      {healthRecord.haircut && <p>✂️ Haircut</p>}
+                    </div>
+                  </div>
                   <div>
-                    <p>{healthEntry.notes}</p>
-                    <span className="muted">
-                      {new Date(healthEntry.created_at).toLocaleDateString()}
-                    </span>
+                    {healthRecord.passed_away ? (
+                      <p>{new Date(pig.created_at).toLocaleDateString()}</p>
+                    ) : (
+                      ""
+                    )}
+                    {healthRecord.notes ? <p>{healthRecord.notes}</p> : null}
                   </div>
-                ) : null}
-
-                {healthEntry.passed_away && (
-                  <div className="error">
-                    Passed:{" "}
-                    {new Date(healthEntry.passed_away).toLocaleDateString()}
-                  </div>
-                )}
-              </div>
-            ))
+                </div>
+              ))}
+            </div>
           )}
         </section>
       </div>

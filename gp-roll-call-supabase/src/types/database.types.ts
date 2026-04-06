@@ -42,7 +42,9 @@ export type Database = {
       health_data: {
         Row: {
           created_at: string
+          haircut: boolean
           id: number
+          nail_clip: boolean
           notes: string | null
           passed_away: string | null
           pig_id: number
@@ -50,7 +52,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          haircut?: boolean
           id?: number
+          nail_clip?: boolean
           notes?: string | null
           passed_away?: string | null
           pig_id: number
@@ -58,7 +62,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          haircut?: boolean
           id?: number
+          nail_clip?: boolean
           notes?: string | null
           passed_away?: string | null
           pig_id?: number
@@ -118,6 +124,7 @@ export type Database = {
           dob: string | null
           gender: Database["public"]["Enums"]["gender"] | null
           id: number
+          last_sighted: string | null
           name: string
         }
         Insert: {
@@ -127,6 +134,7 @@ export type Database = {
           dob?: string | null
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: number
+          last_sighted?: string | null
           name: string
         }
         Update: {
@@ -136,6 +144,7 @@ export type Database = {
           dob?: string | null
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: number
+          last_sighted?: string | null
           name?: string
         }
         Relationships: []

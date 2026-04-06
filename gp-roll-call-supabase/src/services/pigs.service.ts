@@ -8,6 +8,16 @@ export interface Pig {
   dob: string | null;
 }
 
+export interface HealthRecord {
+  id: number;
+  pig_id: number;
+  notes?: string | null;
+  passed_away?: string | null;
+  nail_clip?: boolean;
+  haircut?: boolean;
+  created_at: string;
+}
+
 export interface PigRelationship {
   id: number;
   parent_id: number;
@@ -53,6 +63,25 @@ export const getPigHealth = async (pigId: number) => {
   if (error) throw new Error(error.message);
 
   return data ?? [];
+};
+
+
+export const createPigHealth = async (healthRecord: HealthRecord) => {
+  const { data, error } = await supabase
+    .from("health_data")
+    .insert({
+      pig_id: healthRecord.pig_id,
+      notes: healthRecord.notes ?? null,
+      passed_away: healthRecord.passed_away ?? null,
+      nail_clip: healthRecord.nail_clip ?? false,
+      haircut: healthRecord.haircut ?? false,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  return data;
 };
 
 export const getPigParents = async (pigId: number) => {

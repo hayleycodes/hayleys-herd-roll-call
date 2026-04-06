@@ -15,7 +15,8 @@
   --primary-hover: #6848ff;
 
   /* Accent colours */
-  --accent-pink: #ff4d8d; /* fun hot pink */
+  --accent-red: #ffdddd;
+  --accent-pink: #ffc1c8; /* fun hot pink */
   --accent-yellow: #ffe3b0; /* warm sunny yellow */
   --accent-mint: #2ee6a6; /* fresh mint green */
   --accent-blue: #3abeff; /* bright sky blue */
@@ -23,6 +24,7 @@
   /* Text */
   --text: #2b2d42; /* soft near-black (less harsh) */
   --text-muted: #6c7080;
+  --text-red: #8b0000;
 
   /* Borders */
   --border-color: #ffe3b0;
