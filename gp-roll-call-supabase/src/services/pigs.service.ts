@@ -55,6 +55,25 @@ export const getPig = async (id: number): Promise<Pig> => {
   return data ?? [];
 };
 
+
+export const createPigSighting = async (id: number) => {
+  console.log(id);
+  
+  const { data, error } = await supabase
+    .from("pigs")
+    .update({
+      last_sighted: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select();
+
+    console.log("Supabase response:", { data, error });
+
+  if (error) throw new Error(error.message);
+
+  return data;
+};
+
 export const getPigHealth = async (pigId: number) => {
   const { data, error } = await supabase
     .from("health_data")
@@ -163,3 +182,4 @@ export const getPigSiblings = async (pigId: number) => {
 
   return data ?? [];
 };
+

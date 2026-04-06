@@ -8,19 +8,21 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getAllPigs();
-        setPigs(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadPigs = async () => {
+    try {
+      setLoading(true);
 
-    load();
+      const data = await getAllPigs();
+      setPigs(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPigs();
   }, []);
 
   if (loading) return <p>Loading...</p>;
@@ -28,7 +30,7 @@ const HomePage = () => {
 
   return (
     <div>
-      <PigList pigs={pigs} />
+      <PigList pigs={pigs} setPigs={setPigs} />{" "}
     </div>
   );
 };

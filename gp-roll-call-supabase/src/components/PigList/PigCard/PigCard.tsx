@@ -3,23 +3,34 @@ import { formatDistanceToNow } from "date-fns";
 import type { Pig } from "../../../services/pigs.service";
 import "./PigCard.css";
 
-type PigCardProps = {
+type Props = {
   pig: Pig;
-  relationship?: String;
+  relationship?: string;
+  onEyeClick: () => void;
 };
 
-const PigCard = ({ pig, relationship }: PigCardProps) => {
-  const last_sighted = pig.last_sighted
+const PigCard = ({ pig, relationship, onEyeClick }: Props) => {
+  const lastSighted = pig.last_sighted
     ? formatDistanceToNow(new Date(pig.last_sighted), {
         addSuffix: true,
       })
-    : "";
+    : "Never";
+
   return (
-    <Link to={`/pigs/${pig.id}`} className="pigCard">
-      <h3>{pig.name}</h3>
-      {relationship ? <span>{relationship}</span> : ""}
-      <span>{last_sighted}</span>
-    </Link>
+    <div className="pigCard">
+      <Link to={`/pigs/${pig.id}`}>
+        <h3>{pig.name}</h3>
+        {relationship && <span>{relationship}</span>}
+      </Link>
+
+      <div className="lastSighted">
+        <span>{lastSighted}</span>
+
+        <button className="eyeButton" onClick={onEyeClick}>
+          👀
+        </button>
+      </div>
+    </div>
   );
 };
 
