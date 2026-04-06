@@ -9,14 +9,16 @@ type Props = {
 
 const FamilyPanel = ({ parents, children, siblings }: Props) => {
   return (
-    <div className="pigCardDetail">
+    <div className="pigCardDetail familyPanel">
       <section>
         <h2>Family 👥</h2>
 
         {/* Parents */}
         <h3>Parents 🐖⬆️</h3>
         {parents.length === 0 ? (
-          <p className="muted">No parents recorded</p>
+          <div className="emptyFamily">
+            <p className="muted">No parents recorded</p>
+          </div>
         ) : (
           <div className="family">
             {parents.map((r) => (
@@ -30,7 +32,9 @@ const FamilyPanel = ({ parents, children, siblings }: Props) => {
         {/* Children */}
         <h3>Children 🐷⬇️</h3>
         {children.length === 0 ? (
-          <p className="muted">No children recorded</p>
+          <div className="emptyFamily">
+            <p className="muted">No children recorded</p>
+          </div>
         ) : (
           <div className="family">
             {children.map((r) => (
@@ -44,7 +48,9 @@ const FamilyPanel = ({ parents, children, siblings }: Props) => {
         {/* Siblings */}
         <h3>Siblings 🐖🤝🐖</h3>
         {siblings.length === 0 ? (
-          <p className="muted">No siblings recorded</p>
+          <div className="emptyFamily">
+            <p className="muted">No siblings recorded</p>
+          </div>
         ) : (
           <div className="family">
             {siblings.map((r) => (

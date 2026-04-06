@@ -1,8 +1,20 @@
+.familyPanel {
+  background-color: #ffe9f0;
+  border: 2px solid #ffa9cc;
+}
+
 .family {
   display: grid;
   gap: var(--spacing-sm);
   grid-template-columns: 1fr 1fr;
   width: 100%;
+}
+
+.emptyFamily {
+  padding: var(--spacing-xs);
+  border: 2px solid #faa18f;
+  border-radius: var(--border-radius-sm);
+  background-color: #ffcccc;
 }
 
 .relationshipCard {

@@ -43,43 +43,43 @@ const HealthPanel = ({ pig, health, setHealth }: Props) => {
   };
 
   return (
-    <div className="pigCardDetail">
+    <div className="pigCardDetail healthPanel">
       <section>
         <h2>Health 🏥</h2>
 
         {/* FORM */}
         <div className="healthForm">
-          <h3>Add health record</h3>
-
           <textarea
             placeholder="Notes..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
 
-          <div className="checkboxes">
-            <label>
-              <input
-                type="checkbox"
-                checked={nailClip}
-                onChange={(e) => setNailClip(e.target.checked)}
-              />
-              Nail clip
-            </label>
+          <div className="healthFormWrapper">
+            <div className="checkboxes">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={nailClip}
+                  onChange={(e) => setNailClip(e.target.checked)}
+                />
+                Nail clip
+              </label>
 
-            <label>
-              <input
-                type="checkbox"
-                checked={haircut}
-                onChange={(e) => setHaircut(e.target.checked)}
-              />
-              Haircut
-            </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={haircut}
+                  onChange={(e) => setHaircut(e.target.checked)}
+                />
+                Haircut
+              </label>
+            </div>
+
+            <button onClick={handleAddHealth} disabled={submitting}>
+              {submitting ? "Saving..." : "Add record"}
+            </button>
           </div>
-
-          <button onClick={handleAddHealth} disabled={submitting}>
-            {submitting ? "Saving..." : "Add record"}
-          </button>
         </div>
 
         {/* LIST */}

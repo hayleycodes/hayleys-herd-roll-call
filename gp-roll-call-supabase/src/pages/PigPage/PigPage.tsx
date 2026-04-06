@@ -82,7 +82,7 @@ const PigPage = () => {
 
   return (
     <div className="pigPage">
-      <div className="pigCardDetail">
+      <div className="pigCardDetail detailPanel">
         <h1 className="pigName">{pig.name}</h1>
 
         {pig.last_sighted && (

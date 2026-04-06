@@ -11,7 +11,8 @@
   height: 100%;
   padding: var(--spacing-xs);
 
-  background-color: var(--surface);
+  /* background-color: var(--surface); */
+  background-color: var(--surface-alt);
   border-radius: var(--border-radius-sm);
   box-shadow: 0 6px 12px grey;
 
@@ -72,7 +73,7 @@
   padding: 0px 4px;
   border-radius: var(--border-radius-sm);
   border: 2px solid var(--border-color);
-  background-color: white;
+  background-color: var(--accent-yellow);
   cursor: pointer;
 }
 
