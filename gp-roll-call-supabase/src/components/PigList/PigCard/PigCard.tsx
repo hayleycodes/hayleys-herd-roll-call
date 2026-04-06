@@ -6,7 +6,7 @@ import "./PigCard.css";
 type Props = {
   pig: Pig;
   relationship?: string;
-  onEyeClick: () => void;
+  onEyeClick?: () => void;
 };
 
 const PigCard = ({ pig, relationship, onEyeClick }: Props) => {
@@ -14,7 +14,7 @@ const PigCard = ({ pig, relationship, onEyeClick }: Props) => {
     ? formatDistanceToNow(new Date(pig.last_sighted), {
         addSuffix: true,
       })
-    : "Never";
+    : "";
 
   return (
     <div className="pigCard">
@@ -26,9 +26,11 @@ const PigCard = ({ pig, relationship, onEyeClick }: Props) => {
       <div className="lastSighted">
         <span>{lastSighted}</span>
 
-        <button className="eyeButton" onClick={onEyeClick}>
-          👀
-        </button>
+        {onEyeClick && (
+          <button className="eyeButton" onClick={onEyeClick}>
+            👀
+          </button>
+        )}
       </div>
     </div>
   );
