@@ -2,11 +2,15 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import {
+  compressImage,
   getPig,
   getPigChildren,
   getPigHealth,
+  getPigImageUrl,
   getPigParents,
   getPigSiblings,
+  savePigImage,
+  uploadPigImage,
   type Pig,
 } from "../../services/pigs.service";
 import "./PigPage.css";
@@ -17,12 +21,29 @@ const PigPage = () => {
   const { id } = useParams();
 
   const [pig, setPig] = useState<Pig | null>(null);
+  const [imageUrl, setPigImageUrl] = useState<string | null>(null);
+
   const [health, setHealth] = useState<any[]>([]);
   const [parents, setParents] = useState<any[]>([]);
   const [children, setChildren] = useState<any[]>([]);
   const [siblings, setSiblings] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleUpload = async (file: File, pigId: number) => {
+    const compressed = await compressImage(file);
+
+    const filePath = await uploadPigImage(compressed, pigId);
+
+    await savePigImage(pigId, filePath);
+
+    setPig((prev) => (prev ? { ...prev, image_path: filePath } : prev));
+
+    // generate new signed URL immediately
+    const { signedUrl } = await getPigImageUrl(filePath);
+    setPigImageUrl(signedUrl);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -46,6 +67,12 @@ const PigPage = () => {
         setParents(parentsData);
         setChildren(childrenData);
         setSiblings(siblingsData);
+
+        // generate signed URL for private image
+        if (pigData?.image_path) {
+          const { signedUrl } = await getPigImageUrl(pigData.image_path);
+          setPigImageUrl(signedUrl);
+        }
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -56,33 +83,27 @@ const PigPage = () => {
     load();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="pigPage">
-        <div className="pigCardDetail">Loading pig... 🐷</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="pigPage">
-        <div className="pigCardDetail error">Error: {error}</div>
-      </div>
-    );
-  }
-
-  if (!pig) {
-    return (
-      <div className="pigPage">
-        <div className="pigCardDetail">Pig not found 🐽</div>
-      </div>
-    );
-  }
+  if (loading) return <div className="pigCardDetail">Loading pig... 🐷</div>;
+  if (error) return <div className="pigCardDetail error">{error}</div>;
+  if (!pig) return <div className="pigCardDetail">Pig not found 🐽</div>;
 
   return (
     <div className="pigPage">
-      <div className="pigCardDetail detailPanel">
+      <div
+        className="pigCardDetail detailPanel"
+        style={{
+          backgroundImage: imageUrl
+            ? `linear-gradient(
+                to right,
+                rgba(255,255,255,1) 0%,
+                rgba(255,255,255,0.9) 35%,
+                rgba(255,255,255,0.6) 55%,
+                rgba(255,255,255,0.2) 75%,
+                rgba(255,255,255,0)
+              ), url(${imageUrl})`
+            : undefined,
+        }}
+      >
         <h1 className="pigName">{pig.name}</h1>
 
         {pig.last_sighted && (
@@ -106,10 +127,26 @@ const PigPage = () => {
             <span>Date of Birth: {new Date(pig.dob).toLocaleDateString()}</span>
           )}
         </div>
+
+        <label htmlFor="pig-image-upload" className="pigImageUploadButton">
+          📸
+        </label>
+
+        <input
+          id="pig-image-upload"
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file || !pig) return;
+
+            await handleUpload(file, pig.id);
+          }}
+        />
       </div>
 
       <HealthPanel pig={pig} health={health} setHealth={setHealth} />
-
       <FamilyPanel parents={parents} children={children} siblings={siblings} />
     </div>
   );

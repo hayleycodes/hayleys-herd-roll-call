@@ -15,14 +15,17 @@
 
 .detailPanel {
   border: 2px solid #24b3f0;
-  background: var(--surface);
+  position: relative;
+  background-color: var(--surface);
+  background-size: unset;
+  background-position: 30% 50%;
+  background-repeat: no-repeat;
 }
 
 .pigName {
   font-size: 28px;
   margin: 0px;
   color: var(--text);
-  text-align: center;
 }
 
 .pigDescription {
@@ -35,6 +38,30 @@
   justify-content: space-between;
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.pigImageUploadButton {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  border: 1px solid #ddd;
+
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.pigImageUploadButton:hover {
+  transform: scale(1.05);
 }
 
 .row {
