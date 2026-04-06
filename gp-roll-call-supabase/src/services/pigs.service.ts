@@ -6,6 +6,7 @@ export interface Pig {
   created_at: string;
   description: string | null;
   dob: string | null;
+  last_sighted: string | null;
 }
 
 export interface HealthRecord {
@@ -27,7 +28,8 @@ export interface PigRelationship {
 export const getAllPigs = async (): Promise<Pig[]> => {
   const { data, error } = await supabase
     .from("pigs")
-    .select("*");
+    .select("*")
+    .order('last_sighted', { ascending: true });
 
     console.log(data)
 

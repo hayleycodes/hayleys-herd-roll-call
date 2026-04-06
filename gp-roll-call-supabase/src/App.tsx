@@ -1,6 +1,6 @@
 import { supabase } from "../utils/supabase-client";
 import { useAuth } from "./hooks/useAuth";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 
 import "./App.css";
 import Button from "./components/ui/Button/Button";
@@ -26,7 +26,9 @@ function App() {
   return (
     <div className="wrapper">
       <header>
-        <h1>Hayley's Herd</h1>
+        <Link to="/" className="headerLink">
+          <h1>Hayley's Herd</h1>
+        </Link>
         <Button onClick={handleLogout}>Logout</Button>
       </header>
 

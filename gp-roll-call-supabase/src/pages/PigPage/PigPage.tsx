@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { formatDistanceToNow } from "date-fns";
 import {
   getPig,
   getPigChildren,
@@ -12,6 +13,8 @@ import {
 } from "../../services/pigs.service";
 import "./PigPage.css";
 import PigCard from "../../components/PigList/PigCard/PigCard";
+import HealthPanel from "../../components/HealthPanel/HealthPanel";
+import FamilyPanel from "../../components/FamilyPanel/FamilyPanel";
 
 const PigPage = () => {
   const { id } = useParams();
@@ -117,6 +120,15 @@ const PigPage = () => {
       <div className="pigCardDetail">
         <h1 className="pigName">{pig.name}</h1>
 
+        {pig.last_sighted && (
+          <p>
+            Last sighted:{" "}
+            {formatDistanceToNow(new Date(pig.last_sighted), {
+              addSuffix: true,
+            })}
+          </p>
+        )}
+
         <p className="pigDescription">
           {pig.description ?? "No description yet 🐷"}
         </p>
@@ -129,129 +141,11 @@ const PigPage = () => {
             <span>Date of Birth: {new Date(pig.dob).toLocaleDateString()}</span>
           )}
         </div>
-
-        {/* 🏥 HEALTH DATA */}
-        <section className="section">
-          <h2>Health 🏥</h2>
-
-          <div className="healthForm">
-            <h3>Add health record</h3>
-
-            <textarea
-              placeholder="Notes..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-
-            <div className="checkboxes">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={nailClip}
-                  onChange={(e) => setNailClip(e.target.checked)}
-                />
-                Nail clip
-              </label>
-
-              <label>
-                <input
-                  type="checkbox"
-                  checked={haircut}
-                  onChange={(e) => setHaircut(e.target.checked)}
-                />
-                Haircut
-              </label>
-            </div>
-
-            <button onClick={handleAddHealth} disabled={submitting}>
-              {submitting ? "Saving..." : "Add record"}
-            </button>
-          </div>
-
-          {health.length === 0 ? (
-            <p className="muted">No health records yet</p>
-          ) : (
-            <div>
-              {health.map((healthRecord: HealthRecord) => (
-                <div
-                  key={healthRecord.id}
-                  className={`healthCard ${healthRecord.passed_away ? "passedAway" : ""}`}
-                >
-                  <div className="cardHeader">
-                    {!healthRecord.passed_away && (
-                      <span className="muted">
-                        {new Date(healthRecord.created_at).toLocaleDateString()}
-                      </span>
-                    )}
-                    <div className="icons">
-                      {healthRecord.nail_clip && <p>💅 Nail clip</p>}
-                      {healthRecord.haircut && <p>✂️ Haircut</p>}
-                    </div>
-                  </div>
-                  <div>
-                    {healthRecord.passed_away ? (
-                      <p>{new Date(pig.created_at).toLocaleDateString()}</p>
-                    ) : (
-                      ""
-                    )}
-                    {healthRecord.notes ? <p>{healthRecord.notes}</p> : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
       </div>
-      <div className="pigCardDetail">
-        {/* 👥 RELATIONSHIPS */}
-        {/* 👥 FAMILY */}
-        <section className="section">
-          <h2>Family 👥</h2>
 
-          {/* Parents */}
-          <h3>Parents 🐖⬆️</h3>
-          {parents.length === 0 ? (
-            <p className="muted">No parents recorded</p>
-          ) : (
-            <div className="family">
-              {parents.map((r) => (
-                <div key={r.id} className="relationshipCard">
-                  <PigCard pig={r.pigs} />
-                </div>
-              ))}
-            </div>
-          )}
+      <HealthPanel pig={pig} health={health} setHealth={setHealth} />
 
-          {/* Children */}
-          <h3>Children 🐷⬇️</h3>
-          {children.length === 0 ? (
-            <p className="muted">No children recorded</p>
-          ) : (
-            <div className="family">
-              {children.map((r) => (
-                <div key={r.id} className="relationshipCard">
-                  <PigCard pig={r.pigs} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* SIBLINGS */}
-          <h3>Siblings 🐖🤝🐖</h3>
-
-          {siblings.length === 0 ? (
-            <p className="muted">No siblings recorded</p>
-          ) : (
-            <div className="family">
-              {siblings.map((r) => (
-                <div key={r.id} className="relationshipCard">
-                  <PigCard pig={r.pigs} />
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+      <FamilyPanel parents={parents} children={children} siblings={siblings} />
     </div>
   );
 };
