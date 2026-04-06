@@ -7,12 +7,9 @@ import {
   getPigHealth,
   getPigParents,
   getPigSiblings,
-  createPigHealth,
   type Pig,
-  type HealthRecord,
 } from "../../services/pigs.service";
 import "./PigPage.css";
-import PigCard from "../../components/PigList/PigCard/PigCard";
 import HealthPanel from "../../components/HealthPanel/HealthPanel";
 import FamilyPanel from "../../components/FamilyPanel/FamilyPanel";
 
@@ -26,10 +23,6 @@ const PigPage = () => {
   const [siblings, setSiblings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notes, setNotes] = useState("");
-  const [nailClip, setNailClip] = useState(false);
-  const [haircut, setHaircut] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -62,34 +55,6 @@ const PigPage = () => {
 
     load();
   }, [id]);
-
-  const handleAddHealth = async () => {
-    if (!pig) return;
-
-    try {
-      setSubmitting(true);
-
-      await createPigHealth({
-        pig_id: pig.id,
-        notes,
-        nail_clip: nailClip,
-        haircut,
-      } as any);
-
-      // refresh health list
-      const updatedHealth = await getPigHealth(pig.id);
-      setHealth(updatedHealth);
-
-      // reset form
-      setNotes("");
-      setNailClip(false);
-      setHaircut(false);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   if (loading) {
     return (
