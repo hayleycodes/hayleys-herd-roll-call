@@ -5,7 +5,7 @@ export const getAllPigs = async (): Promise<Pig[]> => {
   const { data, error } = await supabase
     .from("pigs")
     .select("*")
-    .order("last_sighted", { ascending: true });
+    .order("last_sighted", { ascending: true, nullsFirst: true });
 
   if (error) throw new Error(error.message);
 
