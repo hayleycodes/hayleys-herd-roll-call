@@ -5,7 +5,7 @@ const Loading = () => {
     <div className="loadingContainer">
       <div className="loadingPig">🐖</div>
 
-      <p className="loadingText">text=Loading pigs...</p>
+      <p className="loadingText">...loading pigs...</p>
     </div>
   );
 };
