@@ -4,6 +4,7 @@ import "./PigList.css";
 import type { Pig } from "../../services/pigs.types";
 import { createPigSighting } from "../../services/pigs.service";
 import PassedPigList from "./PassedPigList/PassedPigList";
+import Modal from "../ui/Modal/Modal";
 
 type PigListProps = {
   pigs: Pig[];
@@ -14,7 +15,6 @@ type PigListProps = {
 const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
 
   const handleConfirm = async () => {
     if (!selectedPig) return;
@@ -48,12 +48,7 @@ const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
   };
 
   const closeModal = () => {
-    setIsClosing(true);
-
-    setTimeout(() => {
-      setSelectedPig(null);
-      setIsClosing(false);
-    }, 200);
+    setSelectedPig(null);
   };
 
   return (
@@ -70,24 +65,17 @@ const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
 
       <PassedPigList passedPigs={passedPigs} />
 
-      {selectedPig && (
-        <div className="confirmOverlay" onClick={closeModal}>
-          <div
-            className={`confirmModal ${isClosing ? "closing" : ""}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p>Mark {selectedPig.name} as seen?</p>
+      <Modal isOpen={!!selectedPig} onClose={closeModal}>
+        <p>Mark {selectedPig?.name} as seen?</p>
 
-            <div className="confirmActions">
-              <button onClick={closeModal}>Cancel</button>
+        <div className="confirmActions">
+          <button onClick={closeModal}>Cancel</button>
 
-              <button onClick={handleConfirm} disabled={updating}>
-                {updating ? "Saving..." : "Confirm"}
-              </button>
-            </div>
-          </div>
+          <button onClick={handleConfirm} disabled={updating}>
+            {updating ? "Saving..." : "Confirm"}
+          </button>
         </div>
-      )}
+      </Modal>
     </>
   );
 };

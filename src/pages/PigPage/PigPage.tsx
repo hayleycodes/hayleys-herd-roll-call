@@ -20,9 +20,11 @@ import {
   savePigImage,
   getPig,
   updateDescription,
+  createPigSighting,
 } from "../../services/pigs.service";
 import type { Pig } from "../../services/pigs.types";
 import Loading from "../../components/ui/Loading/Loading";
+import Modal from "../../components/ui/Modal/Modal";
 
 const PigPage = () => {
   const { id } = useParams();
@@ -40,6 +42,43 @@ const PigPage = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
+  const [updating, setUpdating] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!selectedPig) return;
+
+    try {
+      setUpdating(true);
+
+      // 1. Update the database
+      await createPigSighting(selectedPig.id);
+
+      // 2. Update LOCAL state immediately
+      // This triggers a re-render so you see the change instantly
+      const now = new Date().toISOString();
+
+      setPig((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          last_sighted: now, // Overwrite the old timestamp with 'now'
+        };
+      });
+
+      // 3. Close the modal
+      setSelectedPig(null);
+    } catch (err) {
+      console.error("Failed to save sighting:", err);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedPig(null);
+  };
 
   const handleUpload = async (file: File, pigId: number) => {
     const compressed = await compressImage(file);
@@ -126,6 +165,9 @@ const PigPage = () => {
             : undefined,
         }}
       >
+        <button className="eyeButton" onClick={() => setSelectedPig(pig)}>
+          👀
+        </button>
         <h1 className="pigName">{pig.name}</h1>
 
         {pig.last_sighted && (
@@ -200,6 +242,18 @@ const PigPage = () => {
 
       <HealthPanel pig={pig} health={health} setHealth={setHealth} />
       <FamilyPanel parents={parents} children={children} siblings={siblings} />
+
+      <Modal isOpen={!!selectedPig} onClose={closeModal}>
+        <p>Mark {pig.name} as seen?</p>
+
+        <div className="confirmActions">
+          <button onClick={closeModal}>Cancel</button>
+
+          <button onClick={handleConfirm} disabled={updating}>
+            {updating ? "Saving..." : "Confirm"}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };

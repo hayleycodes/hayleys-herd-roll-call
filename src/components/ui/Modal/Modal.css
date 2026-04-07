@@ -1,0 +1,63 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 1000;
+}
+
+.modalOverlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* The actual bottom sheet */
+.modalSheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  background: white;
+  border-radius: 16px 16px 0 0;
+
+  padding: 20px;
+  max-height: 70vh;
+  overflow-y: auto;
+
+  /* Force hardware acceleration for smoother sliding */
+  will-change: transform;
+
+  /* Ensure it starts fully off-screen */
+  transform: translateY(100%);
+
+  /* Add a slight cubic-bezier for a more "app-like" feel */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* slide up animation */
+.modalSheet.open {
+  transform: translateY(0);
+}
+
+.modalOverlay p {
+  font-size: 24px;
+}
+
+/* Actions inside modal */
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.confirmActions button {
+  padding: var(--spacing-sm);
+  border: 3px solid var(--bg);
+  background-color: #e8cfff;
+  border-radius: 8px;
+  font-size: 24px;
+}
