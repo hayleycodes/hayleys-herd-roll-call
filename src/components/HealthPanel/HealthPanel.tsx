@@ -47,39 +47,41 @@ const HealthPanel = ({ pig, health, setHealth }: Props) => {
         <h2>Health 🏥</h2>
 
         {/* FORM */}
-        <div className="healthForm">
-          <textarea
-            placeholder="Notes..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
+        {!pig.passed_away && (
+          <div className="healthForm">
+            <textarea
+              placeholder="Notes..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
 
-          <div className="healthFormWrapper">
-            <div className="checkboxes">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={nailClip}
-                  onChange={(e) => setNailClip(e.target.checked)}
-                />
-                Nail clip
-              </label>
+            <div className="healthFormWrapper">
+              <div className="checkboxes">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={nailClip}
+                    onChange={(e) => setNailClip(e.target.checked)}
+                  />
+                  Nail clip
+                </label>
 
-              <label>
-                <input
-                  type="checkbox"
-                  checked={haircut}
-                  onChange={(e) => setHaircut(e.target.checked)}
-                />
-                Haircut
-              </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={haircut}
+                    onChange={(e) => setHaircut(e.target.checked)}
+                  />
+                  Haircut
+                </label>
+              </div>
+
+              <button onClick={handleAddHealth} disabled={submitting}>
+                {submitting ? "Saving..." : "Add record"}
+              </button>
             </div>
-
-            <button onClick={handleAddHealth} disabled={submitting}>
-              {submitting ? "Saving..." : "Add record"}
-            </button>
           </div>
-        </div>
+        )}
 
         {/* LIST */}
         {health.length === 0 ? (

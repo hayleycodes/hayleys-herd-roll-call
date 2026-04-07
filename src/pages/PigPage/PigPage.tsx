@@ -149,7 +149,7 @@ const PigPage = () => {
   if (!pig) return <div className="pigCardDetail">Pig not found 🐽</div>;
 
   return (
-    <div className="pigPage">
+    <div className={`pigPage ${pig.passed_away && "memorialMode"}`}>
       <div
         className="pigCardDetail detailPanel"
         style={{
@@ -165,9 +165,11 @@ const PigPage = () => {
             : undefined,
         }}
       >
-        <button className="eyeButton" onClick={() => setSelectedPig(pig)}>
-          👀
-        </button>
+        {!pig.passed_away && (
+          <button className="eyeButton" onClick={() => setSelectedPig(pig)}>
+            👀
+          </button>
+        )}
         <h1 className="pigName">{pig.name}</h1>
 
         {pig.last_sighted && (
@@ -221,9 +223,11 @@ const PigPage = () => {
           >
             ✏️
           </button>
-          <label htmlFor="pig-image-upload" className="pigImageUploadButton">
-            📸
-          </label>
+          {!pig.passed_away && (
+            <label htmlFor="pig-image-upload" className="pigImageUploadButton">
+              📸
+            </label>
+          )}
         </div>
 
         <input

@@ -30,6 +30,11 @@
   background-repeat: no-repeat;
 }
 
+.memorialMode .pigName::after {
+  content: " 🌈";
+  font-size: 0.8em;
+}
+
 .pigName {
   font-size: 28px;
   margin: 0px;
