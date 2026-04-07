@@ -26,6 +26,23 @@ export const getPig = async (id: number): Promise<Pig> => {
   return data;
 };
 
+export const updateDescription = async (
+  id: number,
+  description: string,
+): Promise<Pig> => {
+  const { data, error } = await supabase
+    .from("pigs")
+    .update({ description })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Pig not found");
+
+  return data;
+};
+
 export const createPigSighting = async (id: number) => {
   const { data, error } = await supabase
     .from("pigs")

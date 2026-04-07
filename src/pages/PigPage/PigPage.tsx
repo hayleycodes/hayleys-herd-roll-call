@@ -16,7 +16,11 @@ import {
   getPigChildren,
   getPigSiblings,
 } from "../../services/pig-relationships.service";
-import { savePigImage, getPig } from "../../services/pigs.service";
+import {
+  savePigImage,
+  getPig,
+  updateDescription,
+} from "../../services/pigs.service";
 import type { Pig } from "../../services/pigs.types";
 
 const PigPage = () => {
@@ -24,6 +28,9 @@ const PigPage = () => {
 
   const [pig, setPig] = useState<Pig | null>(null);
   const [imageUrl, setPigImageUrl] = useState<string | null>(null);
+
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [descriptionDraft, setDescriptionDraft] = useState<string>("");
 
   const [health, setHealth] = useState<any[]>([]);
   const [parents, setParents] = useState<any[]>([]);
@@ -45,6 +52,18 @@ const PigPage = () => {
     // generate new signed URL immediately
     const { signedUrl } = await getPigImageUrl(filePath);
     setPigImageUrl(signedUrl);
+  };
+
+  const handleSaveDescription = async () => {
+    if (!pig) return;
+
+    try {
+      const updated = await updateDescription(pig.id, descriptionDraft);
+      setPig(updated);
+      setIsEditingDescription(false);
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   useEffect(() => {
@@ -117,9 +136,27 @@ const PigPage = () => {
           </p>
         )}
 
-        <p className="pigDescription">
-          {pig.description ?? "No description yet 🐷"}
-        </p>
+        <div className="pigDescription">
+          {!isEditingDescription ? (
+            <>
+              <p>{pig.description ?? "No description yet 🐷"}</p>
+            </>
+          ) : (
+            <div>
+              <textarea
+                value={descriptionDraft}
+                onChange={(e) => setDescriptionDraft(e.target.value)}
+                rows={3}
+              />
+              <div>
+                <button onClick={handleSaveDescription}>Save</button>
+                <button onClick={() => setIsEditingDescription(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="pigMeta">
           {pig.created_at && (
@@ -130,9 +167,21 @@ const PigPage = () => {
           )}
         </div>
 
-        <label htmlFor="pig-image-upload" className="pigImageUploadButton">
-          📸
-        </label>
+        <div className="editButtons">
+          <button
+            onClick={() => {
+              setDescriptionDraft(pig.description ?? "");
+              setIsEditingDescription(true);
+            }}
+            className="pigDescriptionEditButton"
+            aria-label="Edit description"
+          >
+            ✏️
+          </button>
+          <label htmlFor="pig-image-upload" className="pigImageUploadButton">
+            📸
+          </label>
+        </div>
 
         <input
           id="pig-image-upload"

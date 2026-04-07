@@ -33,6 +33,15 @@
   margin-bottom: 16px;
 }
 
+.pigDescription button {
+  padding: var(--spacing-xs);
+  border: 2px solid var(--accent-blue);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
 .pigMeta {
   display: flex;
   justify-content: space-between;
@@ -40,11 +49,12 @@
   color: var(--text-muted);
 }
 
-.pigImageUploadButton {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
+.detailPanel textarea {
+  width: 100%;
+}
 
+.pigImageUploadButton,
+.pigDescriptionEditButton {
   width: 36px;
   height: 36px;
 
@@ -52,9 +62,9 @@
   align-items: center;
   justify-content: center;
 
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 2px solid var(--accent-blue);
 
   cursor: pointer;
   transition: transform 0.15s ease;
@@ -62,6 +72,14 @@
 
 .pigImageUploadButton:hover {
   transform: scale(1.05);
+}
+
+.editButtons {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  display: flex;
+  gap: 2px;
 }
 
 .row {
