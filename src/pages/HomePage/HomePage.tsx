@@ -4,6 +4,7 @@ import "./HomePage.css";
 import PigList from "../../components/PigList/PigList";
 import { getAllPigs, getPassedPigs } from "../../services/pigs.service";
 import type { Pig } from "../../services/pigs.types";
+import Loading from "../../components/ui/Loading/Loading";
 
 const HomePage = () => {
   const [pigs, setPigs] = useState<Pig[]>([]);
@@ -30,7 +31,9 @@ const HomePage = () => {
     loadPigs();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return <Loading />;
+  }
   if (error) return <p>{error}</p>;
 
   return (

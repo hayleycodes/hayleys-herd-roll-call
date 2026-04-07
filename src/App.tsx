@@ -9,6 +9,7 @@ import LoginPage from "./pages/LoginPage/LoginPage";
 import HomePage from "./pages/HomePage/HomePage";
 import PigPage from "./pages/PigPage/PigPage";
 import FamilyTreePage from "./pages/FamilyTreePage/FamilyTreePage.tsx";
+import Loading from "./components/ui/Loading/Loading.tsx";
 
 function App() {
   const { session, loading } = useAuth();
@@ -17,7 +18,7 @@ function App() {
     await supabase.auth.signOut();
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loading />;
 
   if (!session) {
     return <LoginPage />;

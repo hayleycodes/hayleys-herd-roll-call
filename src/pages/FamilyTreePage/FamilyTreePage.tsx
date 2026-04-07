@@ -14,6 +14,7 @@ import { supabase } from "../../../utils/supabase-client";
 import PigCard from "../../components/PigList/PigCard/PigCard";
 import "./FamilyTreePage.css";
 import type { Pig } from "../../services/pigs.types";
+import Loading from "../../components/ui/Loading/Loading";
 
 type Relationship = {
   id: number;
@@ -151,7 +152,7 @@ const FamilyTreePage = () => {
     return { nodes, edges, unrelatedPigs };
   }, [pigs, relationships]);
 
-  if (loading) return <div>Loading tree... 🐷</div>;
+  if (loading) return <Loading />;
 
   return (
     <div className="pageLayout">

@@ -22,6 +22,7 @@ import {
   updateDescription,
 } from "../../services/pigs.service";
 import type { Pig } from "../../services/pigs.types";
+import Loading from "../../components/ui/Loading/Loading";
 
 const PigPage = () => {
   const { id } = useParams();
@@ -104,7 +105,7 @@ const PigPage = () => {
     load();
   }, [id]);
 
-  if (loading) return <div className="pigCardDetail">Loading pig... 🐷</div>;
+  if (loading) return <Loading />;
   if (error) return <div className="pigCardDetail error">{error}</div>;
   if (!pig) return <div className="pigCardDetail">Pig not found 🐽</div>;
 
