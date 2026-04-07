@@ -17,9 +17,10 @@
   /* Accent colours */
   --accent-red: #ffdddd;
   --accent-pink: #ffc1c8; /* fun hot pink */
-  --accent-yellow: #ffe3b0; /* warm sunny yellow */
+  --accent-yellow: #fef0a3; /* warm sunny yellow */
   --accent-mint: #2ee6a6; /* fresh mint green */
   --accent-blue: #3abeff; /* bright sky blue */
+  --accent-grey: grey;
 
   /* Text */
   --text: #2b2d42; /* soft near-black (less harsh) */
@@ -27,7 +28,7 @@
   --text-red: #8b0000;
 
   /* Borders */
-  --border-color: #ffe3b0;
+  --border-color: #fef0a3;
 
   /* =========================
      SPACING

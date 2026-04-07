@@ -3,13 +3,15 @@ import PigCard from "./PigCard/PigCard";
 import "./PigList.css";
 import type { Pig } from "../../services/pigs.types";
 import { createPigSighting } from "../../services/pigs.service";
+import PassedPigList from "./PassedPigList/PassedPigList";
 
 type PigListProps = {
   pigs: Pig[];
+  passedPigs: Pig[];
   setPigs: React.Dispatch<React.SetStateAction<Pig[]>>;
 };
 
-const PigList = ({ pigs, setPigs }: PigListProps) => {
+const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
   const [updating, setUpdating] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -65,6 +67,8 @@ const PigList = ({ pigs, setPigs }: PigListProps) => {
           />
         ))}
       </div>
+
+      <PassedPigList passedPigs={passedPigs} />
 
       {selectedPig && (
         <div className="confirmOverlay" onClick={closeModal}>

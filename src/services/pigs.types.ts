@@ -6,6 +6,7 @@ export interface Pig {
   dob: string | null;
   last_sighted: string | null;
   image_path: string | null;
+  passed_away?: string | null;
 }
 
 export interface HealthRecord {

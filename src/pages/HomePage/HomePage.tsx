@@ -2,20 +2,23 @@ import { useEffect, useState } from "react";
 
 import "./HomePage.css";
 import PigList from "../../components/PigList/PigList";
-import { getAllPigs } from "../../services/pigs.service";
+import { getAllPigs, getPassedPigs } from "../../services/pigs.service";
 import type { Pig } from "../../services/pigs.types";
 
 const HomePage = () => {
   const [pigs, setPigs] = useState<Pig[]>([]);
+  const [passedPigs, setPassedPigs] = useState<Pig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadPigs = async () => {
     try {
       setLoading(true);
-
-      const data = await getAllPigs();
+      let data = await getAllPigs();
       setPigs(data);
+
+      data = await getPassedPigs();
+      setPassedPigs(data);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -32,7 +35,7 @@ const HomePage = () => {
 
   return (
     <div>
-      <PigList pigs={pigs} setPigs={setPigs} />{" "}
+      <PigList pigs={pigs} passedPigs={passedPigs} setPigs={setPigs} />{" "}
     </div>
   );
 };

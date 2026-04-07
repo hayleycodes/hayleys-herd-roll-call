@@ -1,0 +1,16 @@
+.passedPigListWrapper {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+}
+
+.passedPigListWrapper h2 {
+  padding: 24px;
+}
+
+.passedPigList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  width: 100%;
+}

@@ -5,6 +5,7 @@ export const getAllPigs = async (): Promise<Pig[]> => {
   const { data, error } = await supabase
     .from("pigs")
     .select("*")
+    .is("passed_away", null)
     .order("last_sighted", { ascending: true, nullsFirst: true });
 
   if (error) throw new Error(error.message);
@@ -50,4 +51,15 @@ export const savePigImage = async (pigId: number, imagePath: string) => {
   if (error) throw new Error(error.message);
 
   return data;
+};
+
+export const getPassedPigs = async (): Promise<Pig[]> => {
+  const { data, error } = await supabase
+    .from("pigs")
+    .select("*")
+    .not("passed_away", "is", null);
+
+  if (error) throw new Error(error.message);
+
+  return data ?? [];
 };

@@ -1,0 +1,127 @@
+/* --- THE MAIN CLOUD CONTAINER --- */
+.passedAwayCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  padding: 20px;
+  min-height: 120px;
+  max-width: 110px;
+
+  background: transparent;
+  border: none;
+  box-shadow: none;
+
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #444;
+
+  /* Default animation */
+  animation: cloudFloat 5s ease-in-out infinite;
+  z-index: 1;
+}
+
+.passedAwayCard a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* --- THE CLOUD SHAPE (PUFFS) --- */
+.passedAwayCard::before {
+  content: "";
+  position: absolute;
+  inset: 15px;
+  background: white;
+  border-radius: 50px;
+  z-index: -1;
+
+  box-shadow:
+    -20px -15px 0 5px white,
+    25px -20px 0 8px white,
+    35px 10px 0 0px white,
+    -30px 10px 0 2px white,
+    0px 15px 0 5px white;
+
+  filter: blur(2px);
+  transition: filter 0.3s ease;
+}
+
+/* --- THE SOFT GROUND SHADOW --- */
+.passedAwayCard::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 15%;
+  width: 70%;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  filter: blur(5px);
+  z-index: -2;
+}
+
+/* --- VARIATIONS IN MOVEMENT --- */
+
+/* Every 2nd card: Slower, and starts mid-way through animation */
+.passedAwayCard:nth-child(2n) {
+  animation-duration: 7s;
+  animation-delay: -2s;
+}
+
+/* Every 3rd card: Faster, and uses a slightly different drift pattern */
+.passedAwayCard:nth-child(3n) {
+  animation-name: cloudFloatAlt;
+  animation-duration: 4.5s;
+  animation-delay: -1s;
+}
+
+/* Every 4th card: Starts almost at the peak */
+.passedAwayCard:nth-child(4n) {
+  animation-delay: -3.5s;
+}
+
+/* --- INTERACTION --- */
+.passedAwayCard:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+  /* Pause animation on hover so it's easier to click */
+  animation-play-state: paused;
+}
+
+.passedAwayCard:hover::before {
+  filter: blur(4px);
+}
+
+/* --- ANIMATION KEYFRAMES --- */
+
+/* Standard Vertical Bob */
+@keyframes cloudFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Alternative: Bob + Slight Horizontal Drift */
+@keyframes cloudFloatAlt {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(5px, -8px);
+  }
+}
+
+/* Ensure text and icons stay readable and on top */
+.passedAwayCard h3,
+.passedAwayCard .cardIcons {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+}
