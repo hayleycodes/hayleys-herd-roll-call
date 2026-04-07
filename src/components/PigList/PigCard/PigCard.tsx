@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import type { Pig } from "../../../services/pigs.service";
 import "./PigCard.css";
+import type { Pig } from "../../../services/pigs.types";
 
 type Props = {
   pig: Pig;

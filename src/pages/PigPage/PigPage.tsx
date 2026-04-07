@@ -1,21 +1,23 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import {
-  compressImage,
-  getPig,
-  getPigChildren,
-  getPigHealth,
-  getPigImageUrl,
-  getPigParents,
-  getPigSiblings,
-  savePigImage,
-  uploadPigImage,
-  type Pig,
-} from "../../services/pigs.service";
+
 import "./PigPage.css";
 import HealthPanel from "../../components/HealthPanel/HealthPanel";
 import FamilyPanel from "../../components/FamilyPanel/FamilyPanel";
+import { getPigHealth } from "../../services/pig-health.service";
+import {
+  compressImage,
+  uploadPigImage,
+  getPigImageUrl,
+} from "../../services/pig-images.service";
+import {
+  getPigParents,
+  getPigChildren,
+  getPigSiblings,
+} from "../../services/pig-relationships.service";
+import { savePigImage, getPig } from "../../services/pigs.service";
+import type { Pig } from "../../services/pigs.types";
 
 const PigPage = () => {
   const { id } = useParams();

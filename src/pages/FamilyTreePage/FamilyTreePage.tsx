@@ -11,9 +11,9 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 
 import { supabase } from "../../../utils/supabase-client";
-import { type Pig } from "../../services/pigs.service";
 import PigCard from "../../components/PigList/PigCard/PigCard";
 import "./FamilyTreePage.css";
+import type { Pig } from "../../services/pigs.types";
 
 type Relationship = {
   id: number;

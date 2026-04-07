@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { createPigSighting, type Pig } from "../../services/pigs.service";
 import PigCard from "./PigCard/PigCard";
 import "./PigList.css";
+import type { Pig } from "../../services/pigs.types";
+import { createPigSighting } from "../../services/pigs.service";
 
 type PigListProps = {
   pigs: Pig[];

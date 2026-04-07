@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { getAllPigs, type Pig } from "../../services/pigs.service";
+
 import "./HomePage.css";
 import PigList from "../../components/PigList/PigList";
+import { getAllPigs } from "../../services/pigs.service";
+import type { Pig } from "../../services/pigs.types";
 
 const HomePage = () => {
   const [pigs, setPigs] = useState<Pig[]>([]);

@@ -4,9 +4,8 @@ import "./HealthPanel.css";
 import {
   createPigHealth,
   getPigHealth,
-  type HealthRecord,
-  type Pig,
-} from "../../services/pigs.service";
+} from "../../services/pig-health.service";
+import type { Pig, HealthRecord } from "../../services/pigs.types";
 
 type Props = {
   pig: Pig;
