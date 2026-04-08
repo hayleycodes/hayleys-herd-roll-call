@@ -81,6 +81,7 @@
 
   cursor: pointer;
   transition: transform 0.15s ease;
+  font-size: unset;
 }
 
 .pigImageUploadButton:hover {
