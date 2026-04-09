@@ -19,7 +19,6 @@ export const createPigHealth = async (healthRecord: HealthRecord) => {
     .insert({
       pig_id: healthRecord.pig_id,
       notes: healthRecord.notes ?? null,
-      passed_away: healthRecord.passed_away ?? null,
       nail_clip: healthRecord.nail_clip ?? false,
       haircut: healthRecord.haircut ?? false,
     })
