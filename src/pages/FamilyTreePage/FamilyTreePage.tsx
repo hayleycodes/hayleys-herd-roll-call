@@ -13,14 +13,8 @@ import "reactflow/dist/style.css";
 import { supabase } from "../../../utils/supabase-client";
 import PigCard from "../../components/PigList/PigCard/PigCard";
 import "./FamilyTreePage.css";
-import type { Pig } from "../../services/pigs.types";
+import type { Pig, PigRelationship } from "../../services/pigs.types";
 import Loading from "../../components/ui/Loading/Loading";
-
-type Relationship = {
-  id: number;
-  parent_id: number;
-  child_id: number;
-};
 
 const NODE_WIDTH = 120;
 const NODE_HEIGHT = 120;
@@ -49,7 +43,7 @@ const nodeTypes = {
 
 const FamilyTreePage = () => {
   const [pigs, setPigs] = useState<Pig[]>([]);
-  const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const [relationships, setRelationships] = useState<PigRelationship[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,7 +59,7 @@ const FamilyTreePage = () => {
       if (relRes.error) throw relRes.error;
 
       setPigs(pigsRes.data ?? []);
-      setRelationships(relRes.data ?? []);
+      setRelationships((relRes.data ?? []) as PigRelationship[]);
       setLoading(false);
     };
 
@@ -79,14 +73,14 @@ const FamilyTreePage = () => {
     const parentMap = new Map<number, number[]>();
 
     relationships.forEach((r) => {
-      childrenMap.set(r.parent_id, [
-        ...(childrenMap.get(r.parent_id) || []),
-        r.child_id,
+      childrenMap.set(r.pig_id_a, [
+        ...(childrenMap.get(r.pig_id_a) || []),
+        r.pig_id_b,
       ]);
 
-      parentMap.set(r.child_id, [
-        ...(parentMap.get(r.child_id) || []),
-        r.parent_id,
+      parentMap.set(r.pig_id_b, [
+        ...(parentMap.get(r.pig_id_b) || []),
+        r.pig_id_a,
       ]);
     });
 
@@ -142,8 +136,8 @@ const FamilyTreePage = () => {
     // ✅ REAL FIX: unrelated pigs = NOT in relationships at all
     const relatedPigIds = new Set<number>();
     relationships.forEach((r) => {
-      relatedPigIds.add(r.parent_id);
-      relatedPigIds.add(r.child_id);
+      relatedPigIds.add(r.pig_id_a);
+      relatedPigIds.add(r.pig_id_b);
     });
 
     const unrelatedPigs = pigs.filter((p) => !relatedPigIds.has(p.id));

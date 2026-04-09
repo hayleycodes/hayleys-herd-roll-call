@@ -10,6 +10,7 @@ type Props = {
 };
 
 const PigCard = ({ pig, relationship, onEyeClick }: Props) => {
+  
   const lastSighted = pig.last_sighted
     ? formatDistanceToNow(new Date(pig.last_sighted), {
         addSuffix: true,

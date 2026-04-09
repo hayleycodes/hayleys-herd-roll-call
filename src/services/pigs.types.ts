@@ -19,8 +19,14 @@ export interface HealthRecord {
   created_at: string;
 }
 
+export type RelationshipType =
+  | 'parent'
+  | 'sibling'
+  | 'foster_sibling';
+
 export interface PigRelationship {
   id: number;
-  parent_id: number;
-  child_id: number;
+  pig_id_a: number;
+  pig_id_b: number;
+  relationship_type: RelationshipType;
 }

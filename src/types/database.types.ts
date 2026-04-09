@@ -54,34 +54,37 @@ export type Database = {
       }
       pig_relationships: {
         Row: {
-          child_id: number
           created_at: string | null
           id: number
-          parent_id: number
+          pig_id_a: number
+          pig_id_b: number
+          relationship_type: string
         }
         Insert: {
-          child_id: number
           created_at?: string | null
           id?: number
-          parent_id: number
+          pig_id_a: number
+          pig_id_b: number
+          relationship_type: string
         }
         Update: {
-          child_id?: number
           created_at?: string | null
           id?: number
-          parent_id?: number
+          pig_id_a?: number
+          pig_id_b?: number
+          relationship_type?: string
         }
         Relationships: [
           {
-            foreignKeyName: "pig_relationships_child_id_fkey"
-            columns: ["child_id"]
+            foreignKeyName: "pig_relationships_pig_id_a_fkey"
+            columns: ["pig_id_a"]
             isOneToOne: false
             referencedRelation: "pigs"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "pig_relationships_parent_id_fkey"
-            columns: ["parent_id"]
+            foreignKeyName: "pig_relationships_pig_id_b_fkey"
+            columns: ["pig_id_b"]
             isOneToOne: false
             referencedRelation: "pigs"
             referencedColumns: ["id"]
@@ -137,7 +140,7 @@ export type Database = {
     Enums: {
       death_status: "unknown"
       gender: "female" | "male"
-      relationship_types: "parent" | "sibling"
+      relationship_types: "parent" | "sibling" | "foster"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -267,7 +270,7 @@ export const Constants = {
     Enums: {
       death_status: ["unknown"],
       gender: ["female", "male"],
-      relationship_types: ["parent", "sibling"],
+      relationship_types: ["parent", "sibling", "foster"],
     },
   },
 } as const
