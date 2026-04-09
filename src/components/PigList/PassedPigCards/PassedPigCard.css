@@ -23,6 +23,16 @@
   z-index: 1;
 }
 
+.passedAwayCardImage {
+  width: 170%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.95;
+ box-shadow: 0 0 8px 8px white inset; 
+}
+
 .passedAwayCard a {
   color: var(--text);
   text-decoration: none;
@@ -124,4 +134,8 @@
   position: relative;
   z-index: 2;
   margin: 0;
+}
+
+.passedAwayCard h3 {
+  top: -15px;
 }
