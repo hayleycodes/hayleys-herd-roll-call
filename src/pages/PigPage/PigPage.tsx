@@ -139,7 +139,21 @@ const PigPage = () => {
 
   return (
     <div className={`pigPage ${pig.passed_away && "memorialMode"}`}>
-      <div className="pigCardDetail detailPanel">
+      <div
+        className="pigCardDetail detailPanel"
+        style={{
+          backgroundImage: imageUrl
+            ? `linear-gradient(
+                to right,
+                rgba(255,255,255,1) 0%,
+                rgba(255,255,255,0.9) 35%,
+                rgba(255,255,255,0.6) 55%,
+                rgba(255,255,255,0.2) 75%,
+                rgba(255,255,255,0)
+              ), url(${imageUrl})`
+            : undefined,
+        }}
+      >
         {!pig.passed_away && (
           <button className="eyeButton" onClick={() => setSelectedPig(pig)}>
             👀
@@ -175,18 +189,33 @@ const PigPage = () => {
           )}
         </div>
 
+        <div className="pigMeta">
+          {pig.created_at && (
+            <span>Added: {new Date(pig.created_at).toLocaleDateString()}</span>
+          )}
+          {pig.dob && (
+            <span>Date of Birth: {new Date(pig.dob).toLocaleDateString()}</span>
+          )}
+        </div>
+
         <div className="editButtons">
           <button
             onClick={() => {
               setDescriptionDraft(pig.description ?? "");
               setIsEditingDescription(true);
             }}
+            className="pigDescriptionEditButton"
+            aria-label="Edit description"
           >
             ✏️
           </button>
+          <label htmlFor="pig-image-upload" className="pigImageUploadButton">
+            📸
+          </label>
         </div>
 
         <input
+          id="pig-image-upload"
           type="file"
           accept="image/*"
           style={{ display: "none" }}
