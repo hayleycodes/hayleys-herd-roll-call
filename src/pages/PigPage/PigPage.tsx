@@ -42,10 +42,12 @@ const PigPage = () => {
     parents: Pig[];
     children: Pig[];
     siblings: Pig[];
+    fosterFamily: Pig[];
   }>({
     parents: [],
     children: [],
     siblings: [],
+    fosterFamily: [],
   });
 
   const [loading, setLoading] = useState(true);
@@ -64,9 +66,7 @@ const PigPage = () => {
 
       const now = new Date().toISOString();
 
-      setPig((prev) =>
-        prev ? { ...prev, last_sighted: now } : null
-      );
+      setPig((prev) => (prev ? { ...prev, last_sighted: now } : null));
 
       setSelectedPig(null);
     } catch (err) {
@@ -140,7 +140,6 @@ const PigPage = () => {
   return (
     <div className={`pigPage ${pig.passed_away && "memorialMode"}`}>
       <div className="pigCardDetail detailPanel">
-
         {!pig.passed_away && (
           <button className="eyeButton" onClick={() => setSelectedPig(pig)}>
             👀
