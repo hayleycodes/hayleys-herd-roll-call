@@ -1,31 +1,52 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { formatDistanceToNow } from "date-fns";
+import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 
-import "./PigPage.css";
+import './PigPage.css';
 
-import HealthPanel from "../../components/HealthPanel/HealthPanel";
-import FamilyPanel from "../../components/FamilyPanel/FamilyPanel";
-import Loading from "../../components/ui/Loading/Loading";
-import Modal from "../../components/ui/Modal/Modal";
+import HealthPanel from '../../components/HealthPanel/HealthPanel';
+import FamilyPanel from '../../components/FamilyPanel/FamilyPanel';
+import Loading from '../../components/ui/Loading/Loading';
+import Modal from '../../components/ui/Modal/Modal';
+import Confetti from '../../components/ui/Confetti/Confetti';
 
-import { getPigHealth } from "../../services/pig-health.service";
+import { getPigHealth } from '../../services/pig-health.service';
 import {
   compressImage,
   uploadPigImage,
   getPigImageUrl,
-} from "../../services/pig-images.service";
+} from '../../services/pig-images.service';
 
 import {
   savePigImage,
   getPig,
   updateDescription,
   createPigSighting,
-} from "../../services/pigs.service";
+} from '../../services/pigs.service';
 
-import { getPigFamily } from "../../services/pig-relationships.service";
+import { getPigFamily } from '../../services/pig-relationships.service';
 
-import type { Pig } from "../../services/pigs.types";
+import type { Pig } from '../../services/pigs.types';
+import { PASTEL_BORDERS } from '../../components/PigList/PigCard/PigCard';
+
+const PIG_QUOTES = [
+  'Wheek wheek! 🐹',
+  'Got any veggies? 🥬',
+  'Popcorning with joy! 🍿',
+  'Rumble rumble... 💜',
+  'Lettuce celebrate! 🥬🎉',
+  'Just here for the hay 🌾',
+  'Living my best pig life ✨',
+  'Wheek wheek wheeeek! 📢',
+  'Nap time is the best time 😴',
+  'Did someone say cucumber? 🥒',
+  'Hair looking fabulous today 💇',
+  'Zooming around! 💨',
+];
+
+const getQuoteForPig = (pigId: number) => {
+  return PIG_QUOTES[pigId % PIG_QUOTES.length];
+};
 
 const PigPage = () => {
   const { id } = useParams();
@@ -34,7 +55,7 @@ const PigPage = () => {
   const [imageUrl, setPigImageUrl] = useState<string | null>(null);
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [descriptionDraft, setDescriptionDraft] = useState("");
+  const [descriptionDraft, setDescriptionDraft] = useState('');
 
   const [health, setHealth] = useState<any[]>([]);
 
@@ -55,6 +76,10 @@ const PigPage = () => {
 
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiOrigin, setConfettiOrigin] = useState<
+    { x: number; y: number } | undefined
+  >();
 
   const handleConfirm = async () => {
     if (!selectedPig) return;
@@ -69,8 +94,10 @@ const PigPage = () => {
       setPig((prev) => (prev ? { ...prev, last_sighted: now } : null));
 
       setSelectedPig(null);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2500);
     } catch (err) {
-      console.error("Failed to save sighting:", err);
+      console.error('Failed to save sighting:', err);
     } finally {
       setUpdating(false);
     }
@@ -104,10 +131,10 @@ const PigPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        if (!id) throw new Error("Missing pig id");
+        if (!id) throw new Error('Missing pig id');
 
         const pigId = Number(id);
-        if (isNaN(pigId)) throw new Error("Invalid pig id");
+        if (isNaN(pigId)) throw new Error('Invalid pig id');
 
         const [pigData, healthData, familyData] = await Promise.all([
           getPig(pigId),
@@ -137,88 +164,111 @@ const PigPage = () => {
   if (error) return <div className="pigCardDetail error">{error}</div>;
   if (!pig) return <div className="pigCardDetail">Pig not found 🐷</div>;
 
+  const pigColor = PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
+
   return (
-    <div className={`pigPage ${pig.passed_away && "memorialMode"}`}>
+    <div className={`pigPage ${pig.passed_away && 'memorialMode'}`}>
+      <Confetti active={showConfetti} origin={confettiOrigin} />
+
       <div
-        className="pigCardDetail detailPanel"
-        style={{
-          backgroundImage: imageUrl
-            ? `linear-gradient(
-                to right,
-                rgba(255,255,255,1) 0%,
-                rgba(255,255,255,0.9) 35%,
-                rgba(255,255,255,0.6) 55%,
-                rgba(255,255,255,0.2) 75%,
-                rgba(255,255,255,0)
-              ), url(${imageUrl})`
-            : undefined,
-        }}
+        className="pigDetailCard"
+        style={{ '--pig-color': pigColor } as React.CSSProperties}
       >
         {!pig.passed_away && (
-          <button className="eyeButton" onClick={() => setSelectedPig(pig)}>
+          <button
+            className="eyeButton detailEyeButton"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setConfettiOrigin({
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2,
+              });
+              setSelectedPig(pig);
+            }}
+          >
             👀
           </button>
         )}
 
-        <h1 className="pigName">{pig.name}</h1>
+        <div className="detailCircleWrapper">
+          <div className="pigSpeechBubble">{getQuoteForPig(pig.id)}</div>
+          <div className="editButtons">
+            <button
+              onClick={() => {
+                setDescriptionDraft(pig.description ?? '');
+                setIsEditingDescription(true);
+              }}
+              className="pigDescriptionEditButton"
+              aria-label="Edit description"
+            >
+              ✏️
+            </button>
+            <label htmlFor="pig-image-upload" className="pigImageUploadButton">
+              📸
+            </label>
+          </div>
+          <div className="detailCircle" style={{ borderColor: pigColor }}>
+            {imageUrl ? (
+              <img src={imageUrl} alt={pig.name} className="detailImage" />
+            ) : (
+              <span className="detailEmoji">🐖</span>
+            )}
+          </div>
+        </div>
 
-        {pig.last_sighted && (
-          <p>
-            Last sighted:{" "}
-            {formatDistanceToNow(new Date(pig.last_sighted), {
-              addSuffix: true,
-            })}
-          </p>
-        )}
-
-        <div className="pigDescription">
-          {!isEditingDescription ? (
-            <p>{pig.description ?? "No description yet 🐷"}</p>
-          ) : (
-            <div>
-              <textarea
-                value={descriptionDraft}
-                onChange={(e) => setDescriptionDraft(e.target.value)}
-                rows={3}
-              />
-              <button className="btn-outline" onClick={handleSaveDescription}>Save</button>
-              <button className="btn-outline" onClick={() => setIsEditingDescription(false)}>
-                Cancel
-              </button>
-            </div>
+        <div className="detailLabel" style={{ backgroundColor: pigColor }}>
+          <h1 className="pigName">{pig.name}</h1>
+          {pig.last_sighted && (
+            <span className="detailSighted">
+              Last sighted:{' '}
+              {formatDistanceToNow(new Date(pig.last_sighted), {
+                addSuffix: true,
+              })}
+            </span>
           )}
         </div>
 
-        <div className="pigMeta">
-          {pig.created_at && (
-            <span>Added: {new Date(pig.created_at).toLocaleDateString()}</span>
-          )}
-          {pig.dob && (
-            <span>Date of Birth: {new Date(pig.dob).toLocaleDateString()}</span>
-          )}
-        </div>
+        <div className="detailBody">
+          <div className="pigDescription">
+            {!isEditingDescription ? (
+              <p>{pig.description ?? 'No description yet 🐷'}</p>
+            ) : (
+              <div>
+                <textarea
+                  value={descriptionDraft}
+                  onChange={(e) => setDescriptionDraft(e.target.value)}
+                  rows={3}
+                />
+                <button className="btn-outline" onClick={handleSaveDescription}>
+                  Save
+                </button>
+                <button
+                  className="btn-outline"
+                  onClick={() => setIsEditingDescription(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
 
-        <div className="editButtons">
-          <button
-            onClick={() => {
-              setDescriptionDraft(pig.description ?? "");
-              setIsEditingDescription(true);
-            }}
-            className="pigDescriptionEditButton"
-            aria-label="Edit description"
-          >
-            ✏️
-          </button>
-          <label htmlFor="pig-image-upload" className="pigImageUploadButton">
-            📸
-          </label>
+          <div className="pigMeta">
+            {pig.created_at && (
+              <span>
+                Added: {new Date(pig.created_at).toLocaleDateString()}
+              </span>
+            )}
+            {pig.dob && (
+              <span>DOB: {new Date(pig.dob).toLocaleDateString()}</span>
+            )}
+          </div>
         </div>
 
         <input
           id="pig-image-upload"
           type="file"
           accept="image/*"
-          style={{ display: "none" }}
+          style={{ display: 'none' }}
           onChange={async (e) => {
             const file = e.target.files?.[0];
             if (file && pig) {
@@ -237,7 +287,7 @@ const PigPage = () => {
 
         <button onClick={() => setSelectedPig(null)}>Cancel</button>
         <button onClick={handleConfirm} disabled={updating}>
-          {updating ? "Saving..." : "Confirm"}
+          {updating ? 'Saving...' : 'Confirm'}
         </button>
       </Modal>
     </div>

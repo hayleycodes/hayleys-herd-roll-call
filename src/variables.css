@@ -65,6 +65,7 @@
   ========================== */
 
   --border-radius-sm: 8px;
+  --border-radius-md: 15px;
   --border-width: 5px;
   --border-style: solid;
 }

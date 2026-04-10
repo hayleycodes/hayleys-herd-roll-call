@@ -24,6 +24,24 @@ body {
   background: transparent;
 }
 
+body::before {
+  content: '🌿 🐾 🐖 🌽 ☀️ 🍅 🌻 🌼 🥦 🥕 🥬 🐾 🥦 🌽 🍅 🌼 🌿 ☀️ 🥕 🌻 🐖 🥬 🥬 🌼 ☀️ 🌽 🌻 🥦 🌿 🐾 🐖 🥕 🍅 🌼 🌻 🥬 🐾 🌿 🌽 🐖 🍅 🥕 ☀️ 🥦 🐖 ☀️ 🐾 🌽 🍅 🌼 🌻 🥦 🌿 🥕 🥬 🐖 🐾 🥬 🌿 🥕 ☀️ 🌻 🥦 🌽 🍅 🌼 ☀️ 🌿 🌻 🥕 🐖 🌼 🍅 🥦 🌽 🥬 🐾 ☀️ 🌽 🌿 🍅 🥬 🥕 🐾 🌼 🐖 🥦 🌻 🍅 🐾 🌿 🥦 🌽 🌼 ☀️ 🥕 🌻 🐖 🥬 🥦 🐾 🌻 🌽 🌼 ☀️ 🥕 🍅 🥬 🐖 🌿';
+  position: fixed;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  font-size: 28px;
+  line-height: 60px;
+  letter-spacing: 20px;
+  word-spacing: 10px;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  transform: rotate(-15deg);
+  overflow: hidden;
+}
+
 #root {
   height: 100%;
   margin: 0;
@@ -31,6 +49,8 @@ body {
 
 .wrapper {
   padding: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 header {

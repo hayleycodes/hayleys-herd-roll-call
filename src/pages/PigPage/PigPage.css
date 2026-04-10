@@ -7,38 +7,128 @@
   gap: var(--spacing-xs);
 }
 
-.pigCardDetail {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-}
+/* ---- Detail card (PigCard-style) ---- */
 
-.pigPage .pigCardDetail .eyeButton {
-  right: -6px;
-  top: -10px;
-  width: 48px;
-  height: 48px;
-  transform: rotate(10deg);
-}
-
-.detailPanel {
-  border: 2px solid var(--accent-blue);
+.pigDetailCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
-  background-color: var(--surface);
-  background-size: unset;
-  background-position: 30% 50%;
-  background-repeat: no-repeat;
+  width: 100%;
 }
 
-.memorialMode .pigName::after {
-  content: " 🌈";
-  font-size: 0.8em;
+.detailEyeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 64px;
+  height: 64px;
+  padding: 10px;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--pig-color);
+  border-color: var(--pig-color);
+  cursor: pointer;
+  font-size: 36px;
+  z-index: 2;
+  transform: rotate(10deg);
+  box-shadow: 0 4px 10px grey;
+}
+
+.detailCircleWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.pigSpeechBubble {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 2;
+  background: white;
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-muted);
+  box-shadow: 0 4px 10px grey;
+  max-width: 45%;
+  transform: rotate(-13deg);
+}
+
+.pigSpeechBubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 20px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid white;
+}
+
+.detailCircle {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 4px solid var(--border-color);
+  background-color: var(--surface-alt);
+  box-shadow: 0 4px 10px grey;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detailEmoji {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.detailLabel {
+  margin-top: -50px;
+  width: 100%;
+  padding: 12px;
+  border-top-left-radius: var(--border-radius-sm);
+  border-top-right-radius: var(--border-radius-sm);
+  text-align: center;
+  z-index: 1;
 }
 
 .pigName {
   font-size: 28px;
-  margin: 0px;
+  margin: 0;
   color: var(--text);
+}
+
+.memorialMode .pigName::after {
+  content: ' 🌈';
+  font-size: 0.8em;
+}
+
+.detailSighted {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ---- Body (description, meta, edit) ---- */
+
+.detailBody {
+  width: 100%;
+  margin-top: -15px;
+  padding: 30px 12px 16px;
+  position: relative;
+  border-bottom-left-radius: var(--border-radius-sm);
+  border-bottom-right-radius: var(--border-radius-sm);
+  border: 2px solid var(--pig-color);
+  border-top: none;
+  background-color: #ffffff;
 }
 
 .pigDescription {
@@ -46,8 +136,17 @@
   margin-bottom: 16px;
 }
 
+.pigDescription p {
+  margin: 0;
+}
+
 .pigDescription button {
-  border-color: var(--accent-blue);
+  border-color: var(--pig-color);
+}
+
+.pigDescription textarea {
+  width: 100%;
+  font-family: var(--primary-font);
 }
 
 .pigMeta {
@@ -57,38 +156,36 @@
   color: var(--text-muted);
 }
 
-.detailPanel textarea {
-  width: 100%;
+.editButtons {
+  position: absolute;
+  bottom: 55px;
+  right: 5px;
+  z-index: 2;
+  display: flex;
+  gap: 4px;
 }
 
 .pigImageUploadButton,
 .pigDescriptionEditButton {
   width: 36px;
   height: 36px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  background: var(--bg-translucent);
+  background: var(--pig-color);
   border-radius: 8px;
-  border: 2px solid var(--accent-blue);
-
+  border: 2px solid var(--pig-color);
   cursor: pointer;
   transition: transform 0.15s ease;
   font-size: unset;
 }
 
-.pigImageUploadButton:hover {
-  transform: scale(1.05);
-}
+/* ---- Shared utility ---- */
 
-.editButtons {
-  position: absolute;
-  bottom: 6px;
-  right: 6px;
-  display: flex;
-  gap: 2px;
+.pigCardDetail {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
 }
 
 .row {

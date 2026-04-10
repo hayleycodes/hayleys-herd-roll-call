@@ -50,7 +50,7 @@ export const getPigFamilyEdges = async (
           {
             pig: other,
             relationship: "parent",
-            direction: isA ? "up" : "down",
+            direction: isA ? "down" : "up",
           },
         ];
 
