@@ -285,10 +285,12 @@ const PigPage = () => {
       <Modal isOpen={!!selectedPig} onClose={() => setSelectedPig(null)}>
         <p>Mark {pig.name} as seen?</p>
 
-        <button onClick={() => setSelectedPig(null)}>Cancel</button>
-        <button onClick={handleConfirm} disabled={updating}>
-          {updating ? 'Saving...' : 'Confirm'}
-        </button>
+        <div className="confirmActions">
+          <button onClick={() => setSelectedPig(null)}>Cancel</button>
+          <button onClick={handleConfirm} disabled={updating}>
+            {updating ? 'Saving...' : 'Confirm'}
+          </button>
+        </div>
       </Modal>
     </div>
   );
