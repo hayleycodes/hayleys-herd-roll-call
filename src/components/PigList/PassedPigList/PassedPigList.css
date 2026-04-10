@@ -8,9 +8,8 @@
 }
 
 .passedPigList {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--spacing-lg);
+  display: grid;
+  gap: var(--spacing-xs);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   width: 100%;
 }

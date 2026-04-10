@@ -20,10 +20,11 @@ type Props = {
   pig: Pig;
   relationship?: string;
   fading?: boolean;
+  passed?: boolean;
   onEyeClick?: (origin: { x: number; y: number }) => void;
 };
 
-const PigCard = ({ pig, relationship, fading, onEyeClick }: Props) => {
+const PigCard = ({ pig, relationship, fading, passed, onEyeClick }: Props) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(!!pig.image_path);
   const [wiggling, setWiggling] = useState(false);
@@ -56,7 +57,7 @@ const PigCard = ({ pig, relationship, fading, onEyeClick }: Props) => {
   };
 
   return (
-    <div className={`pigCard${fading ? ' pigCardFading' : ''}`} onClick={handleTap}>
+    <div className={`pigCard${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}`} onClick={handleTap}>
       {onEyeClick && (
         <button
           className="eyeButton"

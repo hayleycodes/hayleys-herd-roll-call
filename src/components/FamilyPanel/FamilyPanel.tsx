@@ -22,7 +22,7 @@ const FamilyPanel = ({ family }: Props) => {
           <div className="family">
             {family.siblings.map((pig) => (
               <div key={pig.id} className="relationshipCard">
-                <PigCard pig={pig} />
+                <PigCard pig={pig} passed={!!pig.passed_away} />
               </div>
             ))}
           </div>
@@ -38,7 +38,7 @@ const FamilyPanel = ({ family }: Props) => {
           <div className="family">
             {family.parents.map((pig) => (
               <div key={pig.id} className="relationshipCard">
-                <PigCard pig={pig} />
+                <PigCard pig={pig} passed={!!pig.passed_away} />
               </div>
             ))}
           </div>
@@ -54,7 +54,7 @@ const FamilyPanel = ({ family }: Props) => {
           <div className="family">
             {family.children.map((pig) => (
               <div key={pig.id} className="relationshipCard">
-                <PigCard pig={pig} />
+                <PigCard pig={pig} passed={!!pig.passed_away} />
               </div>
             ))}
           </div>
@@ -70,7 +70,7 @@ const FamilyPanel = ({ family }: Props) => {
           <div className="family">
             {family.fosterFamily.map((pig) => (
               <div key={pig.id} className="relationshipCard">
-                <PigCard pig={pig} />
+                <PigCard pig={pig} passed={!!pig.passed_away} />
               </div>
             ))}
           </div>

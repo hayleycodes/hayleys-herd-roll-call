@@ -147,7 +147,7 @@ const PigPage = () => {
         setFamily(familyData);
 
         if (pigData?.image_path) {
-          const { signedUrl } = await getPigImageUrl(pigData.image_path);
+          const { signedUrl } = await getPigImageUrl(pigData.image_path, true);
           setPigImageUrl(signedUrl);
         }
       } catch (err: any) {
@@ -191,7 +191,7 @@ const PigPage = () => {
         )}
 
         <div className="detailCircleWrapper">
-          <div className="pigSpeechBubble">{getQuoteForPig(pig.id)}</div>
+          {!pig.passed_away && <div className="pigSpeechBubble">{getQuoteForPig(pig.id)}</div>}
           <div className="editButtons">
             <button
               onClick={() => {

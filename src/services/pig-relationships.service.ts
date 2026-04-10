@@ -30,8 +30,8 @@ export const getPigFamilyEdges = async (
       pig_id_a,
       pig_id_b,
       relationship_type,
-      a:pigs!pig_id_a (id, name, description, created_at, dob, last_sighted, image_path),
-      b:pigs!pig_id_b (id, name, description, created_at, dob, last_sighted, image_path)
+      a:pigs!pig_id_a (id, name, description, created_at, dob, last_sighted, image_path, passed_away),
+      b:pigs!pig_id_b (id, name, description, created_at, dob, last_sighted, image_path, passed_away)
     `,
     )
     .or(`pig_id_a.eq.${pigId},pig_id_b.eq.${pigId}`);

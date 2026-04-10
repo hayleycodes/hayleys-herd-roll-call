@@ -31,9 +31,11 @@ export const uploadPigImage = async (file: File, pigId: number) => {
 
 const imageCache = new Map<string, string>();
 
-export const getPigImageUrl = async (path: string) => {
-  const cached = imageCache.get(path);
-  if (cached) return { signedUrl: cached };
+export const getPigImageUrl = async (path: string, skipCache = false) => {
+  if (!skipCache) {
+    const cached = imageCache.get(path);
+    if (cached) return { signedUrl: cached };
+  }
 
   const { data, error } = await supabase.storage
     .from("pig_photos")

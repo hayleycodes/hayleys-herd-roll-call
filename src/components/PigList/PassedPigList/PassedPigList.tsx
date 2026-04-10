@@ -1,5 +1,5 @@
 import type { Pig } from "../../../services/pigs.types";
-import PassedPigCard from "../PassedPigCards/PassedPigCard";
+import PigCard from "../PigCard/PigCard";
 import "./PassedPigList.css";
 
 type PigListProps = {
@@ -12,7 +12,7 @@ const PigList = ({ passedPigs }: PigListProps) => {
       <h2>Forever in the Herd</h2>
       <div className="passedPigList">
         {passedPigs.map((pig) => (
-          <PassedPigCard key={pig.id} pig={pig} />
+          <PigCard key={pig.id} pig={pig} passed />
         ))}
       </div>
     </div>
