@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+.claude/*
+
 *.tsbuildinfo
 
 # Editor directories and files
