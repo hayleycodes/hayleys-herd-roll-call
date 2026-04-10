@@ -54,18 +54,7 @@ h2 {
 }
 
 header button {
-  padding: var(--spacing-xs);
-  border: 2px solid #ac6fe4;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
-  font-size: 12px;
-
-  font-family: var(--primary-font);
-  color: var(--text);
-
-  cursor: pointer;
-  transition: 0.2s ease;
+  border-color: #ac6fe4;
 }
 
 header button:hover {

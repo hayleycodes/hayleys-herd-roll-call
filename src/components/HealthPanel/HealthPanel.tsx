@@ -76,7 +76,7 @@ const HealthPanel = ({ pig, health, setHealth }: Props) => {
                 </label>
               </div>
 
-              <button onClick={handleAddHealth} disabled={submitting}>
+              <button className="btn-outline" onClick={handleAddHealth} disabled={submitting}>
                 {submitting ? "Saving..." : "Add record"}
               </button>
             </div>

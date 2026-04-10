@@ -14,5 +14,5 @@
   padding: var(--spacing-sm);
   border-radius: var(--border-radius-sm);
 
-  background-color: var(--grey);
+  background-color: var(--accent-grey);
 }

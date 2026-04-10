@@ -181,8 +181,8 @@ const PigPage = () => {
                 onChange={(e) => setDescriptionDraft(e.target.value)}
                 rows={3}
               />
-              <button onClick={handleSaveDescription}>Save</button>
-              <button onClick={() => setIsEditingDescription(false)}>
+              <button className="btn-outline" onClick={handleSaveDescription}>Save</button>
+              <button className="btn-outline" onClick={() => setIsEditingDescription(false)}>
                 Cancel
               </button>
             </div>

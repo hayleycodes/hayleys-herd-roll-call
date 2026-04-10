@@ -1,6 +1,6 @@
 .familyPanel {
   background-color: #ffe9f0;
-  border: 2px solid #ffa9cc;
+  border: 2px solid var(--accent-pink);
 }
 
 .family {
@@ -14,7 +14,7 @@
   padding: var(--spacing-xs);
   border: 2px solid #faa18f;
   border-radius: var(--border-radius-sm);
-  background-color: #ffcccc;
+  background-color: var(--accent-red);
 }
 
 .relationshipCard {

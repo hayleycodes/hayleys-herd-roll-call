@@ -12,7 +12,7 @@
 
 .healthCard {
   background-color: #ffffdd;
-  border: 2px solid #faeba4;
+  border: 2px solid var(--border-color);
 }
 
 .healthCard p {
@@ -103,8 +103,6 @@
 
 .healthForm input[type="checkbox"]:checked::after {
   content: "";
-  width: 6px;
-  height: 10px;
   border: solid white;
   border-width: 0 3px 3px 0;
   transform: rotate(45deg);
@@ -126,10 +124,5 @@
 
 .healthForm button {
   align-self: self-end;
-  padding: var(--spacing-xs);
-  border: 2px solid #4c9173;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
-  font-size: 12px;
+  border-color: #4c9173;
 }

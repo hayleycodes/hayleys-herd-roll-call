@@ -5,9 +5,9 @@
 }
 
 .input::placeholder {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .input:focus {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }

@@ -22,7 +22,7 @@
 }
 
 .detailPanel {
-  border: 2px solid #24b3f0;
+  border: 2px solid var(--accent-blue);
   position: relative;
   background-color: var(--surface);
   background-size: unset;
@@ -47,12 +47,7 @@
 }
 
 .pigDescription button {
-  padding: var(--spacing-xs);
-  border: 2px solid var(--accent-blue);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
-  font-size: 12px;
+  border-color: var(--accent-blue);
 }
 
 .pigMeta {
@@ -75,7 +70,7 @@
   align-items: center;
   justify-content: center;
 
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--bg-translucent);
   border-radius: 8px;
   border: 2px solid var(--accent-blue);
 
@@ -98,7 +93,7 @@
 
 .row {
   padding: 8px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .muted {

@@ -14,7 +14,7 @@
   /* background-color: var(--surface); */
   background-color: var(--surface-alt);
   border-radius: var(--border-radius-sm);
-  box-shadow: 0 6px 12px grey;
+  box-shadow: 0 6px 12px var(--accent-grey);
 
   transition:
     transform 0.15s ease,

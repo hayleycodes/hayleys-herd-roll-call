@@ -30,7 +30,7 @@ function App() {
         <Link to="/" className="headerLink">
           <h1>Hayley's Herd</h1>
         </Link>
-        <Button onClick={handleLogout}>Logout</Button>
+        <Button onClick={handleLogout} className="btn-outline">Logout</Button>
       </header>
 
       <Routes>

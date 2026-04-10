@@ -30,6 +30,10 @@
   /* Borders */
   --border-color: #fef0a3;
 
+  /* Utility */
+  --bg-translucent: rgba(255, 255, 255, 0.5);
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+
   /* =========================
      SPACING
   ========================== */
@@ -63,4 +67,16 @@
   --border-radius-sm: 8px;
   --border-width: 5px;
   --border-style: solid;
+}
+
+.btn-outline {
+  padding: var(--spacing-xs);
+  background: var(--bg-translucent);
+  border-radius: 8px;
+  border: 2px solid var(--primary);
+  font-size: 12px;
+  font-family: var(--primary-font);
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.2s ease;
 }
