@@ -25,14 +25,20 @@ type Props = {
 
 const PigCard = ({ pig, relationship, fading, onEyeClick }: Props) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(!!pig.image_path);
   const [wiggling, setWiggling] = useState(false);
   const circleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!pig.image_path) {
+      setImageLoading(false);
+      return;
+    }
+    setImageLoading(true);
     const load = async () => {
-      if (!pig.image_path) return;
-      const { signedUrl } = await getPigImageUrl(pig.image_path);
+      const { signedUrl } = await getPigImageUrl(pig.image_path!);
       setImageUrl(signedUrl);
+      setImageLoading(false);
     };
     load();
   }, [pig.image_path]);
@@ -74,7 +80,9 @@ const PigCard = ({ pig, relationship, fading, onEyeClick }: Props) => {
             onAnimationEnd={() => setWiggling(false)}
             style={{ borderColor: pigColor }}
           >
-            {imageUrl ? (
+            {imageLoading ? (
+              <span className="pigCardEmoji pigCardSpin">🐷</span>
+            ) : imageUrl ? (
               <img src={imageUrl} alt={pig.name} className="pigCardImage" />
             ) : (
               <span className="pigCardEmoji">🐹</span>
