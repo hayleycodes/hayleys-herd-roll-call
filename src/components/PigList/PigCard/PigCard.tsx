@@ -22,6 +22,7 @@ type Props = {
   fading?: boolean;
   passed?: boolean;
   notSightedToday?: boolean;
+  hideLastSeen?: boolean;
   onEyeClick?: (origin: { x: number; y: number }) => void;
 };
 
@@ -31,6 +32,7 @@ const PigCard = ({
   fading,
   passed,
   notSightedToday,
+  hideLastSeen,
   onEyeClick,
 }: Props) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -110,9 +112,11 @@ const PigCard = ({
           {relationship && (
             <span className="pigCardRelationship">{relationship}</span>
           )}
-          <div className="pigCardSighted">
-            <span>{lastSighted}</span>
-          </div>
+          {!hideLastSeen && (
+            <div className="pigCardSighted">
+              <span>{lastSighted}</span>
+            </div>
+          )}
         </div>
       </Link>
     </div>
