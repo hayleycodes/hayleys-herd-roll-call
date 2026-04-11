@@ -17,15 +17,14 @@ html {
 
 body {
   width: 100%;
-  /* Remove the background from here */
   margin: 0px;
   padding: 0px;
-  /* Transparent so the html background shows through */
-  background: transparent;
+  background: linear-gradient(0deg, #c2e6f5, var(--bg));
+  background-attachment: fixed;
 }
 
 body::before {
-  content: '🌿 🐾 🐖 🌽 ☀️ 🍅 🌻 🌼 🥦 🥕 🥬 🐾 🥦 🍅 🌻 🌼 🥦 🥕 🥬 🐾 🥦 🌽 🍅 🌿 🐾 🌽 🍅 🌿 🐾 🐖 🌽 ☀️ 🍅 🌻 🌼 🥦 🥕 🥬 🐾 🥦 🌽 🍅 🌼 🌿 ☀️ 🥕 🌻 🐖 🥬 🥬 🌼 ☀️ 🌽 🌻 🥦 🌿 🐾 🐖 🥕 🍅 🌼 🌻 🥬 🐾 🌿 🌽 🐖 🍅 🥕 ☀️ 🥦 🐖 ☀️ 🐾 🌽 🍅 🌼 🌻 🥦 🌿 🥕 🥬 🐖 🐾 🥬 🌿 🥕 ☀️ 🌻 🥦 🌽 🍅 🌼 ☀️ 🌿 🌻 🥕 🐖 🌼 🍅 🥦 🌽 🥬 🐾 ☀️ 🌽 🌿 🍅 🥬 🥕 🐾 🌼 🐖 🥦 🌻 🍅 🐾 🌿 🥦 🌽 🌼 ☀️ 🥕 🌻 🐖 🥬 🥦 🐾 🌻 🌽 🌼 🌿 🥕 🥬 🐖 🐾 🥬 🌿 🥕 ☀️ 🌻 🥦 🌽 🍅 🌼 ☀️ ☀️ 🥕 🍅 🥬 🐖 🌿';
+  content: '🌿 🐾 🐖 🌽 ☀️ 🍅 🌻 🌼 🥦 🥕 🥬 🐾 🥦 🍅 🌻 🌼 🥦 🥕 🥬 🐾 🥦 🌽 🍅 🌿 🐾 🌽 🍅 🌿 🐾 🐖 🌽 ☀️ 🍅 🌻 🌼 🥦 🥕 🥬 🐾 🥦 🌽 🍅 🌼 🌿 ☀️ 🥕 🌻 🐖 🥬 🥬 🌼 ☀️ 🌽 🌻 🥦 🌿 🐾 🐖 🥕 🍅 🌼 🌻 🥬 🐾 🌿 🌽 🐖 🍅 🥕 ☀️ 🥦 🐖 ☀️ 🐾 🌽 🍅 🌼 🌻 🥦 🌿 🥕 🥬 🐖 🐾 🥬 🌿 🥕 ☀️ 🌻 🥦 🌽 🍅 🌼 ☀️ 🌿 🌻 🥕 🐖 🌼 🍅 🥦 🌽 🥬 🐾 ☀️ 🌽 🌿 🍅 🥬 🥕 🐾 🌼 🐖 🥦 🌻 🍅 🐾 🌿 🥦 🌽 🌼 ☀️ 🥕 🌻 🐖 🥬 🥦 🐾 🌻 🌽 🌼 🌿 🥕 🥬 🐖 🐾 🥬 🌿 🥕 ☀️ 🌻 🥦 🌽 🍅';
   position: fixed;
   top: 0;
   left: -50%;
