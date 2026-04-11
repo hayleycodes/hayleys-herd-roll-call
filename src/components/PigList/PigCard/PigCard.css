@@ -115,6 +115,21 @@
   color: var(--text-muted);
 }
 
+.pigCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.pigCardTag {
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  padding: 1px 4px;
+}
+
 .pigCardSighted {
   display: flex;
   align-items: center;

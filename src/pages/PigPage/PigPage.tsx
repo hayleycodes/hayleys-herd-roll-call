@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 
 import './PigPage.css';
 
@@ -25,6 +26,13 @@ import {
 } from '../../services/pigs.service';
 
 import { getPigFamily } from '../../services/pig-relationships.service';
+import {
+  getPigTags,
+  addPigTag,
+  removePigTag,
+  getTagLabel,
+  TAG_OPTIONS,
+} from '../../services/pig-tags.service';
 
 import type { Pig } from '../../services/pigs.types';
 import { PASTEL_BORDERS } from '../../components/PigList/PigCard/PigCard';
@@ -58,6 +66,12 @@ const PigPage = () => {
   const [descriptionDraft, setDescriptionDraft] = useState('');
 
   const [health, setHealth] = useState<any[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [showTagPicker, setShowTagPicker] = useState(false);
+  const [customTagInput, setCustomTagInput] = useState('');
+  const [customTagEmoji, setCustomTagEmoji] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   const [family, setFamily] = useState<{
     parents: Pig[];
@@ -116,6 +130,29 @@ const PigPage = () => {
     setPigImageUrl(signedUrl);
   };
 
+  const handleAddTag = async (tag: string) => {
+    if (!pig) return;
+    await addPigTag(pig.id, tag);
+    setTags((prev) => [...prev, tag]);
+  };
+
+  const handleAddCustomTag = async () => {
+    const text = customTagInput.trim().toLowerCase().replace(/\s+/g, '-');
+    if (!pig || !text || tags.includes(text)) return;
+    const tag = customTagEmoji ? `${text} ${customTagEmoji}` : text;
+    if (tags.includes(tag)) return;
+    await addPigTag(pig.id, tag);
+    setTags((prev) => [...prev, tag]);
+    setCustomTagInput('');
+    setCustomTagEmoji('');
+  };
+
+  const handleRemoveTag = async (tag: string) => {
+    if (!pig) return;
+    await removePigTag(pig.id, tag);
+    setTags((prev) => prev.filter((t) => t !== tag));
+  };
+
   const handleSaveDescription = async () => {
     if (!pig) return;
 
@@ -136,15 +173,17 @@ const PigPage = () => {
         const pigId = Number(id);
         if (isNaN(pigId)) throw new Error('Invalid pig id');
 
-        const [pigData, healthData, familyData] = await Promise.all([
+        const [pigData, healthData, familyData, tagsData] = await Promise.all([
           getPig(pigId),
           getPigHealth(pigId),
           getPigFamily(pigId),
+          getPigTags(pigId),
         ]);
 
         setPig(pigData);
         setHealth(healthData);
         setFamily(familyData);
+        setTags(tagsData);
 
         if (pigData?.image_path) {
           const { signedUrl } = await getPigImageUrl(pigData.image_path, true);
@@ -191,7 +230,9 @@ const PigPage = () => {
         )}
 
         <div className="detailCircleWrapper">
-          {!pig.passed_away && <div className="pigSpeechBubble">{getQuoteForPig(pig.id)}</div>}
+          {!pig.passed_away && (
+            <div className="pigSpeechBubble">{getQuoteForPig(pig.id)}</div>
+          )}
           <div className="editButtons">
             <button
               onClick={() => {
@@ -206,6 +247,13 @@ const PigPage = () => {
             <label htmlFor="pig-image-upload" className="pigImageUploadButton">
               📸
             </label>
+            <button
+              className="pigTagEditButton"
+              onClick={() => setShowTagPicker(!showTagPicker)}
+              aria-label="Edit tags"
+            >
+              🏷️
+            </button>
           </div>
           <div className="detailCircle" style={{ borderColor: pigColor }}>
             {imageUrl ? (
@@ -229,6 +277,89 @@ const PigPage = () => {
         </div>
 
         <div className="detailBody">
+          {tags.length > 0 && (
+            <div className="detailTags">
+              {tags.map((tag) => (
+                <span key={tag} className="detailTag">
+                  {getTagLabel(tag)}
+                </span>
+              ))}
+            </div>
+          )}
+          {showTagPicker && (
+            <div className="tagPicker">
+              {TAG_OPTIONS.map((opt) => {
+                const active = tags.includes(opt.tag);
+                return (
+                  <button
+                    key={opt.tag}
+                    className={`tagOption${active ? ' tagOptionActive' : ''}`}
+                    onClick={() =>
+                      active ? handleRemoveTag(opt.tag) : handleAddTag(opt.tag)
+                    }
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+              {tags
+                .filter((tag) => !TAG_OPTIONS.some((opt) => opt.tag === tag))
+                .map((tag) => (
+                  <button
+                    key={tag}
+                    className="tagOption tagOptionActive"
+                    onClick={() => handleRemoveTag(tag)}
+                  >
+                    {tag} ✕
+                  </button>
+                ))}
+              <div className="customTagInput">
+                <input
+                  type="text"
+                  placeholder="Custom tag..."
+                  value={customTagInput}
+                  onChange={(e) => setCustomTagInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddCustomTag()}
+                />
+                <div className="emojiPickerWrapper" ref={emojiPickerRef}>
+                  <button
+                    type="button"
+                    className="emojiPickerToggle"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  >
+                    {customTagEmoji || '😀'}
+                  </button>
+                  {showEmojiPicker && (
+                    <div className="emojiDropdown">
+                      <EmojiPicker
+                        onEmojiClick={(emojiData: EmojiClickData) => {
+                          setCustomTagEmoji(emojiData.emoji);
+                          setShowEmojiPicker(false);
+                        }}
+                        width={280}
+                        height={350}
+                        skinTonesDisabled
+                        searchPlaceholder="    Search emoji..."
+                      />
+                    </div>
+                  )}
+                </div>
+                <button
+                  className="btn-outline"
+                  onClick={handleAddCustomTag}
+                  disabled={!customTagInput.trim()}
+                >
+                  Add
+                </button>
+                <button
+                  className="btn-outline"
+                  onClick={() => setShowTagPicker(false)}
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          )}
           <div className="pigDescription">
             {!isEditingDescription ? (
               <p>{pig.description ?? 'No description yet 🐷'}</p>
@@ -239,15 +370,20 @@ const PigPage = () => {
                   onChange={(e) => setDescriptionDraft(e.target.value)}
                   rows={3}
                 />
-                <button className="btn-outline" onClick={handleSaveDescription}>
-                  Save
-                </button>
-                <button
-                  className="btn-outline"
-                  onClick={() => setIsEditingDescription(false)}
-                >
-                  Cancel
-                </button>
+                <div className="descriptionEditActions">
+                  <button
+                    className="btn-outline"
+                    onClick={handleSaveDescription}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="btn-outline"
+                    onClick={() => setIsEditingDescription(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             )}
           </div>

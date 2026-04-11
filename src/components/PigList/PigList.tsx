@@ -11,9 +11,10 @@ type PigListProps = {
   pigs: Pig[];
   passedPigs: Pig[];
   setPigs: React.Dispatch<React.SetStateAction<Pig[]>>;
+  pigTags: Map<number, string[]>;
 };
 
-const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
+const PigList = ({ pigs, passedPigs, setPigs, pigTags }: PigListProps) => {
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
   const [updating, setUpdating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -78,6 +79,7 @@ const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
             key={pig.id}
             pig={pig}
             fading={pig.id === fadingPigId}
+            tags={pigTags.get(pig.id)}
             notSightedToday={!pig.last_sighted || new Date(pig.last_sighted).toDateString() !== today}
             onEyeClick={(origin) => { setSelectedPig(pig); setConfettiOrigin(origin); }}
           />

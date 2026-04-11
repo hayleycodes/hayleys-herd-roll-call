@@ -112,6 +112,105 @@
   font-size: 0.8em;
 }
 
+.detailTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.detailTag {
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
+.tagPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tagOption {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  transition: 0.15s ease;
+}
+
+.tagOptionActive {
+  background: var(--pig-color);
+  border-color: var(--pig-color);
+}
+
+.tagPickerActions {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.tagPickerActions button {
+  background: color-mix(in srgb, var(--pig-color) 40%, white);
+  border-color: var(--pig-color);
+}
+
+.customTagInput {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.customTagInput input {
+  flex: 1;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  font-family: var(--primary-font);
+  font-size: 13px;
+}
+
+.customTagInput > button {
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--pig-color) 40%, white);
+  border-color: var(--pig-color);
+}
+
+.emojiPickerWrapper {
+  position: relative;
+}
+
+.emojiPickerToggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.emojiDropdown {
+  position: absolute;
+  bottom: 42px;
+  right: 0;
+  z-index: 10;
+}
+
 .detailSighted {
   font-size: 12px;
   color: var(--text-muted);
@@ -133,7 +232,7 @@
 
 .pigDescription {
   font-size: 16px;
-  margin-bottom: 16px;
+  margin: 16px 0;
 }
 
 .pigDescription p {
@@ -142,6 +241,17 @@
 
 .pigDescription button {
   border-color: var(--pig-color);
+}
+
+.descriptionEditActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.descriptionEditActions button {
+  background: color-mix(in srgb, var(--pig-color) 40%, white);
 }
 
 .pigDescription textarea {
@@ -166,7 +276,8 @@
 }
 
 .pigImageUploadButton,
-.pigDescriptionEditButton {
+.pigDescriptionEditButton,
+.pigTagEditButton {
   width: 36px;
   height: 36px;
   display: flex;
