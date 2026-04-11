@@ -1,0 +1,11 @@
+.unseenBanner {
+  text-align: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: var(--border-radius-sm);
+  background-color: #ff6b6b;
+  opacity: 0.6;
+  color: black;
+  font-size: 14px;
+  font-weight: bold;
+}

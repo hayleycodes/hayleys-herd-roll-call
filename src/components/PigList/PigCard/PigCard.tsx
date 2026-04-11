@@ -21,10 +21,18 @@ type Props = {
   relationship?: string;
   fading?: boolean;
   passed?: boolean;
+  notSightedToday?: boolean;
   onEyeClick?: (origin: { x: number; y: number }) => void;
 };
 
-const PigCard = ({ pig, relationship, fading, passed, onEyeClick }: Props) => {
+const PigCard = ({
+  pig,
+  relationship,
+  fading,
+  passed,
+  notSightedToday,
+  onEyeClick,
+}: Props) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(!!pig.image_path);
   const [wiggling, setWiggling] = useState(false);
@@ -51,17 +59,23 @@ const PigCard = ({ pig, relationship, fading, passed, onEyeClick }: Props) => {
     : '';
 
   const pigColor = PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
+  const unseenColor = '#ff6b6b';
+  // const borderColor = notSightedToday ? unseenColor : pigColor;
+  const eyeColor = notSightedToday ? unseenColor : pigColor;
 
   const handleTap = () => {
     setWiggling(true);
   };
 
   return (
-    <div className={`pigCard${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}`} onClick={handleTap}>
+    <div
+      className={`pigCard${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}`}
+      onClick={handleTap}
+    >
       {onEyeClick && (
         <button
           className="eyeButton"
-          style={{ backgroundColor: pigColor, borderColor: pigColor }}
+          style={{ backgroundColor: eyeColor, borderColor: eyeColor }}
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             onEyeClick({
@@ -75,6 +89,7 @@ const PigCard = ({ pig, relationship, fading, passed, onEyeClick }: Props) => {
       )}
       <Link to={`/pigs/${pig.id}`} className="pigCardLink">
         <div className="pigCardCircleWrapper">
+          {/* {notSightedToday && <span className="pigCardUnseen">👻</span>} */}
           <div
             ref={circleRef}
             className={`pigCardCircle${wiggling ? ' wiggle' : ''}`}

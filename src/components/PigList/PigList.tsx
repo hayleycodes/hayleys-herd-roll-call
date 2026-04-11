@@ -67,6 +67,8 @@ const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
     setSelectedPig(null);
   };
 
+  const today = new Date().toDateString();
+
   return (
     <>
       <Confetti active={showConfetti} origin={confettiOrigin} />
@@ -76,6 +78,7 @@ const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
             key={pig.id}
             pig={pig}
             fading={pig.id === fadingPigId}
+            notSightedToday={!pig.last_sighted || new Date(pig.last_sighted).toDateString() !== today}
             onEyeClick={(origin) => { setSelectedPig(pig); setConfettiOrigin(origin); }}
           />
         ))}
