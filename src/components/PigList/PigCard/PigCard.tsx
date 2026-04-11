@@ -4,7 +4,6 @@ import { formatDistanceToNow } from 'date-fns';
 import './PigCard.css';
 import type { Pig } from '../../../services/pigs.types';
 import { getPigImageUrl } from '../../../services/pig-images.service';
-import { getTagLabel } from '../../../services/pig-tags.service';
 
 export const PASTEL_BORDERS = [
   '#ffc1c8', // pink
@@ -22,7 +21,6 @@ type Props = {
   relationship?: string;
   fading?: boolean;
   passed?: boolean;
-  tags?: string[];
   notSightedToday?: boolean;
   onEyeClick?: (origin: { x: number; y: number }) => void;
 };
@@ -32,7 +30,6 @@ const PigCard = ({
   relationship,
   fading,
   passed,
-  tags,
   notSightedToday,
   onEyeClick,
 }: Props) => {
@@ -112,15 +109,6 @@ const PigCard = ({
           <h3 className="pigCardName">{pig.name}</h3>
           {relationship && (
             <span className="pigCardRelationship">{relationship}</span>
-          )}
-          {tags && tags.length > 0 && (
-            <div className="pigCardTags">
-              {tags.map((tag) => (
-                <span key={tag} className="pigCardTag">
-                  {getTagLabel(tag)}
-                </span>
-              ))}
-            </div>
           )}
           <div className="pigCardSighted">
             <span>{lastSighted}</span>
