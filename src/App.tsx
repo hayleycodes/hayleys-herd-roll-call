@@ -1,9 +1,11 @@
 import { supabase } from '../utils/supabase-client';
 import { useAuth } from './hooks/useAuth';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 
 import './App.css';
 import Button from './components/ui/Button/Button';
+import PageTransition from './components/ui/PageTransition/PageTransition';
 
 import LoginPage from './pages/LoginPage/LoginPage';
 import HomePage from './pages/HomePage/HomePage';
@@ -13,6 +15,7 @@ import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
   const { session, loading } = useAuth();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -40,11 +43,13 @@ function App() {
         </Button>
       </header>
 
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/pigs/:id" element={<PigPage />} />
-        <Route path="/tree" element={<FamilyTreePage />} />
-      </Routes>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<PageTransition><HomePage /></PageTransition>} />
+          <Route path="/pigs/:id" element={<PageTransition><PigPage /></PageTransition>} />
+          <Route path="/tree" element={<PageTransition><FamilyTreePage /></PageTransition>} />
+        </Routes>
+      </AnimatePresence>
     </div>
   );
 }

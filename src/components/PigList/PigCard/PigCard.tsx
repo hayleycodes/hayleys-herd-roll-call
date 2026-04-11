@@ -40,16 +40,31 @@ const PigCard = ({
   const [wiggling, setWiggling] = useState(false);
   const circleRef = useRef<HTMLDivElement>(null);
 
+  const [imageReady, setImageReady] = useState(false);
+
   useEffect(() => {
     if (!pig.image_path) {
       setImageLoading(false);
       return;
     }
     setImageLoading(true);
+    setImageReady(false);
     const load = async () => {
       const { signedUrl } = await getPigImageUrl(pig.image_path!);
-      setImageUrl(signedUrl);
-      setImageLoading(false);
+      // Preload the image in memory before showing it
+      const img = new Image();
+      img.onload = () => {
+        setImageUrl(signedUrl);
+        setImageLoading(false);
+        // Small delay so the fade-in is visible
+        requestAnimationFrame(() => setImageReady(true));
+      };
+      img.onerror = () => {
+        setImageUrl(signedUrl);
+        setImageLoading(false);
+        setImageReady(true);
+      };
+      img.src = signedUrl;
     };
     load();
   }, [pig.image_path]);
@@ -62,7 +77,6 @@ const PigCard = ({
 
   const pigColor = PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
   const unseenColor = '#ff6b6b';
-  // const borderColor = notSightedToday ? unseenColor : pigColor;
   const eyeColor = notSightedToday ? unseenColor : pigColor;
 
   const handleTap = () => {
@@ -72,6 +86,13 @@ const PigCard = ({
   return (
     <div
       className={`pigCard${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}`}
+      style={
+        passed
+          ? ({
+              '--float-delay': `${(pig.id * 1.37) % 7}s`,
+            } as React.CSSProperties)
+          : undefined
+      }
       onClick={handleTap}
     >
       {onEyeClick && (
@@ -101,7 +122,15 @@ const PigCard = ({
             {imageLoading ? (
               <span className="pigCardEmoji pigCardSpin">🐷</span>
             ) : imageUrl ? (
-              <img src={imageUrl} alt={pig.name} className="pigCardImage" />
+              <img
+                src={imageUrl}
+                alt={pig.name}
+                className="pigCardImage"
+                style={{
+                  opacity: imageReady ? 1 : 0,
+                  transition: 'opacity 0.3s ease',
+                }}
+              />
             ) : (
               <span className="pigCardEmoji">🐹</span>
             )}

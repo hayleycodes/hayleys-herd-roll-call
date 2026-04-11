@@ -91,6 +91,15 @@
   line-height: 1;
 }
 
+.detailEmoji.pigCardSpin {
+  animation: detailSpin 1s linear infinite;
+}
+
+@keyframes detailSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .detailLabel {
   margin-top: -50px;
   width: 100%;

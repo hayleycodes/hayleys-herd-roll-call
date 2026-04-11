@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import PigCard from "./PigCard/PigCard";
 import "./PigList.css";
 import type { Pig } from "../../services/pigs.types";
@@ -73,14 +74,20 @@ const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
     <>
       <Confetti active={showConfetti} origin={confettiOrigin} />
       <div className="pigList">
-        {pigs.map((pig) => (
-          <PigCard
+        {pigs.map((pig, i) => (
+          <motion.div
             key={pig.id}
-            pig={pig}
-            fading={pig.id === fadingPigId}
-            notSightedToday={!pig.last_sighted || new Date(pig.last_sighted).toDateString() !== today}
-            onEyeClick={(origin) => { setSelectedPig(pig); setConfettiOrigin(origin); }}
-          />
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: i * 0.05, duration: 0.3, ease: 'easeOut' }}
+          >
+            <PigCard
+              pig={pig}
+              fading={pig.id === fadingPigId}
+              notSightedToday={!pig.last_sighted || new Date(pig.last_sighted).toDateString() !== today}
+              onEyeClick={(origin) => { setSelectedPig(pig); setConfettiOrigin(origin); }}
+            />
+          </motion.div>
         ))}
       </div>
 

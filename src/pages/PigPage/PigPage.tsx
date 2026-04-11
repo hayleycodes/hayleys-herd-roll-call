@@ -61,6 +61,8 @@ const PigPage = () => {
 
   const [pig, setPig] = useState<Pig | null>(null);
   const [imageUrl, setPigImageUrl] = useState<string | null>(null);
+  const [imageReady, setImageReady] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [descriptionDraft, setDescriptionDraft] = useState('');
@@ -186,8 +188,20 @@ const PigPage = () => {
         setTags(tagsData);
 
         if (pigData?.image_path) {
+          setImageLoading(true);
           const { signedUrl } = await getPigImageUrl(pigData.image_path, true);
-          setPigImageUrl(signedUrl);
+          const img = new Image();
+          img.onload = () => {
+            setPigImageUrl(signedUrl);
+            setImageLoading(false);
+            requestAnimationFrame(() => setImageReady(true));
+          };
+          img.onerror = () => {
+            setPigImageUrl(signedUrl);
+            setImageLoading(false);
+            setImageReady(true);
+          };
+          img.src = signedUrl;
         }
       } catch (err: any) {
         setError(err.message);
@@ -256,8 +270,18 @@ const PigPage = () => {
             </button>
           </div>
           <div className="detailCircle" style={{ borderColor: pigColor }}>
-            {imageUrl ? (
-              <img src={imageUrl} alt={pig.name} className="detailImage" />
+            {imageLoading ? (
+              <span className="detailEmoji pigCardSpin">🐷</span>
+            ) : imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={pig.name}
+                className="detailImage"
+                style={{
+                  opacity: imageReady ? 1 : 0,
+                  transition: 'opacity 0.3s ease',
+                }}
+              />
             ) : (
               <span className="detailEmoji">🐖</span>
             )}
