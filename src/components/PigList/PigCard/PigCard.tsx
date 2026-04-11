@@ -1,20 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './PigCard.css';
 import type { Pig } from '../../../services/pigs.types';
-import { getPigImageUrl } from '../../../services/pig-images.service';
-
-export const PASTEL_BORDERS = [
-  '#ffc1c8', // pink
-  '#fef0a3', // yellow
-  '#c8b6ff', // lavender
-  '#a8e6cf', // mint
-  '#8ed6ff', // sky blue
-  '#ffd6a5', // peach
-  '#ffb3e6', // rose
-  '#b5ead7', // sage
-];
+import { usePigImage } from '../../../hooks/usePigImage';
+import { PASTEL_BORDERS } from '../../../constants/colors';
 
 type Props = {
   pig: Pig;
@@ -35,39 +25,9 @@ const PigCard = ({
   hideLastSeen,
   onEyeClick,
 }: Props) => {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [imageLoading, setImageLoading] = useState(!!pig.image_path);
+  const { imageUrl, imageLoading, imageReady } = usePigImage(pig.image_path);
   const [wiggling, setWiggling] = useState(false);
   const circleRef = useRef<HTMLDivElement>(null);
-
-  const [imageReady, setImageReady] = useState(false);
-
-  useEffect(() => {
-    if (!pig.image_path) {
-      setImageLoading(false);
-      return;
-    }
-    setImageLoading(true);
-    setImageReady(false);
-    const load = async () => {
-      const { signedUrl } = await getPigImageUrl(pig.image_path!);
-      // Preload the image in memory before showing it
-      const img = new Image();
-      img.onload = () => {
-        setImageUrl(signedUrl);
-        setImageLoading(false);
-        // Small delay so the fade-in is visible
-        requestAnimationFrame(() => setImageReady(true));
-      };
-      img.onerror = () => {
-        setImageUrl(signedUrl);
-        setImageLoading(false);
-        setImageReady(true);
-      };
-      img.src = signedUrl;
-    };
-    load();
-  }, [pig.image_path]);
 
   const lastSighted = pig.last_sighted
     ? formatDistanceToNow(new Date(pig.last_sighted), {

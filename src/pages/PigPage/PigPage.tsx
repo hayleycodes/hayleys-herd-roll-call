@@ -15,8 +15,9 @@ import { getPigHealth } from '../../services/pig-health.service';
 import {
   compressImage,
   uploadPigImage,
-  getPigImageUrl,
 } from '../../services/pig-images.service';
+import { usePigImage } from '../../hooks/usePigImage';
+import { PASTEL_BORDERS } from '../../constants/colors';
 
 import {
   savePigImage,
@@ -35,7 +36,6 @@ import {
 } from '../../services/pig-tags.service';
 
 import type { Pig } from '../../services/pigs.types';
-import { PASTEL_BORDERS } from '../../components/PigList/PigCard/PigCard';
 
 const PIG_QUOTES = [
   'Wheek wheek! 🐹',
@@ -60,9 +60,7 @@ const PigPage = () => {
   const { id } = useParams();
 
   const [pig, setPig] = useState<Pig | null>(null);
-  const [imageUrl, setPigImageUrl] = useState<string | null>(null);
-  const [imageReady, setImageReady] = useState(false);
-  const [imageLoading, setImageLoading] = useState(false);
+  const { imageUrl, imageLoading, imageReady } = usePigImage(pig?.image_path);
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [descriptionDraft, setDescriptionDraft] = useState('');
@@ -127,9 +125,6 @@ const PigPage = () => {
     await savePigImage(pigId, filePath);
 
     setPig((prev) => (prev ? { ...prev, image_path: filePath } : prev));
-
-    const { signedUrl } = await getPigImageUrl(filePath);
-    setPigImageUrl(signedUrl);
   };
 
   const handleAddTag = async (tag: string) => {
@@ -186,23 +181,6 @@ const PigPage = () => {
         setHealth(healthData);
         setFamily(familyData);
         setTags(tagsData);
-
-        if (pigData?.image_path) {
-          setImageLoading(true);
-          const { signedUrl } = await getPigImageUrl(pigData.image_path, true);
-          const img = new Image();
-          img.onload = () => {
-            setPigImageUrl(signedUrl);
-            setImageLoading(false);
-            requestAnimationFrame(() => setImageReady(true));
-          };
-          img.onerror = () => {
-            setPigImageUrl(signedUrl);
-            setImageLoading(false);
-            setImageReady(true);
-          };
-          img.src = signedUrl;
-        }
       } catch (err: any) {
         setError(err.message);
       } finally {
