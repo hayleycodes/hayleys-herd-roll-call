@@ -73,8 +73,17 @@ h2 {
   margin: 4px 0;
 }
 
-header button {
-  border-color: #ac6fe4;
+header button.headerButton {
+  border-color: var(--primary-dark);
+}
+
+header button.treeButton {
+  padding: 2px 4px;
+  font-size: 20px;
+}
+
+header a {
+  color: var(--primary-dark);
 }
 
 header button:hover {

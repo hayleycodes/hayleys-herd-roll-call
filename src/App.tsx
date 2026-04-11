@@ -1,15 +1,15 @@
-import { supabase } from "../utils/supabase-client";
-import { useAuth } from "./hooks/useAuth";
-import { Routes, Route, Link } from "react-router-dom";
+import { supabase } from '../utils/supabase-client';
+import { useAuth } from './hooks/useAuth';
+import { Routes, Route, Link } from 'react-router-dom';
 
-import "./App.css";
-import Button from "./components/ui/Button/Button";
+import './App.css';
+import Button from './components/ui/Button/Button';
 
-import LoginPage from "./pages/LoginPage/LoginPage";
-import HomePage from "./pages/HomePage/HomePage";
-import PigPage from "./pages/PigPage/PigPage";
-import FamilyTreePage from "./pages/FamilyTreePage/FamilyTreePage.tsx";
-import Loading from "./components/ui/Loading/Loading.tsx";
+import LoginPage from './pages/LoginPage/LoginPage';
+import HomePage from './pages/HomePage/HomePage';
+import PigPage from './pages/PigPage/PigPage';
+import FamilyTreePage from './pages/FamilyTreePage/FamilyTreePage.tsx';
+import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
   const { session, loading } = useAuth();
@@ -27,10 +27,17 @@ function App() {
   return (
     <div className="wrapper">
       <header>
-        <Link to="/" className="headerLink">
-          <h1>Hayley's Herd</h1>
-        </Link>
-        <Button onClick={handleLogout} className="btn-outline">Logout</Button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link to="/tree">
+            <Button className="btn-outline headerButton treeButton">🌳</Button>
+          </Link>
+          <Link to="/" className="headerLink">
+            <h1>Hayley's Herd</h1>
+          </Link>
+        </div>
+        <Button onClick={handleLogout} className="btn-outline headerButton">
+          Logout
+        </Button>
       </header>
 
       <Routes>
