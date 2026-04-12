@@ -191,6 +191,17 @@ const PigPage = () => {
     load();
   }, [id]);
 
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmojiPicker]);
+
   if (loading) return <Loading />;
   if (error) return <div className="pigCardDetail error">{error}</div>;
   if (!pig) return <div className="pigCardDetail">Pig not found 🐷</div>;
@@ -338,7 +349,7 @@ const PigPage = () => {
                           setCustomTagEmoji(emojiData.emoji);
                           setShowEmojiPicker(false);
                         }}
-                        width={280}
+                        width={'100%'}
                         height={350}
                         skinTonesDisabled
                         searchPlaceholder="    Search emoji..."

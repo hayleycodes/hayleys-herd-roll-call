@@ -19,7 +19,10 @@ export const TAG_OPTIONS = [
   { tag: 'timid', label: 'Timid 🥺' },
   { tag: 'confident', label: 'Confident 😎' },
   { tag: 'brave', label: 'Brave 🦁' },
-  { tag: 'troublemaker', label: 'Troublemaker 😈' },
+  { tag: 'troublemaker', label: 'Troublemaker 😏' },
+  { tag: 'scaredy-pig', label: 'Scaredy Pig 😱' },
+  { tag: 'dumb', label: 'Dumb 🧠' },
+  { tag: 'feral', label: 'Feral 👿' },
 ];
 
 export const getTagLabel = (tag: string): string => {

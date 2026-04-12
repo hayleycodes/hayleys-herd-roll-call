@@ -96,8 +96,12 @@
 }
 
 @keyframes detailSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .detailLabel {
@@ -172,13 +176,15 @@
 
 .customTagInput {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   width: 100%;
   margin-top: 4px;
 }
 
-.customTagInput input {
+.customTagInput > input {
   flex: 1;
+  min-width: 0;
   padding: 4px 10px;
   border-radius: 20px;
   border: 2px solid rgba(0, 0, 0, 0.1);
@@ -214,9 +220,10 @@
 }
 
 .emojiDropdown {
-  position: absolute;
-  bottom: 42px;
-  right: 0;
+  position: fixed;
+  bottom: 80px;
+  left: var(--spacing-xs);
+  right: var(--spacing-xs);
   z-index: 10;
 }
 
