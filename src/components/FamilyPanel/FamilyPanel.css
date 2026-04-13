@@ -1,22 +1,23 @@
-.familyPanel {
-  background-color: #ffe9f0;
-  border: 2px solid var(--accent-pink);
-}
-
 .family {
-  display: grid;
-  gap: var(--spacing-sm);
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
   width: 100%;
 }
 
 .emptyFamily {
   padding: var(--spacing-xs);
-  border: 2px solid #faa18f;
   border-radius: var(--border-radius-sm);
-  background-color: var(--accent-red);
+  background-color: #c8e1f6;
 }
 
 .relationshipCard {
+  width: 40%;
   min-height: 0;
+}
+
+.emptyFamily .muted {
+  font-size: var(--font-size-sm);
+  margin: 2px;
 }

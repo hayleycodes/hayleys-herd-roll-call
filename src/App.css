@@ -72,6 +72,10 @@ h2 {
   margin: 4px 0;
 }
 
+h3 {
+  margin: var(--spacing-xs);
+}
+
 header button.headerButton {
   border-color: var(--primary-dark);
 }
