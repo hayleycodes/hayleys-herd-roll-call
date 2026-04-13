@@ -134,7 +134,7 @@ const PigPage = () => {
   };
 
   const handleAddCustomTag = async () => {
-    const text = customTagInput.trim().toLowerCase().replace(/\s+/g, '-');
+    const text = customTagInput.trim().replace(/\s+/g, '-');
     if (!pig || !text || tags.includes(text)) return;
     const tag = customTagEmoji ? `${text} ${customTagEmoji}` : text;
     if (tags.includes(tag)) return;
@@ -194,7 +194,10 @@ const PigPage = () => {
   useEffect(() => {
     if (!showEmojiPicker) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(e.target as Node)
+      ) {
         setShowEmojiPicker(false);
       }
     };

@@ -1,0 +1,96 @@
+.rollcallCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.rollcallCardImage {
+  width: 70vw;
+  max-width: 320px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 5px solid var(--accent-pink);
+  background-color: var(--surface-alt);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rollcallCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.rollcallCardImg.ready {
+  opacity: 1;
+}
+
+.rollcallCardEmoji {
+  font-size: 80px;
+}
+
+.rollcallCardSpin {
+  font-size: 48px;
+  animation: rollcallSpin 1.2s linear infinite;
+}
+
+@keyframes rollcallSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.rollcallCardName {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.rollcallActions {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 8px;
+}
+
+.rollcallActionBtn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid var(--primary-dark);
+  font-size: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.rollcallActionBtn:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.rollcallActionBtn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.rollcallActionBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.rollcallActionBtn.sighted {
+  background: white;
+}
+
+.rollcallActionBtn.skip {
+  background: white;
+}

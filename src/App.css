@@ -76,9 +76,20 @@ header button.headerButton {
   border-color: var(--primary-dark);
 }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+header .btn-outline {
+  padding: 0px 5px;
+  height: 32px;
+  font-size: 18px;
+}
+
 header button.treeButton {
-  padding: 2px 4px;
-  font-size: 20px;
+  margin-right: 2px;
 }
 
 header a {

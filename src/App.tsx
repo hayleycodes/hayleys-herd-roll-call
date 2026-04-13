@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { supabase } from '../utils/supabase-client';
 import { useAuth } from './hooks/useAuth';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { AnimatePresence } from 'framer-motion';
 import './App.css';
 import Button from './components/ui/Button/Button';
 import PageTransition from './components/ui/PageTransition/PageTransition';
+import RollcallOverlay from './components/Rollcall/RollcallOverlay';
 
 import LoginPage from './pages/LoginPage/LoginPage';
 import HomePage from './pages/HomePage/HomePage';
@@ -16,6 +18,7 @@ import Loading from './components/ui/Loading/Loading.tsx';
 function App() {
   const { session, loading } = useAuth();
   const location = useLocation();
+  const [isRollcallOpen, setIsRollcallOpen] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -30,26 +33,61 @@ function App() {
   return (
     <div className="wrapper">
       <header>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Link to="/tree">
-            <Button className="btn-outline headerButton treeButton">🌳</Button>
-          </Link>
+        <div className="headerLeft">
+          <div>
+            <Link to="/tree">
+              <Button className="btn-outline headerButton treeButton">
+                🌳
+              </Button>
+            </Link>
+            <button
+              className="btn-outline headerButton rollcallButton"
+              onClick={() => setIsRollcallOpen(true)}
+            >
+              🍎
+            </button>
+          </div>
           <Link to="/" className="headerLink">
             <h1>Hayley's Herd</h1>
           </Link>
         </div>
         <Button onClick={handleLogout} className="btn-outline headerButton">
-          Logout
+          🪵
         </Button>
       </header>
 
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageTransition><HomePage /></PageTransition>} />
-          <Route path="/pigs/:id" element={<PageTransition><PigPage /></PageTransition>} />
-          <Route path="/tree" element={<PageTransition><FamilyTreePage /></PageTransition>} />
+          <Route
+            path="/"
+            element={
+              <PageTransition>
+                <HomePage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/pigs/:id"
+            element={
+              <PageTransition>
+                <PigPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/tree"
+            element={
+              <PageTransition>
+                <FamilyTreePage />
+              </PageTransition>
+            }
+          />
         </Routes>
       </AnimatePresence>
+      <RollcallOverlay
+        isOpen={isRollcallOpen}
+        onClose={() => setIsRollcallOpen(false)}
+      />
     </div>
   );
 }

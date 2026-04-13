@@ -11,7 +11,6 @@ const HomePage = () => {
   const [passedPigs, setPassedPigs] = useState<Pig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const loadPigs = async () => {
     try {
       setLoading(true);
@@ -32,6 +31,7 @@ const HomePage = () => {
     loadPigs();
   }, []);
 
+
   if (loading) {
     return <Loading />;
   }
@@ -49,11 +49,7 @@ const HomePage = () => {
           👀 {unseenCount} pig{unseenCount === 1 ? '' : 's'} not sighted today
         </div>
       )}
-      <PigList
-        pigs={pigs}
-        passedPigs={passedPigs}
-        setPigs={setPigs}
-      />{' '}
+      <PigList pigs={pigs} passedPigs={passedPigs} setPigs={setPigs} />
     </div>
   );
 };
