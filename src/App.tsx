@@ -5,6 +5,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 import './App.css';
+import hhLogo from './assets/hh.png';
 import Button from './components/ui/Button/Button';
 import PageTransition from './components/ui/PageTransition/PageTransition';
 import RollcallOverlay from './components/Rollcall/RollcallOverlay';
@@ -34,6 +35,9 @@ function App() {
     <div className="wrapper">
       <header>
         <div className="headerLeft">
+          <Link to="/" className="headerLink">
+            <img src={hhLogo} alt="Hayley's Herd" className="headerLogo" />
+          </Link>
           <div>
             <Link to="/tree">
               <Button className="btn-outline headerButton treeButton">
@@ -47,9 +51,6 @@ function App() {
               🍎
             </button>
           </div>
-          <Link to="/" className="headerLink">
-            <h1>Hayley's Herd</h1>
-          </Link>
         </div>
         <Button onClick={handleLogout} className="btn-outline headerButton">
           🪵

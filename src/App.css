@@ -63,11 +63,26 @@ header {
 
 header .headerLink {
   text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.headerLeft > div {
+  display: flex;
+  align-items: center;
 }
 
 header h1 {
   font-size: var(--font-size-xl);
   margin: 0px;
+}
+
+.headerLogo {
+  height: 42px;
+  width: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-dark);
 }
 
 h2 {

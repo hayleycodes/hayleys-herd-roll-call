@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "../../../utils/supabase-client";
 import "./LoginPage.css";
 import Input from "../../components/ui/Input/Input";
+import logo from "../../assets/hh.png";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -23,6 +24,7 @@ const LoginPage = () => {
   return (
     <div className="loginPage">
       <form onSubmit={handleLogin} className="loginForm">
+        <img src={logo} alt="Hayley's Herd logo" className="loginLogo" />
         <Input
           type="email"
           placeholder="email"
@@ -41,7 +43,7 @@ const LoginPage = () => {
           name="password"
         />
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p className="loginError">{error}</p>}
 
         <button type="submit">login</button>
       </form>

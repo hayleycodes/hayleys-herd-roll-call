@@ -3,16 +3,54 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.loginLogo {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  align-self: center;
 }
 
 .loginForm {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  width: 300px;
+  width: 320px;
+  padding: var(--spacing-lg);
+}
 
+.loginForm button {
   padding: var(--spacing-sm);
+  background: #e8a0ab;
+  color: white;
+  border: 2px solid #d4838f;
   border-radius: var(--border-radius-sm);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
 
-  background-color: var(--accent-grey);
+.loginForm button[type='submit']:hover {
+  background: #d4838f;
+}
+
+.loginForm .input {
+  background: white;
+  border: 2px solid #d4838f;
+  border-radius: var(--border-radius-sm);
+}
+
+.loginError {
+  color: var(--text-red);
+  background: var(--accent-red);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  text-align: center;
+  margin: 0;
 }
