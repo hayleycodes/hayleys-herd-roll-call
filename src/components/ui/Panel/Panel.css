@@ -1,28 +1,24 @@
 .panel {
   width: 100%;
   border-radius: var(--border-radius-sm);
-  border: 3px solid;
+  border: 2px solid;
   text-align: center;
   overflow: hidden;
 }
 
 .greenPanel {
-  border-color: #e0f5e0;
-  background-color: #e0f5e0;
+  border-color: #a0caa2;
+  background-color: #c8e8c8;
 }
 
 .pinkPanel {
   background-color: #ffe9f0;
-  border: 3px solid var(--accent-pink);
+  border-color: var(--accent-pink);
 }
 
 .bluePanel {
-  background-color: #c8e1f6;
-  border: 3px solid #c8e1f6;
-}
-
-.panelHeading {
-  text-align: center;
+  background-color: #b8d8f0;
+  border: 2px solid #8ab8d8;
 }
 
 .panelHeading h2 {

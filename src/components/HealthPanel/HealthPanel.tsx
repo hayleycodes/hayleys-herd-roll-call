@@ -93,7 +93,7 @@ const HealthPanel = ({ pig, health, setHealth }: Props) => {
           {health.map((record) => (
             <div
               key={record.id}
-              className={`healthCard ${record.passed_away ? 'passedAway' : ''}`}
+              className="healthCard"
             >
               <div className="cardHeader">
                 {!record.passed_away && (

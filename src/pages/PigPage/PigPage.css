@@ -109,6 +109,8 @@
   padding: 12px;
   border-top-left-radius: var(--border-radius-sm);
   border-top-right-radius: var(--border-radius-sm);
+  border: 2px solid var(--pig-color);
+  border-bottom: none;
   text-align: center;
   z-index: 1;
 }
@@ -132,9 +134,9 @@
 }
 
 .detailTag {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   background: rgba(0, 0, 0, 0.06);
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm);
   padding: 2px 8px;
 }
 
@@ -161,18 +163,6 @@
   border-color: var(--pig-color);
 }
 
-.tagPickerActions {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  margin-top: 4px;
-}
-
-.tagPickerActions button {
-  background: color-mix(in srgb, var(--pig-color) 40%, white);
-  border-color: var(--pig-color);
-}
-
 .customTagInput {
   display: flex;
   flex-wrap: wrap;
@@ -194,7 +184,7 @@
 .customTagInput > button {
   font-size: 13px;
   padding: 4px 12px;
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm);
   background: color-mix(in srgb, var(--pig-color) 40%, white);
   border-color: var(--pig-color);
 }
@@ -227,7 +217,7 @@
 }
 
 .detailSighted {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
 
@@ -277,7 +267,7 @@
 .pigMeta {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
 
@@ -299,7 +289,7 @@
   align-items: center;
   justify-content: center;
   background: var(--pig-color);
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm);
   border: 2px solid var(--pig-color);
   cursor: pointer;
   transition: transform 0.15s ease;
@@ -311,12 +301,7 @@
 .pigCardDetail {
   width: 100%;
   padding: 10px;
-  border-radius: 8px;
-}
-
-.row {
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
 }
 
 .muted {
