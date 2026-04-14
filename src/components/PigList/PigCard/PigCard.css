@@ -147,6 +147,11 @@
   color: var(--text-muted);
 }
 
+.pigCardSick .pigCardName,
+.pigCardSick .pigCardSighted span {
+  color: white;
+}
+
 /* ---- Passed pig style ---- */
 
 .pigCardPassed {
@@ -197,6 +202,12 @@
   font-size: 20px;
   z-index: 2;
   pointer-events: none;
+}
+
+/* ---- Sick pig style ---- */
+
+.pigCardSick .pigCardCircle {
+  box-shadow: 0 0 8px 2px rgba(230, 57, 70, 0.4);
 }
 
 .eyeButton {

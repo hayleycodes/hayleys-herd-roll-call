@@ -4,6 +4,15 @@
   align-items: flex-start;
   flex-direction: column;
   gap: var(--spacing-xs);
+  position: relative;
+}
+
+.sickMode::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(0deg, #f5c2c2, #ffb3b3);
+  z-index: -1;
 }
 
 /* ---- Detail card (PigCard-style) ---- */
@@ -142,6 +151,12 @@
   padding: 2px 8px;
 }
 
+.detailTagSick {
+  background: #e63946;
+  color: white;
+  font-weight: bold;
+}
+
 .tagPicker {
   display: flex;
   flex-wrap: wrap;
@@ -163,6 +178,18 @@
 .tagOptionActive {
   background: var(--pig-color);
   border-color: var(--pig-color);
+}
+
+.tagOptionSick {
+  background: white;
+  color: #e63946;
+  border-color: #e63946;
+}
+
+.tagOptionSick.tagOptionActive {
+  background: #e63946;
+  color: white;
+  border-color: #e63946;
 }
 
 .customTagInput {
@@ -221,6 +248,11 @@
 .detailSighted {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
+}
+
+.sickMode .pigName,
+.sickMode .detailSighted {
+  color: white;
 }
 
 /* ---- Body (description, meta, edit) ---- */

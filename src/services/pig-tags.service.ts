@@ -23,6 +23,7 @@ export const TAG_OPTIONS = [
   { tag: 'scaredy-pig', label: 'Scaredy Pig 😱' },
   { tag: 'dumb', label: 'Dumb 🧠' },
   { tag: 'feral', label: 'Feral 👿' },
+  { tag: 'sick', label: 'Sick 🤒' },
 ];
 
 export const getTagLabel = (tag: string): string => {

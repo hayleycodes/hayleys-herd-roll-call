@@ -7,7 +7,7 @@
 .healthCard {
   border-radius: var(--border-radius-sm);
   padding: 12px;
-  background-color: #e0f5e0;
+  background-color: color-mix(in srgb, var(--panel-color, #a0caa2) 25%, white);
   text-align: left;
 }
 

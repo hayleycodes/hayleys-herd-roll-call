@@ -226,10 +226,11 @@ const PigPage = () => {
   if (error) return <div className="pigCardDetail error">{error}</div>;
   if (!pig) return <div className="pigCardDetail">Pig not found 🐷</div>;
 
-  const pigColor = PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
+  const isSick = tags.includes('sick');
+  const pigColor = isSick ? '#e63946' : PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
 
   return (
-    <div className={`pigPage ${pig.passed_away && 'memorialMode'}`}>
+    <div className={`pigPage ${pig.passed_away && 'memorialMode'} ${isSick && 'sickMode'}`}>
       <Confetti active={showConfetti} origin={confettiOrigin} />
 
       <div
@@ -259,7 +260,7 @@ const PigPage = () => {
               👀
             </button>
           )}
-          {!pig.passed_away && (
+          {!pig.passed_away && !isSick && (
             <div className="pigSpeechBubble">{getQuoteForPig(pig.id)}</div>
           )}
           <div className="editButtons">
@@ -319,7 +320,7 @@ const PigPage = () => {
           {tags.length > 0 && (
             <div className="detailTags">
               {tags.map((tag) => (
-                <span key={tag} className="detailTag">
+                <span key={tag} className={`detailTag${tag === 'sick' ? ' detailTagSick' : ''}`}>
                   {getTagLabel(tag)}
                 </span>
               ))}
@@ -332,7 +333,7 @@ const PigPage = () => {
                 return (
                   <button
                     key={opt.tag}
-                    className={`tagOption${active ? ' tagOptionActive' : ''}`}
+                    className={`tagOption${active ? ' tagOptionActive' : ''}${opt.tag === 'sick' ? ' tagOptionSick' : ''}`}
                     onClick={() =>
                       active ? handleRemoveTag(opt.tag) : handleAddTag(opt.tag)
                     }
@@ -453,7 +454,7 @@ const PigPage = () => {
         />
       </div>
 
-      <HealthPanel pig={pig} health={health} setHealth={setHealth} />
+      <HealthPanel pig={pig} health={health} setHealth={setHealth} sick={isSick} />
 
       <TasksPanel tasks={tasks} setTasks={setTasks} pigId={pig.id} />
 

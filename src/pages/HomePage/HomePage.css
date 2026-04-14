@@ -3,7 +3,19 @@
   padding: 8px 12px;
   margin-bottom: 8px;
   border-radius: var(--border-radius-sm);
-  background-color: #ff6b6b;
+  background-color: #e63946;
+  opacity: 0.6;
+  color: black;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.sickBanner {
+  text-align: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: var(--border-radius-sm);
+  background-color: #e63946;
   opacity: 0.6;
   color: black;
   font-size: 14px;
@@ -16,7 +28,7 @@
   padding: 8px 12px;
   margin-bottom: 8px;
   border-radius: var(--border-radius-sm);
-  background-color: #8ab8d8;
+  background-color: var(--primary);
   opacity: 0.6;
   color: black;
   font-size: 14px;

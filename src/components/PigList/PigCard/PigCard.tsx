@@ -11,6 +11,7 @@ type Props = {
   relationship?: string;
   fading?: boolean;
   passed?: boolean;
+  sick?: boolean;
   notSightedToday?: boolean;
   hideLastSeen?: boolean;
   onEyeClick?: (origin: { x: number; y: number }) => void;
@@ -21,6 +22,7 @@ const PigCard = ({
   relationship,
   fading,
   passed,
+  sick,
   notSightedToday,
   hideLastSeen,
   onEyeClick,
@@ -35,7 +37,7 @@ const PigCard = ({
       })
     : '';
 
-  const pigColor = PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
+  const pigColor = sick ? '#e63946' : PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
   const unseenColor = '#ff6b6b';
   const eyeColor = notSightedToday ? unseenColor : pigColor;
 
@@ -45,7 +47,7 @@ const PigCard = ({
 
   return (
     <div
-      className={`pigCard${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}`}
+      className={`pigCard${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}`}
       style={
         passed
           ? ({
@@ -97,7 +99,7 @@ const PigCard = ({
           </div>
         </div>
         <div className="pigCardLabel" style={{ backgroundColor: pigColor }}>
-          <h3 className="pigCardName">{pig.name}</h3>
+          <h3 className="pigCardName">{sick && '🤒 '}{pig.name}</h3>
           {relationship && (
             <span className="pigCardRelationship">{relationship}</span>
           )}

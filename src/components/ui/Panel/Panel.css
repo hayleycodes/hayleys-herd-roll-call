@@ -7,6 +7,7 @@
 }
 
 .greenPanel {
+  --panel-color: #a0caa2;
   border-color: #a0caa2;
   background-color: #c8e8c8;
 }

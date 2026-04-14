@@ -9,16 +9,17 @@ type Props = {
   pig: Pig;
   health: HealthRecord[];
   setHealth: (h: HealthRecord[]) => void;
+  sick?: boolean;
 };
 
-const HealthPanel = ({ pig, health, setHealth }: Props) => {
+const HealthPanel = ({ pig, health, setHealth, sick }: Props) => {
   const handleRecordAdded = async () => {
     const updated = await getPigHealth(pig.id);
     setHealth(updated);
   };
 
   return (
-    <Panel heading="Health 🏥" theme="green">
+    <Panel heading="Health 🏥" theme={sick ? 'custom' : 'green'} color={sick ? '#e8a317' : undefined}>
       {!pig.passed_away && (
         <HealthForm pigId={pig.id} onRecordAdded={handleRecordAdded} />
       )}

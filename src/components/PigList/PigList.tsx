@@ -12,9 +12,10 @@ type PigListProps = {
   pigs: Pig[];
   passedPigs: Pig[];
   setPigs: React.Dispatch<React.SetStateAction<Pig[]>>;
+  sickPigIds?: Set<number>;
 };
 
-const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
+const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
   const [updating, setUpdating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -50,10 +51,15 @@ const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
       setTimeout(() => {
         setFadingPigId(null);
         setPigs((prev) =>
-          [...prev].sort((a, b) =>
-            new Date(a.last_sighted ?? 0).getTime() -
-            new Date(b.last_sighted ?? 0).getTime()
-          ),
+          [...prev].sort((a, b) => {
+            if (sickPigIds) {
+              const aSick = sickPigIds.has(a.id) ? 0 : 1;
+              const bSick = sickPigIds.has(b.id) ? 0 : 1;
+              if (aSick !== bSick) return aSick - bSick;
+            }
+            return new Date(a.last_sighted ?? 0).getTime() -
+              new Date(b.last_sighted ?? 0).getTime();
+          }),
         );
         setShowConfetti(false);
       }, 1800);
@@ -84,6 +90,7 @@ const PigList = ({ pigs, passedPigs, setPigs }: PigListProps) => {
             <PigCard
               pig={pig}
               fading={pig.id === fadingPigId}
+              sick={sickPigIds?.has(pig.id)}
               notSightedToday={!pig.last_sighted || new Date(pig.last_sighted).toDateString() !== today}
               onEyeClick={(origin) => { setSelectedPig(pig); setConfettiOrigin(origin); }}
             />
