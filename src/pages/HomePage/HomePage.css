@@ -9,3 +9,21 @@
   font-size: 14px;
   font-weight: bold;
 }
+
+.tasksBanner {
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: var(--border-radius-sm);
+  background-color: #8ab8d8;
+  opacity: 0.6;
+  color: black;
+  font-size: 14px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.tasksBanner:hover {
+  opacity: 0.8;
+}

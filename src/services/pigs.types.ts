@@ -30,3 +30,11 @@ export interface PigRelationship {
   pig_id_b: number;
   relationship_type: RelationshipType;
 }
+
+export interface Task {
+  id: number;
+  title: string;
+  pig_id: number | null;
+  completed: boolean;
+  created_at: string;
+}

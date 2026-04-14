@@ -91,6 +91,35 @@ export type Database = {
           },
         ]
       }
+      pig_tags: {
+        Row: {
+          created_at: string | null
+          id: number
+          pig_id: number | null
+          tag: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          pig_id?: number | null
+          tag: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          pig_id?: number | null
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pig_tags_pig_id_fkey"
+            columns: ["pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pigs: {
         Row: {
           created_at: string
@@ -129,6 +158,38 @@ export type Database = {
           passed_away?: string | null
         }
         Relationships: []
+      }
+      tasks: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: number
+          pig_id: number | null
+          title: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: never
+          pig_id?: number | null
+          title: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: never
+          pig_id?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_pig_id_fkey"
+            columns: ["pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

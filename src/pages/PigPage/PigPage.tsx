@@ -6,12 +6,14 @@ import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 import './PigPage.css';
 
 import HealthPanel from '../../components/HealthPanel/HealthPanel';
+import TasksPanel from '../../components/TasksPanel/TasksPanel';
 import FamilyPanel from '../../components/FamilyPanel/FamilyPanel';
 import Loading from '../../components/ui/Loading/Loading';
 import Modal from '../../components/ui/Modal/Modal';
 import Confetti from '../../components/ui/Confetti/Confetti';
 
 import { getPigHealth } from '../../services/pig-health.service';
+import { getTasksForPig } from '../../services/tasks.service';
 import {
   compressImage,
   uploadPigImage,
@@ -35,7 +37,7 @@ import {
   TAG_OPTIONS,
 } from '../../services/pig-tags.service';
 
-import type { Pig } from '../../services/pigs.types';
+import type { Pig, Task } from '../../services/pigs.types';
 
 const PIG_QUOTES = [
   'Wheek wheek! 🐹',
@@ -66,6 +68,7 @@ const PigPage = () => {
   const [descriptionDraft, setDescriptionDraft] = useState('');
 
   const [health, setHealth] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [showTagPicker, setShowTagPicker] = useState(false);
   const [customTagInput, setCustomTagInput] = useState('');
@@ -182,17 +185,19 @@ const PigPage = () => {
         const pigId = Number(id);
         if (isNaN(pigId)) throw new Error('Invalid pig id');
 
-        const [pigData, healthData, familyData, tagsData] = await Promise.all([
+        const [pigData, healthData, familyData, tagsData, tasksData] = await Promise.all([
           getPig(pigId),
           getPigHealth(pigId),
           getPigFamily(pigId),
           getPigTags(pigId),
+          getTasksForPig(pigId),
         ]);
 
         setPig(pigData);
         setHealth(healthData);
         setFamily(familyData);
         setTags(tagsData);
+        setTasks(tasksData);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -449,6 +454,8 @@ const PigPage = () => {
       </div>
 
       <HealthPanel pig={pig} health={health} setHealth={setHealth} />
+
+      <TasksPanel tasks={tasks} setTasks={setTasks} pigId={pig.id} />
 
       <FamilyPanel family={family} />
 

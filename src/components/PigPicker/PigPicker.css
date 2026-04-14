@@ -1,0 +1,147 @@
+/* Shared thumbnail */
+.pigPickerThumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.pigPickerThumbPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--accent-yellow);
+  font-size: 14px;
+}
+
+/* Dropdown container */
+.pigPickerDropdown {
+  position: relative;
+  --picker-color: var(--primary);
+  --picker-hover: #e8e0f8;
+}
+
+.pigPicker--green {
+  --picker-color: #a0caa2;
+  --picker-hover: #e0f5e0;
+}
+
+.pigPicker--purple {
+  --picker-color: var(--primary);
+  --picker-hover: #e8e0f8;
+}
+
+/* Default trigger (full-width button) */
+.pigPickerTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  border: 2px dashed var(--picker-color);
+  border-radius: var(--border-radius-sm);
+  background: white;
+  font-family: var(--primary-font);
+  font-size: 16px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.pigPickerTrigger .pigPickerThumb {
+  width: 30px;
+  height: 30px;
+}
+
+.pigPickerPlaceholder {
+  color: var(--text-muted);
+}
+
+/* Compact trigger — matches btn-outline style */
+.pigPickerCompactTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  border: 2px solid var(--picker-color);
+  border-radius: 8px;
+  background: var(--bg-translucent);
+  font-family: var(--primary-font);
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pigPickerCompactTrigger .pigPickerThumb {
+  width: 20px;
+  height: 20px;
+}
+
+.pigPickerCompactIcon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Dropdown menu wrapper — holds arrow + scrollable list */
+.pigPickerMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 200px;
+  background: white;
+  border: 2px solid var(--picker-color);
+  border-radius: var(--border-radius-sm);
+  z-index: 10;
+}
+
+.pigPickerMenu::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-left: 2px solid var(--picker-color);
+  border-top: 2px solid var(--picker-color);
+  transform: rotate(45deg);
+}
+
+.pigPickerMenuInner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.pigPickerOption {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 6px var(--spacing-xs);
+  border: none;
+  background: white;
+  font-family: var(--primary-font);
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.pigPickerOption:hover {
+  background-color: var(--picker-hover);
+}
+
+.pigPickerOptionActive {
+  background-color: var(--picker-hover);
+  font-weight: var(--font-weight-bold);
+}
+
+.pigPickerOptionClear {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}

@@ -17,8 +17,20 @@
 }
 
 .bluePanel {
+  --panel-color: #8ab8d8;
   background-color: #b8d8f0;
   border: 2px solid #8ab8d8;
+}
+
+.purplePanel {
+  --panel-color: var(--primary);
+  background-color: color-mix(in srgb, var(--primary) 25%, white);
+  border: 2px solid var(--primary);
+}
+
+.customPanel {
+  border: 2px solid var(--panel-color);
+  background-color: color-mix(in srgb, var(--panel-color) 40%, white);
 }
 
 .panelHeading h2 {

@@ -4,13 +4,22 @@ import './Panel.css';
 type PanelProps = {
   heading: string;
   subHeading?: string;
-  theme: 'green' | 'pink' | 'blue';
+  theme: 'green' | 'pink' | 'blue' | 'purple' | 'custom';
+  color?: string;
   children: ReactNode;
 };
 
-const Panel = ({ heading, subHeading, theme, children }: PanelProps) => {
+const Panel = ({ heading, subHeading, theme, color, children }: PanelProps) => {
+  const style = color
+    ? ({
+        '--panel-color': color,
+        borderColor: color,
+        backgroundColor: `color-mix(in srgb, ${color} 40%, white)`,
+      } as React.CSSProperties)
+    : undefined;
+
   return (
-    <div className={`panel ${theme}Panel`}>
+    <div className={`panel ${theme}Panel`} style={style}>
       <div className="panelHeading">
         <h2>{heading}</h2>
         {subHeading && <p>{subHeading}</p>}

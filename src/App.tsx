@@ -16,6 +16,7 @@ import HomePage from './pages/HomePage/HomePage';
 import PigPage from './pages/PigPage/PigPage';
 import FamilyTreePage from './pages/FamilyTreePage/FamilyTreePage.tsx';
 import HealthLogPage from './pages/HealthLogPage/HealthLogPage.tsx';
+import TasksPage from './pages/TasksPage/TasksPage.tsx';
 import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
@@ -49,6 +50,9 @@ function App() {
             </Link>
             <Link to="/health-log">
               <Button className="btn-outline headerButton">🏥</Button>
+            </Link>
+            <Link to="/tasks">
+              <Button className="btn-outline headerButton">📝</Button>
             </Link>
             <button
               className="btn-outline headerButton rollcallButton"
@@ -94,6 +98,14 @@ function App() {
             element={
               <PageTransition>
                 <HealthLogPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/tasks"
+            element={
+              <PageTransition>
+                <TasksPage />
               </PageTransition>
             }
           />
