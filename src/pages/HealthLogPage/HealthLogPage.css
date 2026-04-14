@@ -1,0 +1,98 @@
+.healthLogPage {
+  height: calc(100dvh - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+.healthLogPage .panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.healthLogPage .panelContent {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.healthLogPage .panelHeading h2 {
+  color: #1a4d1a;
+}
+
+.healthLogList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs);
+}
+
+.healthLogCard {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: 12px;
+  border-radius: var(--border-radius-sm);
+  background-color: #e0f5e0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.healthLogPigName {
+  flex-grow: 1;
+  font-weight: var(--font-weight-bold);
+  color: #1a4d1a;
+  text-decoration: none;
+  display: block;
+}
+
+.healthLogDate {
+  font-size: var(--font-size-sm);
+  display: block;
+}
+
+.healthLogThumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.healthLogThumbPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--accent-yellow);
+  font-size: 20px;
+}
+
+.healthLogCardBody {
+  text-align: left;
+}
+
+.healthLogCardBody p {
+  margin: var(--spacing-xs) 0 0;
+}
+
+.healthLogIcons {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.healthLogBadge {
+  padding: 4px 8px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+}
+
+.healthLogSentinel {
+  padding: var(--spacing-md) 0;
+  display: flex;
+  justify-content: center;
+}

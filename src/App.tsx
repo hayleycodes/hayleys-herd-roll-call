@@ -14,6 +14,7 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import HomePage from './pages/HomePage/HomePage';
 import PigPage from './pages/PigPage/PigPage';
 import FamilyTreePage from './pages/FamilyTreePage/FamilyTreePage.tsx';
+import HealthLogPage from './pages/HealthLogPage/HealthLogPage.tsx';
 import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
@@ -38,11 +39,14 @@ function App() {
           <Link to="/" className="headerLink">
             <img src={hhLogo} alt="Hayley's Herd" className="headerLogo" />
           </Link>
-          <div>
+          <div className="headerLinks">
             <Link to="/tree">
               <Button className="btn-outline headerButton treeButton">
                 🌳
               </Button>
+            </Link>
+            <Link to="/health-log">
+              <Button className="btn-outline headerButton">🏥</Button>
             </Link>
             <button
               className="btn-outline headerButton rollcallButton"
@@ -80,6 +84,14 @@ function App() {
             element={
               <PageTransition>
                 <FamilyTreePage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/health-log"
+            element={
+              <PageTransition>
+                <HealthLogPage />
               </PageTransition>
             }
           />

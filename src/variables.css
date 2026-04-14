@@ -38,6 +38,7 @@
   /* =========================
      SPACING
   ========================== */
+  --spacing-xxs: 2px;
   --spacing-xs: 8px;
   --spacing-sm: 16px;
   --spacing-md: 24px;
