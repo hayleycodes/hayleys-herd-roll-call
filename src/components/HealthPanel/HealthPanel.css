@@ -1,29 +1,37 @@
-.healthCard,
-.healthForm {
-  border-radius: var(--border-radius-sm);
-  padding: 12px;
+.healthCardList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
 .healthCard {
+  border-radius: var(--border-radius-sm);
+  padding: 12px;
   background-color: #e0f5e0;
+  text-align: left;
 }
 
 .healthCard p {
   margin: 4px 0;
 }
 
-.healthCard .cardHeader {
+.healthCard .healthCardHeader {
   display: flex;
 }
 
-.healthCard .icons {
+.btn-outline.addButton {
+  margin: 0px;
+}
+
+.healthCard .healthCardIcons {
   display: flex;
   flex-direction: row;
   gap: 8px;
   margin-left: auto;
 }
 
-.healthCard .icons p {
+/* Shared badge style for health indicators */
+.healthBadge {
   margin: 0;
   padding: 4px 8px;
   background: white;
@@ -31,93 +39,4 @@
   border-radius: 999px;
   font-size: var(--font-size-sm);
   line-height: 1;
-}
-
-.healthForm {
-  display: flex;
-  flex-direction: column;
-  background-color: #e0f5e0;
-}
-
-.healthForm h3 {
-  margin: var(--spacing-xs) 0;
-}
-
-.healthForm textarea {
-  width: 100%;
-  border: none;
-}
-
-.healthForm .healthFormWrapper {
-  display: flex;
-  justify-content: space-between;
-}
-
-.checkboxes {
-  display: flex;
-  flex-direction: column;
-  margin-top: var(--spacing-xs);
-  gap: var(--spacing-xs);
-}
-
-.checkboxes label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: var(--border-radius-sm);
-  transition: background 0.15s ease;
-}
-
-.checkboxes label:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-/* custom checkbox */
-.healthForm input[type='checkbox'] {
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  margin: 0px;
-  border-radius: 6px;
-  border: 2px dashed #a0caa2;
-  background-color: white;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  transition: all 0.15s ease;
-}
-
-.healthForm input[type='checkbox']:checked {
-  background-color: #a0caa2;
-  border-color: rgba(0, 0, 0, 0.2);
-}
-
-.healthForm input[type='checkbox']:checked::after {
-  content: '';
-  border: solid white;
-  border-width: 0 3px 3px 0;
-  transform: rotate(45deg);
-  position: absolute;
-  left: 11px;
-  top: 8px;
-  width: 5px;
-  height: 11px;
-}
-
-.healthForm input[type='checkbox']:active {
-  transform: scale(0.95);
-}
-
-.healthForm input[type='checkbox']:focus {
-  outline: 2px solid #a0caa2;
-  outline-offset: 2px;
-}
-
-.healthForm button {
-  align-self: self-end;
-  border-color: #a0caa2;
 }

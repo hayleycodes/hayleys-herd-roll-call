@@ -9,7 +9,7 @@ type Props = {
 
 const FamilyPanel = ({ family }: Props) => {
   return (
-    <Panel heading="Family 👥" theme="blue">
+    <Panel heading="Family 🌳" theme="blue">
       {/* Siblings */}
       <h3>Siblings 🐖🤝🐖</h3>
       {family.siblings.length === 0 ? (

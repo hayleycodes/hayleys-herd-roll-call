@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import './HealthPanel.css';
-import {
-  createPigHealth,
-  getPigHealth,
-} from '../../services/pig-health.service';
+import { getPigHealth } from '../../services/pig-health.service';
 import type { Pig, HealthRecord } from '../../services/pigs.types';
 import Panel from '../ui/Panel/Panel';
+import HealthForm from '../HealthForm/HealthForm';
 
 type Props = {
   pig: Pig;
@@ -15,87 +12,28 @@ type Props = {
 };
 
 const HealthPanel = ({ pig, health, setHealth }: Props) => {
-  const [notes, setNotes] = useState('');
-  const [nailClip, setNailClip] = useState(false);
-  const [haircut, setHaircut] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleAddHealth = async () => {
-    try {
-      setSubmitting(true);
-
-      await createPigHealth({
-        pig_id: pig.id,
-        notes,
-        nail_clip: nailClip,
-        haircut,
-      } as any);
-
-      const updated = await getPigHealth(pig.id);
-      setHealth(updated);
-
-      setNotes('');
-      setNailClip(false);
-      setHaircut(false);
-    } finally {
-      setSubmitting(false);
-    }
+  const handleRecordAdded = async () => {
+    const updated = await getPigHealth(pig.id);
+    setHealth(updated);
   };
 
   return (
     <Panel heading="Health 🏥" theme="green">
-      {/* FORM */}
       {!pig.passed_away && (
-        <div className="healthForm">
-          <textarea
-            placeholder="Notes..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-
-          <div className="healthFormWrapper">
-            <div className="checkboxes">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={nailClip}
-                  onChange={(e) => setNailClip(e.target.checked)}
-                />
-                Nail clip
-              </label>
-
-              <label>
-                <input
-                  type="checkbox"
-                  checked={haircut}
-                  onChange={(e) => setHaircut(e.target.checked)}
-                />
-                Haircut
-              </label>
-            </div>
-
-            <button
-              className="btn-outline"
-              onClick={handleAddHealth}
-              disabled={submitting}
-            >
-              {submitting ? 'Saving...' : 'Add record'}
-            </button>
-          </div>
-        </div>
+        <HealthForm pigId={pig.id} onRecordAdded={handleRecordAdded} />
       )}
 
       {/* LIST */}
       {health.length === 0 ? (
         <p className="muted">No health records yet</p>
       ) : (
-        <div>
+        <div className="healthCardList">
           {health.map((record) => (
             <div
               key={record.id}
               className="healthCard"
             >
-              <div className="cardHeader">
+              <div className="healthCardHeader">
                 {!record.passed_away && (
                   <span className="muted">
                     {formatDistanceToNow(new Date(record.created_at), {
@@ -104,9 +42,9 @@ const HealthPanel = ({ pig, health, setHealth }: Props) => {
                   </span>
                 )}
 
-                <div className="icons">
-                  {record.nail_clip && <p>💅 Nail clip</p>}
-                  {record.haircut && <p>✂️ Haircut</p>}
+                <div className="healthCardIcons">
+                  {record.nail_clip && <p className="healthBadge">💅 Nail clip</p>}
+                  {record.haircut && <p className="healthBadge">✂️ Haircut</p>}
                 </div>
               </div>
 

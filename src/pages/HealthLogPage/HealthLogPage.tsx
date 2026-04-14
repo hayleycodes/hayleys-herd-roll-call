@@ -2,11 +2,15 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './HealthLogPage.css';
+import '../../components/HealthPanel/HealthPanel.css';
 import { getAllHealth } from '../../services/pig-health.service';
 import type { HealthLogEntry } from '../../services/pig-health.service';
+import { getAllPigs } from '../../services/pigs.service';
+import type { Pig } from '../../services/pigs.types';
 import { getPigImageUrl } from '../../services/pig-images.service';
 import Loading from '../../components/ui/Loading/Loading';
 import Panel from '../../components/ui/Panel/Panel';
+import HealthForm from '../../components/HealthForm/HealthForm';
 
 const PAGE_SIZE = 10;
 
@@ -30,11 +34,13 @@ const PigThumbnail = ({ imagePath }: { imagePath: string | null }) => {
 
 const HealthLogPage = () => {
   const [records, setRecords] = useState<HealthLogEntry[]>([]);
+  const [pigs, setPigs] = useState<Pig[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const loadRecords = useCallback(async (offset: number) => {
     const data = await getAllHealth(offset, PAGE_SIZE);
@@ -45,8 +51,12 @@ const HealthLogPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await loadRecords(0);
-        setRecords(data);
+        const [healthData, pigData] = await Promise.all([
+          loadRecords(0),
+          getAllPigs(),
+        ]);
+        setRecords(healthData);
+        setPigs(pigData.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -55,6 +65,18 @@ const HealthLogPage = () => {
     };
     load();
   }, [loadRecords]);
+
+  useEffect(() => {
+    if (!loading && scrollRef.current) {
+      const scrollContainer = scrollRef.current.querySelector('.panelContent');
+      if (scrollContainer) scrollContainer.scrollTop = 0;
+    }
+  }, [loading]);
+
+  const handleRecordAdded = async () => {
+    const data = await getAllHealth(0, records.length + 1);
+    setRecords(data);
+  };
 
   useEffect(() => {
     if (!sentinelRef.current || !hasMore) return;
@@ -82,8 +104,10 @@ const HealthLogPage = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="healthLogPage">
+    <div className="healthLogPage" ref={scrollRef}>
       <Panel heading="Health Log 🏥" theme="green">
+        <HealthForm pigs={pigs} onRecordAdded={handleRecordAdded} />
+
         {records.length === 0 ? (
           <p className="muted">No health records yet</p>
         ) : (
@@ -112,10 +136,10 @@ const HealthLogPage = () => {
                   {record.notes && <p>{record.notes}</p>}
                   <div className="healthLogIcons">
                     {record.nail_clip && (
-                      <span className="healthLogBadge">💅 Nail clip</span>
+                      <span className="healthBadge">💅 Nail clip</span>
                     )}
                     {record.haircut && (
-                      <span className="healthLogBadge">✂️ Haircut</span>
+                      <span className="healthBadge">✂️ Haircut</span>
                     )}
                   </div>
                 </div>
