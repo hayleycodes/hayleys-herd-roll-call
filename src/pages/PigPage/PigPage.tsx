@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 
@@ -85,6 +85,8 @@ const PigPage = () => {
     fosterFamily: [],
   });
 
+  const [scrollScale, setScrollScale] = useState(1);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -162,6 +164,16 @@ const PigPage = () => {
     }
   };
 
+  const handleScroll = useCallback(() => {
+    const scale = Math.max(0.55, 1 - (window.scrollY / 250) * 0.45);
+    setScrollScale(scale);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -219,23 +231,29 @@ const PigPage = () => {
         className="pigDetailCard"
         style={{ '--pig-color': pigColor } as React.CSSProperties}
       >
-        {!pig.passed_away && (
-          <button
-            className="eyeButton detailEyeButton"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              setConfettiOrigin({
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2,
-              });
-              setSelectedPig(pig);
-            }}
-          >
-            👀
-          </button>
-        )}
-
-        <div className="detailCircleWrapper">
+        <div
+          className="detailCircleWrapper"
+          style={{
+            transform: `scale(${scrollScale})`,
+            transformOrigin: 'top center',
+            marginBottom: `${-(1 - scrollScale) * 100}%`,
+          }}
+        >
+          {!pig.passed_away && (
+            <button
+              className="eyeButton detailEyeButton"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setConfettiOrigin({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top + rect.height / 2,
+                });
+                setSelectedPig(pig);
+              }}
+            >
+              👀
+            </button>
+          )}
           {!pig.passed_away && (
             <div className="pigSpeechBubble">{getQuoteForPig(pig.id)}</div>
           )}

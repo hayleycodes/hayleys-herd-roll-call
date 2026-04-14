@@ -8,6 +8,7 @@ import './App.css';
 import hhLogo from './assets/hh.png';
 import Button from './components/ui/Button/Button';
 import PageTransition from './components/ui/PageTransition/PageTransition';
+import ScrollToTop from './components/ui/ScrollToTop';
 import RollcallOverlay from './components/Rollcall/RollcallOverlay';
 
 import LoginPage from './pages/LoginPage/LoginPage';
@@ -34,6 +35,7 @@ function App() {
 
   return (
     <div className="wrapper">
+      <ScrollToTop />
       <header>
         <div className="headerLeft">
           <Link to="/" className="headerLink">
