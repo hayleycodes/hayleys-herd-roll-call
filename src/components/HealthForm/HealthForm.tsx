@@ -1,15 +1,30 @@
-import { useState } from 'react';
-import { createPigHealth } from '../../services/pig-health.service';
-import type { Pig } from '../../services/pigs.types';
+import { useState, useEffect } from 'react';
+import {
+  createPigHealth,
+  updatePigHealth,
+} from '../../services/pig-health.service';
+import type { Pig, HealthRecord } from '../../services/pigs.types';
 import PigPicker from '../PigPicker/PigPicker';
 import './HealthForm.css';
 
 type Props =
-  | { pigId: number; pigs?: never; onRecordAdded: () => void }
-  | { pigId?: never; pigs: Pig[]; onRecordAdded: () => void };
+  | {
+      pigId: number;
+      pigs?: never;
+      onRecordAdded: () => void;
+      editingRecord?: HealthRecord | null;
+      onCancelEdit?: () => void;
+    }
+  | {
+      pigId?: never;
+      pigs: Pig[];
+      onRecordAdded: () => void;
+      editingRecord?: HealthRecord | null;
+      onCancelEdit?: () => void;
+    };
 
 const HealthForm = (props: Props) => {
-  const { onRecordAdded } = props;
+  const { onRecordAdded, editingRecord, onCancelEdit } = props;
 
   const [selectedPigId, setSelectedPigId] = useState<number | ''>(
     props.pigId ?? ''
@@ -17,33 +32,70 @@ const HealthForm = (props: Props) => {
   const [notes, setNotes] = useState('');
   const [nailClip, setNailClip] = useState(false);
   const [haircut, setHaircut] = useState(false);
+  const [parasiteTreatment, setParasiteTreatment] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const showDropdown = !!props.pigs;
+  const isEditing = !!editingRecord;
+
+  useEffect(() => {
+    if (editingRecord) {
+      setNotes(editingRecord.notes ?? '');
+      setNailClip(editingRecord.nail_clip ?? false);
+      setHaircut(editingRecord.haircut ?? false);
+      setParasiteTreatment(editingRecord.parasite_treatment ?? false);
+      if (showDropdown) setSelectedPigId(editingRecord.pig_id);
+    }
+  }, [editingRecord, showDropdown]);
+
+  const resetForm = () => {
+    setNotes('');
+    setNailClip(false);
+    setHaircut(false);
+    setParasiteTreatment(false);
+    if (showDropdown) setSelectedPigId('');
+  };
 
   const handleSubmit = async () => {
-    if (!selectedPigId) return;
+    const pigId = isEditing ? editingRecord.pig_id : selectedPigId;
+    if (!pigId) return;
     try {
       setSubmitting(true);
-      await createPigHealth({
-        pig_id: selectedPigId,
-        notes,
-        nail_clip: nailClip,
-        haircut,
-      } as any);
-
-      setNotes('');
-      setNailClip(false);
-      setHaircut(false);
-      if (showDropdown) setSelectedPigId('');
+      setError(null);
+      if (isEditing) {
+        await updatePigHealth(editingRecord.id, {
+          notes: notes || null,
+          nail_clip: nailClip,
+          haircut,
+          parasite_treatment: parasiteTreatment,
+        });
+      } else {
+        await createPigHealth({
+          pig_id: pigId,
+          notes,
+          nail_clip: nailClip,
+          haircut,
+          parasite_treatment: parasiteTreatment,
+        } as any);
+      }
+      resetForm();
+      if (isEditing) onCancelEdit?.();
       onRecordAdded();
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to save');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleCancel = () => {
+    resetForm();
+    onCancelEdit?.();
+  };
+
   return (
-    <div className="healthForm">
+    <div className={`healthForm ${isEditing ? 'healthFormEditing' : ''}`} key={editingRecord?.id ?? 'new'}>
       {showDropdown && (
         <PigPicker
           pigs={props.pigs}
@@ -78,14 +130,30 @@ const HealthForm = (props: Props) => {
             />
             Haircut
           </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={parasiteTreatment}
+              onChange={(e) => setParasiteTreatment(e.target.checked)}
+            />
+            Parasite treatment
+          </label>
         </div>
+      </div>
 
+      {error && <p style={{ color: 'red', margin: 0, fontSize: 12 }}>{error}</p>}
+      <div className="healthFormButtons">
+        {isEditing && (
+          <button className="btn-outline addButton" onClick={handleCancel}>
+            Cancel
+          </button>
+        )}
         <button
           className="btn-outline addButton"
           onClick={handleSubmit}
-          disabled={submitting || !selectedPigId}
+          disabled={submitting || !(isEditing ? editingRecord.pig_id : selectedPigId)}
         >
-          {submitting ? 'Saving...' : 'Add record'}
+          {submitting ? 'Saving...' : isEditing ? 'Save' : 'Add record'}
         </button>
       </div>
     </div>

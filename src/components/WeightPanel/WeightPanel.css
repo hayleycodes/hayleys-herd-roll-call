@@ -1,0 +1,61 @@
+.weightForm {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.weightForm input[type="number"] {
+  flex: 1;
+  padding: var(--spacing-xs);
+  border: 2px solid var(--primary);
+  border-radius: var(--border-radius-sm);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-md);
+}
+
+.weightList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.weightCard {
+  border-radius: var(--border-radius-sm);
+  padding: 12px;
+  background-color: color-mix(in srgb, var(--panel-color, #a0caa2) 25%, white);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.weightCard p {
+  margin: 0;
+}
+
+.weightValue {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+}
+
+.weightMeta {
+  text-align: right;
+}
+
+.weightChange {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.weightChange.up {
+  color: #2e7d32;
+}
+
+.weightChange.down {
+  color: #c62828;
+}
+
+.weightChange.same {
+  color: var(--text-muted);
+}

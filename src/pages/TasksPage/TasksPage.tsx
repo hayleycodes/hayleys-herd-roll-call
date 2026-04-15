@@ -51,7 +51,9 @@ const TasksPage = () => {
 
   const [title, setTitle] = useState('');
   const [selectedPigId, setSelectedPigId] = useState<number | ''>('');
-  const [taskToComplete, setTaskToComplete] = useState<TaskWithPig | null>(null);
+  const [taskToComplete, setTaskToComplete] = useState<TaskWithPig | null>(
+    null
+  );
   const [taskToDelete, setTaskToDelete] = useState<TaskWithPig | null>(null);
   const [updating, setUpdating] = useState(false);
 
@@ -167,7 +169,14 @@ const TasksPage = () => {
                 <div
                   key={task.id}
                   className="taskItem"
-                  style={pigColor ? { '--pig-color': pigColor, borderColor: pigColor } as React.CSSProperties : undefined}
+                  style={
+                    pigColor
+                      ? ({
+                          '--pig-color': pigColor,
+                          borderColor: pigColor,
+                        } as React.CSSProperties)
+                      : undefined
+                  }
                 >
                   <label className="taskCheckboxLabel">
                     <input
@@ -182,11 +191,11 @@ const TasksPage = () => {
                       to={`/pigs/${task.pig_id}`}
                       className="taskPigSection"
                     >
+                      <span className="taskPigName">{task.pigs.name}</span>
                       <TaskPigAvatar
                         imagePath={task.pigs.image_path}
                         name={task.pigs.name}
                       />
-                      <span className="taskPigName">{task.pigs.name}</span>
                     </Link>
                   )}
                 </div>
@@ -208,7 +217,14 @@ const TasksPage = () => {
                 <div
                   key={task.id}
                   className="taskItem taskItemCompleted"
-                  style={pigColor ? { '--pig-color': pigColor, borderColor: pigColor } as React.CSSProperties : undefined}
+                  style={
+                    pigColor
+                      ? ({
+                          '--pig-color': pigColor,
+                          borderColor: pigColor,
+                        } as React.CSSProperties)
+                      : undefined
+                  }
                 >
                   <label className="taskCheckboxLabel">
                     <input

@@ -1,0 +1,133 @@
+.weightsPage {
+  height: calc(100dvh - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+.weightsPage .panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.weightsPage .panelContent {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-top: 0px;
+}
+
+.weightsPage .panelHeading h2 {
+  color: #1a4d1a;
+}
+
+.weightsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+}
+
+.weightsCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 12px;
+  border-radius: var(--border-radius-sm);
+  background-color: #e0f5e0;
+  color: inherit;
+}
+
+.weightsCardLink {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.weightsCardInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.weightsName {
+  font-weight: var(--font-weight-bold);
+  color: #1a4d1a;
+}
+
+.weightsValue {
+  font-size: var(--font-size-sm);
+}
+
+.weightsAddBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 2px solid #3a9a3a;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  color: #3a9a3a;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.weightsInlineForm {
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: 8px 12px 0;
+  animation: slideDown 0.2s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 60px;
+    padding-top: 8px;
+  }
+}
+
+.weightsInlineForm .btn-outline {
+  border-color: #3a9a3a;
+}
+
+.weightsInlineForm input[type='number'] {
+  flex: 1;
+  padding: var(--spacing-xs);
+  border: 2px solid #3a9a3a;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-md);
+}
+
+.weightThumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.weightThumbPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3a9a3a;
+  font-size: 20px;
+}

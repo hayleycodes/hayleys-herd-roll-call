@@ -16,6 +16,7 @@ export interface HealthRecord {
   passed_away?: string | null;
   nail_clip?: boolean;
   haircut?: boolean;
+  parasite_treatment?: boolean | null;
   created_at: string;
 }
 
@@ -29,6 +30,13 @@ export interface PigRelationship {
   pig_id_a: number;
   pig_id_b: number;
   relationship_type: RelationshipType;
+}
+
+export interface WeightRecord {
+  id: number;
+  pig_id: number;
+  weight_grams: number;
+  recorded_at: string;
 }
 
 export interface Task {

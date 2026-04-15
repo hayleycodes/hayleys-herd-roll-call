@@ -40,3 +40,38 @@
   font-size: var(--font-size-sm);
   line-height: 1;
 }
+
+/* Edit / Delete actions */
+.healthCardActions {
+  display: flex;
+  gap: 4px;
+  margin: var(--spacing-xxs) calc(0px - var(--spacing-xxs))
+    calc(0px - var(--spacing-xxs));
+  justify-content: flex-end;
+}
+
+.healthCardBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--panel-color, #a0caa2) 40%, white);
+  border: 2px solid color-mix(in srgb, var(--panel-color, #a0caa2) 40%, white);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  transition: transform 0.15s ease;
+}
+
+.healthCardBtn:hover {
+  transform: scale(1.1);
+}
+
+/* Editing state on card */
+.healthCardEditing {
+  border: 2px dashed var(--panel-color, #a0caa2);
+  opacity: 0.6;
+}
+

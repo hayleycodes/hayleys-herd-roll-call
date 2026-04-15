@@ -27,7 +27,8 @@
 
 .healthFormCheckboxes {
   display: flex;
-  /* margin-left: calc(0px - var(--spacing-xs)); */
+  justify-content: space-between;
+  width: 100%;
   gap: var(--spacing-xs);
 }
 
@@ -35,7 +36,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   border-radius: var(--border-radius-sm);
   transition: background 0.15s ease;
@@ -71,12 +72,12 @@
   content: '';
   border: solid white;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  position: absolute;
-  left: 4px;
-  top: 1px;
   width: 4px;
   height: 8px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%) rotate(45deg);
 }
 
 .healthForm input[type='checkbox']:active {
@@ -88,9 +89,25 @@
   outline-offset: 2px;
 }
 
+.healthFormButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .healthForm .btn-outline {
   border-color: var(--panel-color, #a0caa2);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
+/* Flash when entering edit mode */
+.healthFormEditing {
+  animation: formFlash 0.4s ease;
+}
+
+@keyframes formFlash {
+  0% { background-color: #fff; }
+  40% { background-color: color-mix(in srgb, var(--panel-color, #a0caa2) 25%, white); }
+  100% { background-color: #fff; }
+}

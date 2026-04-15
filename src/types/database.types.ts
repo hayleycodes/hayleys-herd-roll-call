@@ -21,6 +21,7 @@ export type Database = {
           id: number
           nail_clip: boolean
           notes: string | null
+          parasite_treatment: boolean | null
           pig_id: number
           updated_at: string | null
         }
@@ -30,6 +31,7 @@ export type Database = {
           id?: number
           nail_clip?: boolean
           notes?: string | null
+          parasite_treatment?: boolean | null
           pig_id: number
           updated_at?: string | null
         }
@@ -39,6 +41,7 @@ export type Database = {
           id?: number
           nail_clip?: boolean
           notes?: string | null
+          parasite_treatment?: boolean | null
           pig_id?: number
           updated_at?: string | null
         }
@@ -184,6 +187,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tasks_pig_id_fkey"
+            columns: ["pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weights: {
+        Row: {
+          id: number
+          pig_id: number
+          recorded_at: string
+          weight_grams: number
+        }
+        Insert: {
+          id?: number
+          pig_id: number
+          recorded_at?: string
+          weight_grams: number
+        }
+        Update: {
+          id?: number
+          pig_id?: number
+          recorded_at?: string
+          weight_grams?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pig_weights_pig_id_fkey"
             columns: ["pig_id"]
             isOneToOne: false
             referencedRelation: "pigs"

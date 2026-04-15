@@ -37,6 +37,7 @@ export const createPigHealth = async (healthRecord: HealthRecord) => {
       notes: healthRecord.notes ?? null,
       nail_clip: healthRecord.nail_clip ?? false,
       haircut: healthRecord.haircut ?? false,
+      parasite_treatment: healthRecord.parasite_treatment ?? false,
     })
     .select()
     .single();
@@ -44,4 +45,29 @@ export const createPigHealth = async (healthRecord: HealthRecord) => {
   if (error) throw new Error(error.message);
 
   return data;
+};
+
+export const updatePigHealth = async (
+  id: number,
+  updates: { notes?: string | null; nail_clip?: boolean; haircut?: boolean; parasite_treatment?: boolean }
+) => {
+  const { data, error } = await supabase
+    .from("health_data")
+    .update(updates)
+    .eq("id", id)
+    .select();
+
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error("Update failed — check that an UPDATE policy exists for health_data in Supabase");
+  }
+};
+
+export const deletePigHealth = async (id: number) => {
+  const { error } = await supabase
+    .from("health_data")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
 };

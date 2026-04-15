@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './HealthLogPage.css';
 import '../../components/HealthPanel/HealthPanel.css';
-import { getAllHealth } from '../../services/pig-health.service';
+import { getAllHealth, deletePigHealth } from '../../services/pig-health.service';
 import type { HealthLogEntry } from '../../services/pig-health.service';
 import { getAllPigs } from '../../services/pigs.service';
 import type { Pig } from '../../services/pigs.types';
@@ -39,6 +39,7 @@ const HealthLogPage = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingRecord, setEditingRecord] = useState<HealthLogEntry | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -78,6 +79,12 @@ const HealthLogPage = () => {
     setRecords(data);
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm('Delete this health record?')) return;
+    await deletePigHealth(id);
+    setRecords((prev) => prev.filter((r) => r.id !== id));
+  };
+
   useEffect(() => {
     if (!sentinelRef.current || !hasMore) return;
 
@@ -106,44 +113,68 @@ const HealthLogPage = () => {
   return (
     <div className="healthLogPage" ref={scrollRef}>
       <Panel heading="Health Log 🏥" theme="green">
-        <HealthForm pigs={pigs} onRecordAdded={handleRecordAdded} />
+        <Link to="/weights" className="weightsLink btn-outline">⚖️</Link>
+        <HealthForm
+          pigs={pigs}
+          onRecordAdded={handleRecordAdded}
+          editingRecord={editingRecord}
+          onCancelEdit={() => setEditingRecord(null)}
+        />
 
         {records.length === 0 ? (
           <p className="muted">No health records yet</p>
         ) : (
           <div className="healthLogList">
             {records.map((record) => (
-              <Link
-                key={record.id}
-                to={`/pigs/${record.pig_id}`}
-                className="healthLogCard"
-              >
-                <PigThumbnail imagePath={record.pigs?.image_path ?? null} />
+              <div key={record.id} className={`healthLogCard ${editingRecord?.id === record.id ? 'healthCardEditing' : ''}`}>
+                <Link
+                  to={`/pigs/${record.pig_id}`}
+                  className="healthLogCardLink"
+                >
+                  <PigThumbnail imagePath={record.pigs?.image_path ?? null} />
 
-                <div className="healthLogCardBody">
-                  <div>
-                    <span className="healthLogPigName">
-                      {record.pigs?.name ?? 'Unknown pig'}
-                    </span>
-                    <span className="muted healthLogDate">
-                      Recorded:{' '}
-                      {formatDistanceToNow(new Date(record.created_at), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  </div>
+                  <div className="healthLogCardBody">
+                    <div>
+                      <span className="healthLogPigName">
+                        {record.pigs?.name ?? 'Unknown pig'}
+                      </span>
+                      <span className="muted healthLogDate">
+                        Recorded:{' '}
+                        {formatDistanceToNow(new Date(record.created_at), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    </div>
 
-                  {record.notes && <p>{record.notes}</p>}
-                  <div className="healthLogIcons">
-                    {record.nail_clip && (
-                      <span className="healthBadge">💅 Nail clip</span>
-                    )}
-                    {record.haircut && (
-                      <span className="healthBadge">✂️ Haircut</span>
-                    )}
+                    {record.notes && <p>{record.notes}</p>}
+                    <div className="healthLogIcons">
+                      {record.nail_clip && (
+                        <span className="healthBadge">💅 Nail clip</span>
+                      )}
+                      {record.haircut && (
+                        <span className="healthBadge">✂️ Haircut</span>
+                      )}
+                      {record.parasite_treatment && (
+                        <span className="healthBadge">🐛 Parasite treatment</span>
+                      )}
+                    </div>
                   </div>
+                </Link>
+                <div className="healthCardActions">
+                  <button
+                    className="healthCardBtn"
+                    onClick={() => setEditingRecord(record)}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="healthCardBtn healthCardBtnDelete"
+                    onClick={() => handleDelete(record.id)}
+                  >
+                    🗑️
+                  </button>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
