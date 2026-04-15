@@ -89,6 +89,9 @@ const PigPage = () => {
   });
 
   const [scrollScale, setScrollScale] = useState(1);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxMounted, setLightboxMounted] = useState(false);
+  const [lightboxActive, setLightboxActive] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -209,6 +212,18 @@ const PigPage = () => {
   }, [id]);
 
   useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    if (lightboxOpen) {
+      setLightboxMounted(true);
+      timeout = setTimeout(() => setLightboxActive(true), 10);
+    } else {
+      setLightboxActive(false);
+      timeout = setTimeout(() => setLightboxMounted(false), 300);
+    }
+    return () => clearTimeout(timeout);
+  }, [lightboxOpen]);
+
+  useEffect(() => {
     if (!showEmojiPicker) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -293,9 +308,11 @@ const PigPage = () => {
                 src={imageUrl}
                 alt={pig.name}
                 className="detailImage"
+                onClick={() => setLightboxOpen(true)}
                 style={{
                   opacity: imageReady ? 1 : 0,
                   transition: 'opacity 0.3s ease',
+                  cursor: 'pointer',
                 }}
               />
             ) : (
@@ -470,6 +487,23 @@ const PigPage = () => {
           </button>
         </div>
       </Modal>
+
+      {lightboxMounted && imageUrl && (
+        <div
+          className={`imageLightboxOverlay ${lightboxActive ? 'open' : ''}`}
+          style={{ '--pig-color': pigColor } as React.CSSProperties}
+          onClick={() => setLightboxOpen(false)}
+        >
+          <div className={`imageLightboxCircle ${lightboxActive ? 'open' : ''}`}>
+            <img
+              src={imageUrl}
+              alt={pig.name}
+              className="imageLightboxImg"
+              style={{ borderColor: pigColor }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
