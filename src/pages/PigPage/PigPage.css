@@ -38,7 +38,6 @@
   cursor: pointer;
   font-size: 36px;
   z-index: 2;
-  transform: rotate(10deg);
   box-shadow: 0 4px 10px grey;
 }
 

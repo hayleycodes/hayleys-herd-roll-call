@@ -16,6 +16,7 @@ const HomePage = () => {
   const [taskCount, setTaskCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
   const loadPigs = async () => {
     try {
       setLoading(true);
@@ -61,28 +62,41 @@ const HomePage = () => {
   if (error) return <p>{error}</p>;
 
   const today = new Date().toDateString();
-  const unseenCount = pigs.filter(
+  const unseenPigs = pigs.filter(
     (p) => !p.last_sighted || new Date(p.last_sighted).toDateString() !== today
-  ).length;
+  );
+  const unseenCount = unseenPigs.length;
+
+  const filteredPigs = filter === 'unseen'
+    ? unseenPigs
+    : filter === 'sick'
+      ? pigs.filter((p) => sickPigIds.has(p.id))
+      : pigs;
 
   return (
     <div>
       {unseenCount > 0 && (
-        <div className="unseenBanner">
+        <button
+          className={`unseenBanner${filter === 'unseen' ? ' bannerActive' : ''}`}
+          onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
+        >
           👀 {unseenCount} pig{unseenCount === 1 ? '' : 's'} not sighted today
-        </div>
+        </button>
       )}
       {sickPigIds.size > 0 && (
-        <div className="sickBanner">
+        <button
+          className={`sickBanner${filter === 'sick' ? ' bannerActive' : ''}`}
+          onClick={() => setFilter(filter === 'sick' ? null : 'sick')}
+        >
           🤒 {sickPigIds.size} sick pig{sickPigIds.size === 1 ? '' : 's'}
-        </div>
+        </button>
       )}
       {taskCount > 0 && (
         <Link to="/tasks" className="tasksBanner">
           📝 {taskCount} task{taskCount === 1 ? '' : 's'} to do
         </Link>
       )}
-      <PigList pigs={pigs} passedPigs={passedPigs} setPigs={setPigs} sickPigIds={sickPigIds} />
+      <PigList pigs={filteredPigs} passedPigs={filter ? [] : passedPigs} setPigs={setPigs} sickPigIds={sickPigIds} />
     </div>
   );
 };

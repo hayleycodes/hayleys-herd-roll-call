@@ -13,6 +13,7 @@ import Modal from '../../components/ui/Modal/Modal';
 import Confetti from '../../components/ui/Confetti/Confetti';
 
 import { getPigHealth } from '../../services/pig-health.service';
+import { getPigWeights } from '../../services/pig-weights.service';
 import { getTasksForPig } from '../../services/tasks.service';
 import {
   compressImage,
@@ -37,7 +38,7 @@ import {
   TAG_OPTIONS,
 } from '../../services/pig-tags.service';
 
-import type { Pig, Task } from '../../services/pigs.types';
+import type { Pig, Task, WeightRecord } from '../../services/pigs.types';
 
 const PIG_QUOTES = [
   'Wheek wheek! 🐹',
@@ -68,6 +69,7 @@ const PigPage = () => {
   const [descriptionDraft, setDescriptionDraft] = useState('');
 
   const [health, setHealth] = useState<any[]>([]);
+  const [latestWeight, setLatestWeight] = useState<WeightRecord | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [showTagPicker, setShowTagPicker] = useState(false);
@@ -188,12 +190,13 @@ const PigPage = () => {
         const pigId = Number(id);
         if (isNaN(pigId)) throw new Error('Invalid pig id');
 
-        const [pigData, healthData, familyData, tagsData, tasksData] = await Promise.all([
+        const [pigData, healthData, familyData, tagsData, tasksData, weightsData] = await Promise.all([
           getPig(pigId),
           getPigHealth(pigId),
           getPigFamily(pigId),
           getPigTags(pigId),
           getTasksForPig(pigId),
+          getPigWeights(pigId),
         ]);
 
         setPig(pigData);
@@ -201,6 +204,7 @@ const PigPage = () => {
         setFamily(familyData);
         setTags(tagsData);
         setTasks(tasksData);
+        if (weightsData.length > 0) setLatestWeight(weightsData[0]);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -453,6 +457,9 @@ const PigPage = () => {
             )}
             {pig.dob && (
               <span>DOB: {new Date(pig.dob).toLocaleDateString()}</span>
+            )}
+            {latestWeight && (
+              <span>Weight: {latestWeight.weight_grams}g</span>
             )}
           </div>
         </div>

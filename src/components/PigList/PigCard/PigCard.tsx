@@ -57,23 +57,24 @@ const PigCard = ({
       }
       onClick={handleTap}
     >
-      {onEyeClick && (
-        <button
-          className="eyeButton"
-          style={{ backgroundColor: eyeColor, borderColor: eyeColor }}
-          onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            onEyeClick({
-              x: rect.left + rect.width / 2,
-              y: rect.top + rect.height / 2,
-            });
-          }}
-        >
-          👀
-        </button>
-      )}
       <Link to={`/pigs/${pig.id}`} className="pigCardLink">
         <div className="pigCardCircleWrapper">
+          {onEyeClick && (
+            <button
+              className="eyeButton"
+              style={{ backgroundColor: eyeColor, borderColor: eyeColor }}
+              onClick={(e) => {
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                onEyeClick({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top + rect.height / 2,
+                });
+              }}
+            >
+              👀
+            </button>
+          )}
           {/* {notSightedToday && <span className="pigCardUnseen">👻</span>} */}
           <div
             ref={circleRef}

@@ -1,4 +1,7 @@
-.unseenBanner {
+.unseenBanner,
+.sickBanner {
+  display: block;
+  width: 100%;
   text-align: center;
   padding: 8px 12px;
   margin-bottom: 8px;
@@ -8,18 +11,20 @@
   color: black;
   font-size: 14px;
   font-weight: bold;
+  font-family: var(--primary-font);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
-.sickBanner {
-  text-align: center;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  border-radius: var(--border-radius-sm);
-  background-color: #e63946;
-  opacity: 0.6;
-  color: black;
-  font-size: 14px;
-  font-weight: bold;
+.unseenBanner:hover,
+.sickBanner:hover {
+  opacity: 0.8;
+}
+
+.unseenBanner.bannerActive,
+.sickBanner.bannerActive {
+  opacity: 1;
 }
 
 .tasksBanner {

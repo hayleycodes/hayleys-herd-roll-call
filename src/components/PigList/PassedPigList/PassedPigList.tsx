@@ -7,6 +7,8 @@ type PigListProps = {
 };
 
 const PigList = ({ passedPigs }: PigListProps) => {
+  if (passedPigs.length === 0) return null;
+
   return (
     <div className="passedPigListWrapper">
       <h2>Forever in the Herd</h2>
