@@ -1,5 +1,5 @@
 .healthLogPage {
-  height: calc(100dvh - 80px);
+  height: calc(100dvh - 100px);
   display: flex;
   flex-direction: column;
 }
@@ -105,12 +105,30 @@
   font-size: var(--font-size-lg);
   margin-bottom: var(--spacing-xs);
 }
-/* 
+
 .tabs {
-  width: 100%;
+  margin: 0px calc(0px - var(--spacing-xs));
+}
+
+.tabs button:first-child {
+  border-right: 2px solid #a0caa2;
 }
 
 .tabs button {
+  padding: var(--spacing-xs) 0;
   width: 50%;
-  height: 20px;
-} */
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  opacity: 0.6;
+}
+
+.tabs button.active {
+  border-bottom-color: #1a4d1a;
+  opacity: 1;
+  font-weight: var(--font-weight-bold);
+}

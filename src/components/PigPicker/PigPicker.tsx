@@ -39,6 +39,7 @@ const PigPicker = ({
   dropUp = false,
 }: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [alignRight, setAlignRight] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedPig = pigs.find((p) => p.id === selectedPigId) ?? null;
@@ -57,13 +58,21 @@ const PigPicker = ({
     return () => document.removeEventListener('mousedown', handleClick);
   }, [dropdownOpen]);
 
+  const openDropdown = () => {
+    if (!dropdownOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      setAlignRight(rect.left > 200);
+    }
+    setDropdownOpen(!dropdownOpen);
+  };
+
   return (
     <div className={`pigPickerDropdown pigPicker--${theme}`} ref={dropdownRef}>
       {view === 'compact' ? (
         <button
           type="button"
           className="pigPickerCompactTrigger"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+          onClick={openDropdown}
           title={selectedPig ? selectedPig.name : 'Link a pig'}
         >
           {selectedPig ? (
@@ -76,7 +85,7 @@ const PigPicker = ({
         <button
           type="button"
           className="pigPickerTrigger"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+          onClick={openDropdown}
         >
           {selectedPig ? (
             <>
@@ -89,7 +98,7 @@ const PigPicker = ({
         </button>
       )}
       {dropdownOpen && (
-        <div className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}`}>
+        <div className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}${alignRight ? '' : ' pigPickerMenu--left'}`}>
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
               <button

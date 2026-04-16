@@ -13,6 +13,17 @@ export const getPigWeights = async (pigId: number): Promise<WeightRecord[]> => {
   return (data as WeightRecord[]) ?? [];
 };
 
+export const getAllWeights = async (): Promise<WeightRecord[]> => {
+  const { data, error } = await supabase
+    .from("weights")
+    .select("*")
+    .order("recorded_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  return (data as WeightRecord[]) ?? [];
+};
+
 export const getLatestWeights = async (): Promise<WeightRecord[]> => {
   const { data, error } = await supabase
     .from("weights")

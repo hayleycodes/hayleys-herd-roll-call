@@ -102,6 +102,16 @@
   z-index: 10;
 }
 
+.pigPickerMenu--left {
+  right: auto;
+  left: 0;
+}
+
+.pigPickerMenu--left::before {
+  right: auto;
+  left: 12px;
+}
+
 .pigPickerMenu::before {
   content: '';
   position: absolute;

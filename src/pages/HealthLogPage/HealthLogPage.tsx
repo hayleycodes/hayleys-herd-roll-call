@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './HealthLogPage.css';
+import '../WeightsPage/WeightsPage.css';
 import '../../components/HealthPanel/HealthPanel.css';
 import {
   getAllHealth,
@@ -9,8 +10,9 @@ import {
 } from '../../services/pig-health.service';
 import type { HealthLogEntry } from '../../services/pig-health.service';
 import { getAllPigs } from '../../services/pigs.service';
-import type { Pig } from '../../services/pigs.types';
+import type { Pig, WeightRecord } from '../../services/pigs.types';
 import { getPigImageUrl } from '../../services/pig-images.service';
+import { getLatestWeights, getAllWeights, createPigWeight } from '../../services/pig-weights.service';
 import Loading from '../../components/ui/Loading/Loading';
 import Panel from '../../components/ui/Panel/Panel';
 import HealthForm from '../../components/HealthForm/HealthForm';
@@ -47,6 +49,12 @@ const HealthLogPage = () => {
   const [editingRecord, setEditingRecord] = useState<HealthLogEntry | null>(
     null
   );
+  const [activeTab, setActiveTab] = useState<'notes' | 'weight'>('notes');
+  const [weights, setWeights] = useState<Map<number, WeightRecord>>(new Map());
+  const [allWeights, setAllWeights] = useState<Map<number, WeightRecord[]>>(new Map());
+  const [addingPigId, setAddingPigId] = useState<number | null>(null);
+  const [gramsInput, setGramsInput] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -59,12 +67,26 @@ const HealthLogPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [healthData, pigData] = await Promise.all([
+        const [healthData, pigData, weightData, allWeightData] = await Promise.all([
           loadRecords(0),
           getAllPigs(),
+          getLatestWeights(),
+          getAllWeights(),
         ]);
         setRecords(healthData);
         setPigs(pigData.sort((a, b) => a.name.localeCompare(b.name)));
+        const weightMap = new Map<number, WeightRecord>();
+        for (const w of weightData) {
+          weightMap.set(w.pig_id, w);
+        }
+        setWeights(weightMap);
+        const allWeightMap = new Map<number, WeightRecord[]>();
+        for (const w of allWeightData) {
+          const list = allWeightMap.get(w.pig_id) ?? [];
+          list.push(w);
+          allWeightMap.set(w.pig_id, list);
+        }
+        setAllWeights(allWeightMap);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -92,6 +114,48 @@ const HealthLogPage = () => {
     setRecords((prev) => prev.filter((r) => r.id !== id));
   };
 
+  const refreshWeights = async () => {
+    const weightData = await getLatestWeights();
+    const weightMap = new Map<number, WeightRecord>();
+    for (const w of weightData) {
+      weightMap.set(w.pig_id, w);
+    }
+    setWeights(weightMap);
+  };
+
+  const handleAddWeight = async (pigId: number) => {
+    const value = Number(gramsInput);
+    if (!value || value <= 0) return;
+
+    setSubmitting(true);
+    try {
+      await createPigWeight(pigId, value);
+      await refreshWeights();
+      setAddingPigId(null);
+      setGramsInput('');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getWeightAtTime = (pigId: number, date: string): number | null => {
+    const pigWeights = allWeights.get(pigId);
+    if (!pigWeights || pigWeights.length === 0) return null;
+    const recordTime = new Date(date).getTime();
+    let closest: WeightRecord | null = null;
+    let closestDiff = Infinity;
+    for (const w of pigWeights) {
+      const diff = Math.abs(new Date(w.recorded_at).getTime() - recordTime);
+      if (diff < closestDiff) {
+        closestDiff = diff;
+        closest = w;
+      }
+    }
+    return closest?.weight_grams ?? null;
+  };
+
+  const livingPigs = pigs.filter((p) => !p.passed_away);
+
   useEffect(() => {
     if (!sentinelRef.current || !hasMore) return;
 
@@ -110,6 +174,8 @@ const HealthLogPage = () => {
       { threshold: 0.1 }
     );
 
+    useEffect(() => {});
+
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [hasMore, loadingMore, records.length, loadRecords]);
@@ -121,87 +187,158 @@ const HealthLogPage = () => {
     <div className="healthLogPage" ref={scrollRef}>
       <Panel heading="Health Log 🏥" theme="green">
         <div className="tabs">
-          <Button variant="outline">Notes</Button>
-          <Button variant="outline">Weight</Button>
+          <button
+            className={activeTab === 'notes' ? 'active' : ''}
+            onClick={() => setActiveTab('notes')}
+          >
+            Notes 📝
+          </button>
+          <button
+            className={activeTab === 'weight' ? 'active' : ''}
+            onClick={() => setActiveTab('weight')}
+          >
+            Weight ⚖️
+          </button>
         </div>
-        <Link to="/weights" className="weightsLink btn-outline">
-          ⚖️
-        </Link>
-        <HealthForm
-          pigs={pigs}
-          onRecordAdded={handleRecordAdded}
-          editingRecord={editingRecord}
-          onCancelEdit={() => setEditingRecord(null)}
-        />
 
-        {records.length === 0 ? (
-          <p className="muted">No health records yet</p>
-        ) : (
-          <div className="healthLogList">
-            {records.map((record) => (
-              <div
-                key={record.id}
-                className={`healthLogCard ${editingRecord?.id === record.id ? 'healthCardEditing' : ''}`}
-              >
-                <Link
-                  to={`/pigs/${record.pig_id}`}
-                  className="healthLogCardLink"
-                >
-                  <PigThumbnail imagePath={record.pigs?.image_path ?? null} />
+        {activeTab === 'notes' && (
+          <>
+            <HealthForm
+              pigs={pigs}
+              onRecordAdded={handleRecordAdded}
+              editingRecord={editingRecord}
+              onCancelEdit={() => setEditingRecord(null)}
+            />
 
-                  <div className="healthLogCardBody">
-                    <div>
-                      <span className="healthLogPigName">
-                        {record.pigs?.name ?? 'Unknown pig'}
-                      </span>
-                      <span className="muted healthLogDate">
-                        Recorded:{' '}
-                        {formatDistanceToNow(new Date(record.created_at), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                    </div>
+            {records.length === 0 ? (
+              <p className="muted">No health records yet</p>
+            ) : (
+              <div className="healthLogList">
+                {records.map((record) => (
+                  <div
+                    key={record.id}
+                    className={`healthLogCard ${editingRecord?.id === record.id ? 'healthCardEditing' : ''}`}
+                  >
+                    <Link
+                      to={`/pigs/${record.pig_id}`}
+                      className="healthLogCardLink"
+                    >
+                      <PigThumbnail imagePath={record.pigs?.image_path ?? null} />
 
-                    {record.notes && <p>{record.notes}</p>}
-                    <div className="healthLogIcons">
-                      {record.nail_clip && (
-                        <span className="healthBadge">💅 Nail clip</span>
-                      )}
-                      {record.haircut && (
-                        <span className="healthBadge">✂️ Haircut</span>
-                      )}
-                      {record.parasite_treatment && (
-                        <span className="healthBadge">
-                          🐛 Parasite treatment
-                        </span>
-                      )}
+                      <div className="healthLogCardBody">
+                        <div>
+                          <span className="healthLogPigName">
+                            {record.pigs?.name ?? 'Unknown pig'}
+                          </span>
+                          <span className="muted healthLogDate">
+                            Recorded:{' '}
+                            {formatDistanceToNow(new Date(record.created_at), {
+                              addSuffix: true,
+                            })}
+                          </span>
+                        </div>
+
+                        {record.notes && <p>{record.notes}</p>}
+                        <div className="healthLogIcons">
+                          {record.nail_clip && (
+                            <span className="healthBadge">💅 Nail clip</span>
+                          )}
+                          {record.haircut && (
+                            <span className="healthBadge">✂️ Haircut</span>
+                          )}
+                          {record.parasite_treatment && (
+                            <span className="healthBadge">
+                              🐛 Parasite treatment
+                            </span>
+                          )}
+                          {(() => {
+                            const weight = getWeightAtTime(record.pig_id, record.created_at);
+                            return weight ? (
+                              <span className="healthBadge">⚖️ {weight}g</span>
+                            ) : null;
+                          })()}
+                        </div>
+                      </div>
+                    </Link>
+                    <div className="healthCardActions">
+                      <EmojiButton
+                        className="healthCardBtn"
+                        size="sm"
+                        onClick={() => setEditingRecord(record)}
+                      >
+                        ✏️
+                      </EmojiButton>
+                      <EmojiButton
+                        className="healthCardBtn healthCardBtnDelete"
+                        size="sm"
+                        onClick={() => handleDelete(record.id)}
+                      >
+                        🗑️
+                      </EmojiButton>
                     </div>
                   </div>
-                </Link>
-                <div className="healthCardActions">
-                  <EmojiButton
-                    className="healthCardBtn"
-                    size="sm"
-                    onClick={() => setEditingRecord(record)}
-                  >
-                    ✏️
-                  </EmojiButton>
-                  <EmojiButton
-                    className="healthCardBtn healthCardBtnDelete"
-                    size="sm"
-                    onClick={() => handleDelete(record.id)}
-                  >
-                    🗑️
-                  </EmojiButton>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+
+            {hasMore && (
+              <div ref={sentinelRef} className="healthLogSentinel">
+                {loadingMore && <Loading />}
+              </div>
+            )}
+          </>
         )}
 
-        {hasMore && (
-          <div ref={sentinelRef} className="healthLogSentinel">
-            {loadingMore && <Loading />}
+        {activeTab === 'weight' && (
+          <div className="weightsList">
+            {livingPigs.map((pig) => {
+              const record = weights.get(pig.id);
+              const isAdding = addingPigId === pig.id;
+              return (
+                <div key={pig.id} className="weightsCardWrapper">
+                  <div className="weightsCard">
+                    <Link to={`/pigs/${pig.id}`} className="weightsCardLink">
+                      <PigThumbnail imagePath={pig.image_path} />
+                      <div className="weightsCardInfo">
+                        <span className="weightsName">{pig.name}</span>
+                        <span className={`weightsValue ${!record ? 'muted' : ''}`}>
+                          {record ? `${record.weight_grams}g` : 'No weight recorded'}
+                        </span>
+                      </div>
+                    </Link>
+                    <EmojiButton
+                      className="weightsAddBtn"
+                      size="sm"
+                      shape="circle"
+                      onClick={() => {
+                        setAddingPigId(isAdding ? null : pig.id);
+                        setGramsInput('');
+                      }}
+                    >
+                      {isAdding ? '✕' : '+'}
+                    </EmojiButton>
+                  </div>
+                  {isAdding && (
+                    <form
+                      className="weightsInlineForm"
+                      onSubmit={(e) => { e.preventDefault(); handleAddWeight(pig.id); }}
+                    >
+                      <input
+                        type="number"
+                        placeholder="Grams"
+                        value={gramsInput}
+                        onChange={(e) => setGramsInput(e.target.value)}
+                        min="1"
+                        autoFocus
+                      />
+                      <Button type="submit" disabled={submitting || !gramsInput}>
+                        {submitting ? 'Saving...' : 'Save'}
+                      </Button>
+                    </form>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </Panel>
