@@ -7,6 +7,8 @@ import { getPigImageUrl } from '../../services/pig-images.service';
 import type { Pig, WeightRecord } from '../../services/pigs.types';
 import Loading from '../../components/ui/Loading/Loading';
 import Panel from '../../components/ui/Panel/Panel';
+import Button from '../../components/ui/Button/Button';
+import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 
 const PigThumbnail = ({ imagePath }: { imagePath: string | null }) => {
   const [url, setUrl] = useState<string | null>(null);
@@ -108,15 +110,17 @@ const WeightsPage = () => {
                       </span>
                     </div>
                   </Link>
-                  <button
+                  <EmojiButton
                     className="weightsAddBtn"
+                    size="sm"
+                    shape="circle"
                     onClick={() => {
                       setAddingPigId(isAdding ? null : pig.id);
                       setGramsInput('');
                     }}
                   >
                     {isAdding ? '✕' : '+'}
-                  </button>
+                  </EmojiButton>
                 </div>
                 {isAdding && (
                   <form
@@ -131,9 +135,9 @@ const WeightsPage = () => {
                       min="1"
                       autoFocus
                     />
-                    <button className="btn-outline" type="submit" disabled={submitting || !gramsInput}>
+                    <Button type="submit" disabled={submitting || !gramsInput}>
                       {submitting ? 'Saving...' : 'Save'}
-                    </button>
+                    </Button>
                   </form>
                 )}
               </div>

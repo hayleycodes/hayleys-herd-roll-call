@@ -6,6 +6,7 @@ import type { Pig } from "../../services/pigs.types";
 import { createPigSighting } from "../../services/pigs.service";
 import PassedPigList from "./PassedPigList/PassedPigList";
 import Modal from "../ui/Modal/Modal";
+import Button from "../ui/Button/Button";
 import Confetti from "../ui/Confetti/Confetti";
 
 type PigListProps = {
@@ -104,11 +105,11 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
         <p>Mark {selectedPig?.name} as seen?</p>
 
         <div className="confirmActions">
-          <button onClick={closeModal}>Cancel</button>
+          <Button onClick={closeModal}>Cancel</Button>
 
-          <button onClick={handleConfirm} disabled={updating}>
+          <Button onClick={handleConfirm} disabled={updating}>
             {updating ? "Saving..." : "Confirm"}
-          </button>
+          </Button>
         </div>
       </Modal>
     </>

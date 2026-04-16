@@ -2,9 +2,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllPigs, createPigSighting } from '../../services/pigs.service';
 import type { Pig } from '../../services/pigs.types';
-import { PASTEL_BORDERS } from '../../constants/colors';
+import { getPigColorClass } from '../../constants/colors';
 import RollcallCard from './RollcallCard';
 import Confetti from '../ui/Confetti/Confetti';
+import EmojiButton from '../ui/EmojiButton/EmojiButton';
 import './RollcallOverlay.css';
 
 type Props = {
@@ -115,22 +116,19 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
   if (!mounted) return null;
 
   const currentPig = queue[currentIndex];
-  const bgColor = currentPig
-    ? PASTEL_BORDERS[currentPig.id % PASTEL_BORDERS.length]
-    : '#ffffff';
+  const pigColorClass = currentPig ? getPigColorClass(currentPig.id) : '';
 
   return (
     <div
-      className={`rollcallOverlay ${active ? 'open' : ''}`}
-      style={{ backgroundColor: `${bgColor}dd` }}
+      className={`rollcallOverlay ${active ? 'open' : ''} ${pigColorClass}`}
     >
       <div className="rollcallHeader">
         <div className="rollcallProgress">
           {sightedCount} / {totalCount} sighted
         </div>
-        <button className="rollcallClose" onClick={handleClose} aria-label="Close rollcall">
+        <EmojiButton className="rollcallClose" shape="circle" onClick={handleClose} aria-label="Close rollcall">
           ✕
-        </button>
+        </EmojiButton>
       </div>
 
       <div className="rollcallContent">

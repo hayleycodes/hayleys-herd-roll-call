@@ -4,6 +4,7 @@ import './HealthPanel.css';
 import { getPigHealth, deletePigHealth } from '../../services/pig-health.service';
 import type { Pig, HealthRecord } from '../../services/pigs.types';
 import Panel from '../ui/Panel/Panel';
+import EmojiButton from '../ui/EmojiButton/EmojiButton';
 import HealthForm from '../HealthForm/HealthForm';
 
 type Props = {
@@ -72,18 +73,20 @@ const HealthPanel = ({ pig, health, setHealth, sick }: Props) => {
 
               {!record.passed_away && (
                 <div className="healthCardActions">
-                  <button
+                  <EmojiButton
                     className="healthCardBtn"
+                    size="sm"
                     onClick={() => setEditingRecord(record)}
                   >
                     ✏️
-                  </button>
-                  <button
+                  </EmojiButton>
+                  <EmojiButton
                     className="healthCardBtn healthCardBtnDelete"
+                    size="sm"
                     onClick={() => handleDelete(record.id)}
                   >
                     🗑️
-                  </button>
+                  </EmojiButton>
                 </div>
               )}
             </div>

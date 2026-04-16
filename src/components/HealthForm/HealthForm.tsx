@@ -5,6 +5,7 @@ import {
 } from '../../services/pig-health.service';
 import type { Pig, HealthRecord } from '../../services/pigs.types';
 import PigPicker from '../PigPicker/PigPicker';
+import Button from '../ui/Button/Button';
 import './HealthForm.css';
 
 type Props =
@@ -96,15 +97,6 @@ const HealthForm = (props: Props) => {
 
   return (
     <div className={`healthForm ${isEditing ? 'healthFormEditing' : ''}`} key={editingRecord?.id ?? 'new'}>
-      {showDropdown && (
-        <PigPicker
-          pigs={props.pigs}
-          selectedPigId={selectedPigId}
-          onSelect={setSelectedPigId}
-          theme="green"
-        />
-      )}
-
       <textarea
         placeholder="Notes..."
         value={notes}
@@ -143,18 +135,26 @@ const HealthForm = (props: Props) => {
 
       {error && <p style={{ color: 'red', margin: 0, fontSize: 12 }}>{error}</p>}
       <div className="healthFormButtons">
-        {isEditing && (
-          <button className="btn-outline addButton" onClick={handleCancel}>
-            Cancel
-          </button>
+        {showDropdown && (
+          <PigPicker
+            pigs={props.pigs}
+            selectedPigId={selectedPigId}
+            onSelect={setSelectedPigId}
+            view="compact"
+            theme="green"
+          />
         )}
-        <button
-          className="btn-outline addButton"
+        {isEditing && (
+          <Button onClick={handleCancel}>
+            Cancel
+          </Button>
+        )}
+        <Button
           onClick={handleSubmit}
           disabled={submitting || !(isEditing ? editingRecord.pig_id : selectedPigId)}
         >
           {submitting ? 'Saving...' : isEditing ? 'Save' : 'Add record'}
-        </button>
+        </Button>
       </div>
     </div>
   );

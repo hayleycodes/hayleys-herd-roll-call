@@ -19,7 +19,7 @@
   display: flex;
 }
 
-.btn-outline.addButton {
+.healthFormButtons .btn--outline {
   margin: 0px;
 }
 
@@ -51,22 +51,8 @@
 }
 
 .healthCardBtn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: color-mix(in srgb, var(--panel-color, #a0caa2) 40%, white);
-  border: 2px solid color-mix(in srgb, var(--panel-color, #a0caa2) 40%, white);
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 0;
-  transition: transform 0.15s ease;
-}
-
-.healthCardBtn:hover {
-  transform: scale(1.1);
+  border-color: color-mix(in srgb, var(--panel-color, #a0caa2) 40%, white);
 }
 
 /* Editing state on card */

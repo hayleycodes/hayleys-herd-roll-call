@@ -6,11 +6,10 @@
 }
 
 .rollcallCardImage {
-  width: 70vw;
-  max-width: 320px;
+  width: 100vw;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  border: 5px solid var(--accent-pink);
+  border: 5px solid var(--pig-color, var(--accent-pink));
   background-color: var(--surface-alt);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
   overflow: hidden;
@@ -41,8 +40,12 @@
 }
 
 @keyframes rollcallSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .rollcallCardName {
@@ -62,35 +65,15 @@
 .rollcallActionBtn {
   width: 72px;
   height: 72px;
-  border-radius: 50%;
   border: 4px solid var(--primary-dark);
   font-size: 32px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .rollcallActionBtn:hover:not(:disabled) {
-  transform: scale(1.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
 }
 
 .rollcallActionBtn:active:not(:disabled) {
   transform: scale(0.95);
-}
-
-.rollcallActionBtn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.rollcallActionBtn.sighted {
-  background: white;
-}
-
-.rollcallActionBtn.skip {
-  background: white;
 }

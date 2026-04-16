@@ -4,6 +4,7 @@ import './WeightPanel.css';
 import { getPigWeights, createPigWeight } from '../../services/pig-weights.service';
 import type { Pig, WeightRecord } from '../../services/pigs.types';
 import Panel from '../ui/Panel/Panel';
+import Button from '../ui/Button/Button';
 
 type Props = {
   pig: Pig;
@@ -57,9 +58,9 @@ const WeightPanel = ({ pig, weights, setWeights }: Props) => {
             onChange={(e) => setGrams(e.target.value)}
             min="1"
           />
-          <button className="btn-outline" type="submit" disabled={submitting || !grams}>
+          <Button type="submit" disabled={submitting || !grams}>
             {submitting ? 'Adding...' : 'Add'}
-          </button>
+          </Button>
         </form>
       )}
 

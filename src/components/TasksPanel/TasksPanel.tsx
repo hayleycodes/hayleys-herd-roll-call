@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './TasksPanel.css';
 import Panel from '../ui/Panel/Panel';
 import Modal from '../ui/Modal/Modal';
+import Button from '../ui/Button/Button';
 import { toggleTaskComplete, createTask, getTasksForPig } from '../../services/tasks.service';
 import type { Task } from '../../services/pigs.types';
 
@@ -72,22 +73,21 @@ const TasksPanel = ({ tasks, setTasks, pigId }: Props) => {
           onChange={(e) => setTitle(e.target.value)}
           className="tasksPanelInput"
         />
-        <button
+        <Button
           type="submit"
-          className="btn-outline tasksPanelAddButton"
           disabled={!title.trim()}
         >
           Add
-        </button>
+        </Button>
       </form>
 
       <Modal isOpen={!!taskToComplete} onClose={() => setTaskToComplete(null)}>
         <p>Mark "{taskToComplete?.title}" as done?</p>
         <div className="confirmActions">
-          <button onClick={() => setTaskToComplete(null)}>Cancel</button>
-          <button onClick={handleConfirm} disabled={updating}>
+          <Button onClick={() => setTaskToComplete(null)}>Cancel</Button>
+          <Button onClick={handleConfirm} disabled={updating}>
             {updating ? 'Saving...' : 'Confirm'}
-          </button>
+          </Button>
         </div>
       </Modal>
     </Panel>

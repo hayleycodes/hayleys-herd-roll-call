@@ -92,10 +92,15 @@
 .healthFormButtons {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 8px;
 }
 
-.healthForm .btn-outline {
+.healthFormButtons .pigPickerDropdown {
+  margin-right: auto;
+}
+
+.healthForm .btn--outline {
   border-color: var(--panel-color, #a0caa2);
   white-space: nowrap;
   flex-shrink: 0;

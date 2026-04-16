@@ -14,8 +14,10 @@ import {
   type TaskWithPig,
 } from '../../services/tasks.service';
 import { usePigImage } from '../../hooks/usePigImage';
-import { PASTEL_BORDERS } from '../../constants/colors';
+import { PIG_COLOR_CLASSES } from '../../constants/colors';
 import type { Pig } from '../../services/pigs.types';
+import Button from '../../components/ui/Button/Button';
+import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 
 const TaskPigAvatar = ({
   imagePath,
@@ -144,13 +146,12 @@ const TasksPage = () => {
           onSelect={setSelectedPigId}
           view="compact"
         />
-        <button
+        <Button
           type="submit"
-          className="btn-outline taskAddButton"
           disabled={!title.trim()}
         >
           Add
-        </button>
+        </Button>
       </form>
 
       {outstanding.length === 0 && completed.length === 0 && (
@@ -162,21 +163,13 @@ const TasksPage = () => {
           <h2>To do</h2>
           <div className="taskList">
             {outstanding.map((task) => {
-              const pigColor = task.pig_id
-                ? PASTEL_BORDERS[task.pig_id % PASTEL_BORDERS.length]
-                : undefined;
+              const pigClass = task.pig_id
+                ? PIG_COLOR_CLASSES[task.pig_id % PIG_COLOR_CLASSES.length]
+                : '';
               return (
                 <div
                   key={task.id}
-                  className="taskItem"
-                  style={
-                    pigColor
-                      ? ({
-                          '--pig-color': pigColor,
-                          borderColor: pigColor,
-                        } as React.CSSProperties)
-                      : undefined
-                  }
+                  className={`taskItem ${pigClass}`}
                 >
                   <label className="taskCheckboxLabel">
                     <input
@@ -210,21 +203,13 @@ const TasksPage = () => {
           <h2>Done</h2>
           <div className="taskList">
             {completed.map((task) => {
-              const pigColor = task.pig_id
-                ? PASTEL_BORDERS[task.pig_id % PASTEL_BORDERS.length]
-                : undefined;
+              const pigClass = task.pig_id
+                ? PIG_COLOR_CLASSES[task.pig_id % PIG_COLOR_CLASSES.length]
+                : '';
               return (
                 <div
                   key={task.id}
-                  className="taskItem taskItemCompleted"
-                  style={
-                    pigColor
-                      ? ({
-                          '--pig-color': pigColor,
-                          borderColor: pigColor,
-                        } as React.CSSProperties)
-                      : undefined
-                  }
+                  className={`taskItem taskItemCompleted ${pigClass}`}
                 >
                   <label className="taskCheckboxLabel">
                     <input
@@ -246,13 +231,14 @@ const TasksPage = () => {
                       <span className="taskPigName">{task.pigs.name}</span>
                     </Link>
                   )}
-                  <button
+                  <EmojiButton
                     className="taskDeleteButton"
+                    size="sm"
                     onClick={() => setTaskToDelete(task)}
                     aria-label="Delete task"
                   >
                     ✕
-                  </button>
+                  </EmojiButton>
                 </div>
               );
             })}
@@ -266,20 +252,20 @@ const TasksPage = () => {
             : `Mark "${taskToComplete?.title}" as done?`}
         </p>
         <div className="confirmActions">
-          <button onClick={() => setTaskToComplete(null)}>Cancel</button>
-          <button onClick={handleConfirmToggle} disabled={updating}>
+          <Button onClick={() => setTaskToComplete(null)}>Cancel</Button>
+          <Button onClick={handleConfirmToggle} disabled={updating}>
             {updating ? 'Saving...' : 'Confirm'}
-          </button>
+          </Button>
         </div>
       </Modal>
 
       <Modal isOpen={!!taskToDelete} onClose={() => setTaskToDelete(null)}>
         <p>Delete "{taskToDelete?.title}"?</p>
         <div className="confirmActions">
-          <button onClick={() => setTaskToDelete(null)}>Cancel</button>
-          <button onClick={handleConfirmDelete} disabled={updating}>
+          <Button onClick={() => setTaskToDelete(null)}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} disabled={updating}>
             {updating ? 'Deleting...' : 'Delete'}
-          </button>
+          </Button>
         </div>
       </Modal>
     </div>

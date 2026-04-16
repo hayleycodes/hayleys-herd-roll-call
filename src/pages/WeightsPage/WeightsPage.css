@@ -41,10 +41,12 @@
 
 .weightsCardLink {
   display: flex;
+  justify-content: flex-start;
   align-items: center;
   gap: var(--spacing-sm);
   flex: 1;
   text-decoration: none;
+  text-align: left;
   color: inherit;
   min-width: 0;
 }
@@ -61,23 +63,13 @@
 }
 
 .weightsValue {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-lg);
 }
 
 .weightsAddBtn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border: 2px solid #3a9a3a;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 18px;
-  font-weight: bold;
+  border-color: #3a9a3a;
   color: #3a9a3a;
-  padding: 0;
+  font-weight: bold;
   flex-shrink: 0;
 }
 
@@ -102,7 +94,7 @@
   }
 }
 
-.weightsInlineForm .btn-outline {
+.weightsInlineForm .btn--outline {
   border-color: #3a9a3a;
 }
 

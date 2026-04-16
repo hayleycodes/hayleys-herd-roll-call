@@ -59,7 +59,7 @@
   background: white;
 }
 
-.tasksPanelAddButton {
+.tasksPanelForm .btn--outline {
   border-color: var(--panel-color, var(--primary));
   font-weight: var(--font-weight-bold);
 }

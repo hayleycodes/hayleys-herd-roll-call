@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './HealthLogPage.css';
 import '../../components/HealthPanel/HealthPanel.css';
-import { getAllHealth, deletePigHealth } from '../../services/pig-health.service';
+import {
+  getAllHealth,
+  deletePigHealth,
+} from '../../services/pig-health.service';
 import type { HealthLogEntry } from '../../services/pig-health.service';
 import { getAllPigs } from '../../services/pigs.service';
 import type { Pig } from '../../services/pigs.types';
@@ -11,6 +14,8 @@ import { getPigImageUrl } from '../../services/pig-images.service';
 import Loading from '../../components/ui/Loading/Loading';
 import Panel from '../../components/ui/Panel/Panel';
 import HealthForm from '../../components/HealthForm/HealthForm';
+import Button from '../../components/ui/Button/Button';
+import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 
 const PAGE_SIZE = 10;
 
@@ -39,7 +44,9 @@ const HealthLogPage = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingRecord, setEditingRecord] = useState<HealthLogEntry | null>(null);
+  const [editingRecord, setEditingRecord] = useState<HealthLogEntry | null>(
+    null
+  );
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -113,7 +120,13 @@ const HealthLogPage = () => {
   return (
     <div className="healthLogPage" ref={scrollRef}>
       <Panel heading="Health Log 🏥" theme="green">
-        <Link to="/weights" className="weightsLink btn-outline">⚖️</Link>
+        <div className="tabs">
+          <Button variant="outline">Notes</Button>
+          <Button variant="outline">Weight</Button>
+        </div>
+        <Link to="/weights" className="weightsLink btn-outline">
+          ⚖️
+        </Link>
         <HealthForm
           pigs={pigs}
           onRecordAdded={handleRecordAdded}
@@ -126,7 +139,10 @@ const HealthLogPage = () => {
         ) : (
           <div className="healthLogList">
             {records.map((record) => (
-              <div key={record.id} className={`healthLogCard ${editingRecord?.id === record.id ? 'healthCardEditing' : ''}`}>
+              <div
+                key={record.id}
+                className={`healthLogCard ${editingRecord?.id === record.id ? 'healthCardEditing' : ''}`}
+              >
                 <Link
                   to={`/pigs/${record.pig_id}`}
                   className="healthLogCardLink"
@@ -155,24 +171,28 @@ const HealthLogPage = () => {
                         <span className="healthBadge">✂️ Haircut</span>
                       )}
                       {record.parasite_treatment && (
-                        <span className="healthBadge">🐛 Parasite treatment</span>
+                        <span className="healthBadge">
+                          🐛 Parasite treatment
+                        </span>
                       )}
                     </div>
                   </div>
                 </Link>
                 <div className="healthCardActions">
-                  <button
+                  <EmojiButton
                     className="healthCardBtn"
+                    size="sm"
                     onClick={() => setEditingRecord(record)}
                   >
                     ✏️
-                  </button>
-                  <button
+                  </EmojiButton>
+                  <EmojiButton
                     className="healthCardBtn healthCardBtnDelete"
+                    size="sm"
                     onClick={() => handleDelete(record.id)}
                   >
                     🗑️
-                  </button>
+                  </EmojiButton>
                 </div>
               </div>
             ))}

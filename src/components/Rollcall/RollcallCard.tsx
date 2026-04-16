@@ -1,6 +1,7 @@
 import { usePigImage } from '../../hooks/usePigImage';
-import { PASTEL_BORDERS } from '../../constants/colors';
+import { getPigColorClass } from '../../constants/colors';
 import type { Pig } from '../../services/pigs.types';
+import EmojiButton from '../ui/EmojiButton/EmojiButton';
 import './RollcallCard.css';
 
 type Props = {
@@ -12,11 +13,11 @@ type Props = {
 
 const RollcallCard = ({ pig, onSighted, onSkipped, disabled }: Props) => {
   const { imageUrl, imageLoading, imageReady } = usePigImage(pig.image_path);
-  const borderColor = PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
+  const pigColorClass = getPigColorClass(pig.id);
 
   return (
-    <div className="rollcallCard">
-      <div className="rollcallCardImage" style={{ borderColor }}>
+    <div className={`rollcallCard ${pigColorClass}`}>
+      <div className="rollcallCardImage">
         {imageLoading && <span className="rollcallCardSpin">🐷</span>}
         {!imageLoading && !imageUrl && (
           <span className="rollcallCardEmoji">🐹</span>
@@ -31,22 +32,26 @@ const RollcallCard = ({ pig, onSighted, onSkipped, disabled }: Props) => {
       </div>
       <h2 className="rollcallCardName">{pig.name}</h2>
       <div className="rollcallActions">
-        <button
+        <EmojiButton
           className="rollcallActionBtn skip"
+          size="lg"
+          shape="circle"
           onClick={onSkipped}
           disabled={disabled}
           aria-label="Skip pig"
         >
           🤷‍♀️
-        </button>
-        <button
+        </EmojiButton>
+        <EmojiButton
           className="rollcallActionBtn sighted"
+          size="lg"
+          shape="circle"
           onClick={onSighted}
           disabled={disabled}
           aria-label="Mark pig as sighted"
         >
           👀
-        </button>
+        </EmojiButton>
       </div>
     </div>
   );

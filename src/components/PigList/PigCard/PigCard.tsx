@@ -4,7 +4,8 @@ import { formatDistanceToNow } from 'date-fns';
 import './PigCard.css';
 import type { Pig } from '../../../services/pigs.types';
 import { usePigImage } from '../../../hooks/usePigImage';
-import { PASTEL_BORDERS } from '../../../constants/colors';
+import { getPigColorClass } from '../../../constants/colors';
+import EmojiButton from '../../ui/EmojiButton/EmojiButton';
 
 type Props = {
   pig: Pig;
@@ -37,9 +38,8 @@ const PigCard = ({
       })
     : '';
 
-  const pigColor = sick ? '#e63946' : PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
-  const unseenColor = '#ff6b6b';
-  const eyeColor = notSightedToday ? unseenColor : pigColor;
+  const pigColorClass = getPigColorClass(pig.id, sick);
+  const eyeUnseen = notSightedToday && !sick;
 
   const handleTap = () => {
     setWiggling(true);
@@ -47,7 +47,7 @@ const PigCard = ({
 
   return (
     <div
-      className={`pigCard${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}`}
+      className={`pigCard ${pigColorClass}${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}`}
       style={
         passed
           ? ({
@@ -60,9 +60,10 @@ const PigCard = ({
       <Link to={`/pigs/${pig.id}`} className="pigCardLink">
         <div className="pigCardCircleWrapper">
           {onEyeClick && (
-            <button
-              className="eyeButton"
-              style={{ backgroundColor: eyeColor, borderColor: eyeColor }}
+            <EmojiButton
+              className={`eyeButton${eyeUnseen ? ' eyeButtonUnseen' : ''}`}
+              size="sm"
+              variant="pig"
               onClick={(e) => {
                 e.preventDefault();
                 const rect = e.currentTarget.getBoundingClientRect();
@@ -73,14 +74,13 @@ const PigCard = ({
               }}
             >
               👀
-            </button>
+            </EmojiButton>
           )}
           {/* {notSightedToday && <span className="pigCardUnseen">👻</span>} */}
           <div
             ref={circleRef}
             className={`pigCardCircle${wiggling ? ' wiggle' : ''}`}
             onAnimationEnd={() => setWiggling(false)}
-            style={{ borderColor: pigColor }}
           >
             {imageLoading ? (
               <span className="pigCardEmoji pigCardSpin">🐷</span>
@@ -99,7 +99,7 @@ const PigCard = ({
             )}
           </div>
         </div>
-        <div className="pigCardLabel" style={{ backgroundColor: pigColor }}>
+        <div className="pigCardLabel">
           <h3 className="pigCardName">{sick && '🤒 '}{pig.name}</h3>
           {relationship && (
             <span className="pigCardRelationship">{relationship}</span>
