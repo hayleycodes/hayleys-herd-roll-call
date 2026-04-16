@@ -33,6 +33,11 @@
   --picker-hover: #e8e0f8;
 }
 
+.pigPicker--blue {
+  --picker-color: #8ec5e6;
+  --picker-hover: #daedf8;
+}
+
 /* Default trigger (full-width button) */
 .pigPickerTrigger {
   width: 100%;
@@ -108,6 +113,17 @@
   border-left: 2px solid var(--picker-color);
   border-top: 2px solid var(--picker-color);
   transform: rotate(45deg);
+}
+
+.pigPickerMenu--up {
+  top: auto;
+  bottom: calc(100% + 10px);
+}
+
+.pigPickerMenu--up::before {
+  top: auto;
+  bottom: -8px;
+  transform: rotate(225deg);
 }
 
 .pigPickerMenuInner {

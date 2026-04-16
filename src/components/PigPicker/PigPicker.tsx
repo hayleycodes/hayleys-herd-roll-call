@@ -26,7 +26,8 @@ type Props = {
   selectedPigId: number | '';
   onSelect: (pigId: number | '') => void;
   view?: 'default' | 'compact';
-  theme?: 'green' | 'purple';
+  theme?: 'green' | 'purple' | 'blue';
+  dropUp?: boolean;
 };
 
 const PigPicker = ({
@@ -35,6 +36,7 @@ const PigPicker = ({
   onSelect,
   view = 'default',
   theme = 'purple',
+  dropUp = false,
 }: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -87,7 +89,7 @@ const PigPicker = ({
         </button>
       )}
       {dropdownOpen && (
-        <div className="pigPickerMenu">
+        <div className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}`}>
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
               <button

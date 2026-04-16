@@ -13,6 +13,17 @@ export const getAllPigs = async (): Promise<Pig[]> => {
   return data ?? [];
 };
 
+export const getAllPigsIncludingPassed = async (): Promise<Pig[]> => {
+  const { data, error } = await supabase
+    .from("pigs")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (error) throw new Error(error.message);
+
+  return data ?? [];
+};
+
 export const getPig = async (id: number): Promise<Pig> => {
   const { data, error } = await supabase
     .from("pigs")
