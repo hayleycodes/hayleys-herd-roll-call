@@ -29,13 +29,7 @@
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 64px;
-  height: 64px;
   padding: 10px;
-  border-radius: var(--border-radius-sm);
-  background-color: var(--pig-color);
-  border-color: var(--pig-color);
-  cursor: pointer;
   font-size: 36px;
   z-index: 2;
   box-shadow: 0 4px 10px grey;
@@ -80,7 +74,7 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  border: 4px solid var(--border-color);
+  border: 4px solid var(--pig-color, var(--border-color));
   background-color: var(--surface-alt);
   box-shadow: 0 4px 10px grey;
   overflow: hidden;
@@ -121,6 +115,7 @@
   border-top-right-radius: var(--border-radius-sm);
   border: 2px solid var(--pig-color);
   border-bottom: none;
+  background-color: var(--pig-color);
   text-align: center;
   z-index: 1;
 }
@@ -313,22 +308,6 @@
   gap: 4px;
 }
 
-.pigImageUploadButton,
-.pigDescriptionEditButton,
-.pigTagEditButton {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--pig-color);
-  border-radius: var(--border-radius-sm);
-  border: 2px solid var(--pig-color);
-  cursor: pointer;
-  transition: transform 0.15s ease;
-  font-size: unset;
-}
-
 /* ---- Shared utility ---- */
 
 .pigCardDetail {
@@ -368,6 +347,20 @@
   pointer-events: auto;
 }
 
+.lightboxClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--primary-dark);
+  z-index: 2001;
+}
+
+.lightboxClose:hover {
+  background: var(--surface-alt);
+}
+
 .imageLightboxCircle {
   width: 120%;
   flex-shrink: 0;
@@ -387,5 +380,5 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-  border: 4px solid var(--border-color);
+  border: 4px solid var(--pig-color, var(--border-color));
 }

@@ -11,6 +11,8 @@ import FamilyPanel from '../../components/FamilyPanel/FamilyPanel';
 import Loading from '../../components/ui/Loading/Loading';
 import Modal from '../../components/ui/Modal/Modal';
 import Confetti from '../../components/ui/Confetti/Confetti';
+import Button from '../../components/ui/Button/Button';
+import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 
 import { getPigHealth } from '../../services/pig-health.service';
 import { getPigWeights } from '../../services/pig-weights.service';
@@ -20,16 +22,18 @@ import {
   uploadPigImage,
 } from '../../services/pig-images.service';
 import { usePigImage } from '../../hooks/usePigImage';
-import { PASTEL_BORDERS } from '../../constants/colors';
+import { getPigColorClass } from '../../constants/colors';
 
 import {
   savePigImage,
   getPig,
+  getAllPigsIncludingPassed,
   updateDescription,
   createPigSighting,
 } from '../../services/pigs.service';
 
 import { getPigFamily } from '../../services/pig-relationships.service';
+import type { PigFamily } from '../../services/pig-relationships.service';
 import {
   getPigTags,
   addPigTag,
@@ -78,17 +82,13 @@ const PigPage = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
 
-  const [family, setFamily] = useState<{
-    parents: Pig[];
-    children: Pig[];
-    siblings: Pig[];
-    fosterFamily: Pig[];
-  }>({
+  const [family, setFamily] = useState<PigFamily>({
     parents: [],
     children: [],
     siblings: [],
     fosterFamily: [],
   });
+  const [allPigs, setAllPigs] = useState<Pig[]>([]);
 
   const [scrollScale, setScrollScale] = useState(1);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -172,6 +172,17 @@ const PigPage = () => {
     }
   };
 
+  const handleFamilyRefresh = async () => {
+    if (!id) return;
+    const pigId = Number(id);
+    const [familyData, allPigsData] = await Promise.all([
+      getPigFamily(pigId),
+      getAllPigsIncludingPassed(),
+    ]);
+    setFamily(familyData);
+    setAllPigs(allPigsData);
+  };
+
   const handleScroll = useCallback(() => {
     const scale = Math.max(0.55, 1 - (window.scrollY / 250) * 0.45);
     setScrollScale(scale);
@@ -190,13 +201,14 @@ const PigPage = () => {
         const pigId = Number(id);
         if (isNaN(pigId)) throw new Error('Invalid pig id');
 
-        const [pigData, healthData, familyData, tagsData, tasksData, weightsData] = await Promise.all([
+        const [pigData, healthData, familyData, tagsData, tasksData, weightsData, allPigsData] = await Promise.all([
           getPig(pigId),
           getPigHealth(pigId),
           getPigFamily(pigId),
           getPigTags(pigId),
           getTasksForPig(pigId),
           getPigWeights(pigId),
+          getAllPigsIncludingPassed(),
         ]);
 
         setPig(pigData);
@@ -204,6 +216,7 @@ const PigPage = () => {
         setFamily(familyData);
         setTags(tagsData);
         setTasks(tasksData);
+        setAllPigs(allPigsData);
         if (weightsData.length > 0) setLatestWeight(weightsData[0]);
       } catch (err: any) {
         setError(err.message);
@@ -246,15 +259,23 @@ const PigPage = () => {
   if (!pig) return <div className="pigCardDetail">Pig not found 🐷</div>;
 
   const isSick = tags.includes('sick');
-  const pigColor = isSick ? '#e63946' : PASTEL_BORDERS[pig.id % PASTEL_BORDERS.length];
+  const pigColorClass = getPigColorClass(pig.id, isSick);
+
+  const relatedPigIds = new Set([
+    pig.id,
+    ...family.parents.map((m) => m.pig.id),
+    ...family.children.map((m) => m.pig.id),
+    ...family.siblings.map((m) => m.pig.id),
+    ...family.fosterFamily.map((m) => m.pig.id),
+  ]);
+  const availablePigs = allPigs.filter((p) => !relatedPigIds.has(p.id));
 
   return (
     <div className={`pigPage ${pig.passed_away && 'memorialMode'} ${isSick && 'sickMode'}`}>
       <Confetti active={showConfetti} origin={confettiOrigin} />
 
       <div
-        className="pigDetailCard"
-        style={{ '--pig-color': pigColor } as React.CSSProperties}
+        className={`pigDetailCard ${pigColorClass}`}
       >
         <div
           className="detailCircleWrapper"
@@ -265,8 +286,10 @@ const PigPage = () => {
           }}
         >
           {!pig.passed_away && (
-            <button
+            <EmojiButton
               className="eyeButton detailEyeButton"
+              size="lg"
+              variant="pig"
               onClick={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 setConfettiOrigin({
@@ -277,34 +300,38 @@ const PigPage = () => {
               }}
             >
               👀
-            </button>
+            </EmojiButton>
           )}
           {!pig.passed_away && !isSick && (
             <div className="pigSpeechBubble">{getQuoteForPig(pig.id)}</div>
           )}
           <div className="editButtons">
-            <button
+            <EmojiButton
+              variant="pig"
               onClick={() => {
                 setDescriptionDraft(pig.description ?? '');
                 setIsEditingDescription(true);
               }}
-              className="pigDescriptionEditButton"
               aria-label="Edit description"
             >
               ✏️
-            </button>
-            <label htmlFor="pig-image-upload" className="pigImageUploadButton">
+            </EmojiButton>
+            <EmojiButton
+              variant="pig"
+              aria-label="Upload photo"
+              onClick={() => document.getElementById('pig-image-upload')?.click()}
+            >
               📸
-            </label>
-            <button
-              className="pigTagEditButton"
+            </EmojiButton>
+            <EmojiButton
+              variant="pig"
               onClick={() => setShowTagPicker(!showTagPicker)}
               aria-label="Edit tags"
             >
               🏷️
-            </button>
+            </EmojiButton>
           </div>
-          <div className="detailCircle" style={{ borderColor: pigColor }}>
+          <div className="detailCircle">
             {imageLoading ? (
               <span className="detailEmoji pigCardSpin">🐷</span>
             ) : imageUrl ? (
@@ -325,7 +352,7 @@ const PigPage = () => {
           </div>
         </div>
 
-        <div className="detailLabel" style={{ backgroundColor: pigColor }}>
+        <div className="detailLabel">
           <h1 className="pigName">{pig.name}</h1>
           {pig.last_sighted && (
             <span className="detailSighted">
@@ -383,13 +410,13 @@ const PigPage = () => {
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCustomTag()}
                 />
                 <div className="emojiPickerWrapper" ref={emojiPickerRef}>
-                  <button
-                    type="button"
+                  <EmojiButton
                     className="emojiPickerToggle"
+                    shape="circle"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   >
                     {customTagEmoji || '😀'}
-                  </button>
+                  </EmojiButton>
                   {showEmojiPicker && (
                     <div className="emojiDropdown">
                       <EmojiPicker
@@ -405,19 +432,19 @@ const PigPage = () => {
                     </div>
                   )}
                 </div>
-                <button
-                  className="btn-outline"
+                <Button
+
                   onClick={handleAddCustomTag}
                   disabled={!customTagInput.trim()}
                 >
                   Add
-                </button>
-                <button
-                  className="btn-outline"
+                </Button>
+                <Button
+
                   onClick={() => setShowTagPicker(false)}
                 >
                   Done
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -432,18 +459,18 @@ const PigPage = () => {
                   rows={3}
                 />
                 <div className="descriptionEditActions">
-                  <button
-                    className="btn-outline"
+                  <Button
+  
                     onClick={handleSaveDescription}
                   >
                     Save
-                  </button>
-                  <button
-                    className="btn-outline"
+                  </Button>
+                  <Button
+  
                     onClick={() => setIsEditingDescription(false)}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -482,31 +509,42 @@ const PigPage = () => {
 
       <TasksPanel tasks={tasks} setTasks={setTasks} pigId={pig.id} />
 
-      <FamilyPanel family={family} />
+      <FamilyPanel
+        family={family}
+        currentPigId={pig.id}
+        availablePigs={availablePigs}
+        onRefresh={handleFamilyRefresh}
+      />
 
       <Modal isOpen={!!selectedPig} onClose={() => setSelectedPig(null)}>
         <p>Mark {pig.name} as seen?</p>
 
         <div className="confirmActions">
-          <button onClick={() => setSelectedPig(null)}>Cancel</button>
-          <button onClick={handleConfirm} disabled={updating}>
+          <Button onClick={() => setSelectedPig(null)}>Cancel</Button>
+          <Button onClick={handleConfirm} disabled={updating}>
             {updating ? 'Saving...' : 'Confirm'}
-          </button>
+          </Button>
         </div>
       </Modal>
 
       {lightboxMounted && imageUrl && (
         <div
-          className={`imageLightboxOverlay ${lightboxActive ? 'open' : ''}`}
-          style={{ '--pig-color': pigColor } as React.CSSProperties}
+          className={`imageLightboxOverlay ${lightboxActive ? 'open' : ''} ${pigColorClass}`}
           onClick={() => setLightboxOpen(false)}
         >
+          <EmojiButton
+            className="lightboxClose"
+            shape="circle"
+            onClick={() => setLightboxOpen(false)}
+            aria-label="Close lightbox"
+          >
+            ✕
+          </EmojiButton>
           <div className={`imageLightboxCircle ${lightboxActive ? 'open' : ''}`}>
             <img
               src={imageUrl}
               alt={pig.name}
               className="imageLightboxImg"
-              style={{ borderColor: pigColor }}
             />
           </div>
         </div>
