@@ -93,10 +93,6 @@ h3 {
   margin: var(--spacing-xs);
 }
 
-header button.headerButton {
-  border-color: var(--primary-dark);
-}
-
 .headerLeft {
   display: flex;
   align-items: center;
@@ -108,10 +104,12 @@ header button.headerButton {
   gap: var(--spacing-xxs);
 }
 
-header .btn-outline {
+header .emoji-btn {
   padding: 0px 5px;
   height: 32px;
+  width: auto;
   font-size: 18px;
+  border-color: var(--primary-dark);
 }
 
 header a {

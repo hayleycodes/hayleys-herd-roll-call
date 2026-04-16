@@ -1,0 +1,58 @@
+.emoji-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: white;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.emoji-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.emoji-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Sizes */
+.emoji-btn--sm {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.emoji-btn--md {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+}
+
+.emoji-btn--lg {
+  width: 64px;
+  height: 64px;
+  font-size: 36px;
+}
+
+/* Variants */
+.emoji-btn--default {
+  background: white;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.emoji-btn--pig {
+  background: var(--pig-color);
+  border-color: var(--pig-color);
+}
+
+/* Shapes */
+.emoji-btn--square {
+  border-radius: var(--border-radius-sm);
+}
+
+.emoji-btn--circle {
+  border-radius: 50%;
+}

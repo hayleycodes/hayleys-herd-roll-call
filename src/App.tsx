@@ -6,7 +6,7 @@ import { AnimatePresence } from 'framer-motion';
 
 import './App.css';
 import hhLogo from './assets/hh.png';
-import Button from './components/ui/Button/Button';
+import EmojiButton from './components/ui/EmojiButton/EmojiButton';
 import PageTransition from './components/ui/PageTransition/PageTransition';
 import ScrollToTop from './components/ui/ScrollToTop';
 import RollcallOverlay from './components/Rollcall/RollcallOverlay';
@@ -45,27 +45,22 @@ function App() {
           </Link>
           <div className="headerLinks">
             <Link to="/tree">
-              <Button className="btn-outline headerButton treeButton">
-                🌳
-              </Button>
+              <EmojiButton>🌳</EmojiButton>
             </Link>
             <Link to="/health-log">
-              <Button className="btn-outline headerButton">🏥</Button>
+              <EmojiButton>🏥</EmojiButton>
             </Link>
             <Link to="/tasks">
-              <Button className="btn-outline headerButton">📝</Button>
+              <EmojiButton>📝</EmojiButton>
             </Link>
-            <button
-              className="btn-outline headerButton rollcallButton"
-              onClick={() => setIsRollcallOpen(true)}
-            >
+            <EmojiButton onClick={() => setIsRollcallOpen(true)}>
               🍎
-            </button>
+            </EmojiButton>
           </div>
         </div>
-        <Button onClick={handleLogout} className="btn-outline headerButton">
+        <EmojiButton onClick={handleLogout}>
           🪵
-        </Button>
+        </EmojiButton>
       </header>
 
       <AnimatePresence mode="wait">

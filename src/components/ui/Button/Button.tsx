@@ -2,11 +2,10 @@ import "./Button.css";
 
 type ButtonProps = {
   children: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
-  variant?: "primary" | "secondary";
-  className?: string;
+  "aria-label"?: string;
 };
 
 const Button = ({
@@ -14,15 +13,15 @@ const Button = ({
   onClick,
   type = "button",
   disabled = false,
-  variant = "primary",
-  className,
+  "aria-label": ariaLabel,
 }: ButtonProps) => {
   return (
     <button
-      className={`btn btn--${variant}${className ? ` ${className}` : ""}`}
+      className="btn btn--outline"
       onClick={onClick}
       type={type}
       disabled={disabled}
+      aria-label={ariaLabel}
     >
       {children}
     </button>

@@ -1,13 +1,11 @@
-button {
-  padding: var(--spacing-sm);
-  border-radius: var(--border-radius-sm);
-  border-color: var(--border-color);
-  border-width: var(--border-width);
-  border-style: var(--border-style);
-
-  color: var(--text);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-
+.btn--outline {
+  padding: var(--spacing-xs);
+  background: var(--bg-translucent);
+  border-radius: 8px;
+  border: 2px solid var(--primary);
+  font-size: 12px;
   font-family: var(--primary-font);
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.2s ease;
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "../../../utils/supabase-client";
 import "./LoginPage.css";
 import Input from "../../components/ui/Input/Input";
+import Button from "../../components/ui/Button/Button";
 import logo from "../../assets/hh.png";
 
 const LoginPage = () => {
@@ -45,7 +46,7 @@ const LoginPage = () => {
 
         {error && <p className="loginError">{error}</p>}
 
-        <button type="submit">login</button>
+        <Button type="submit">login</Button>
       </form>
     </div>
   );

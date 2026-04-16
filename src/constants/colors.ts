@@ -1,10 +1,15 @@
-export const PASTEL_BORDERS = [
-  '#ffc1c8', // pink
-  '#fef0a3', // yellow
-  '#c8b6ff', // lavender
-  '#a8e6cf', // mint
-  '#8ed6ff', // sky blue
-  '#ffd6a5', // peach
-  '#ffb3e6', // rose
-  '#b5ead7', // sage
+export const PIG_COLOR_CLASSES = [
+  'pig-color-pink',
+  'pig-color-yellow',
+  'pig-color-lavender',
+  'pig-color-mint',
+  'pig-color-sky',
+  'pig-color-peach',
+  'pig-color-rose',
+  'pig-color-sage',
 ];
+
+export const PIG_COLOR_SICK = 'pig-color-sick';
+
+export const getPigColorClass = (pigId: number, isSick = false): string =>
+  isSick ? PIG_COLOR_SICK : PIG_COLOR_CLASSES[pigId % PIG_COLOR_CLASSES.length];

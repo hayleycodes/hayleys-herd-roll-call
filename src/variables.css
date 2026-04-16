@@ -72,6 +72,20 @@
   --border-style: solid;
 }
 
+/* =========================
+   PIG COLOURS
+========================== */
+
+.pig-color-pink    { --pig-color: #ffc1c8; }
+.pig-color-yellow  { --pig-color: #fef0a3; }
+.pig-color-lavender { --pig-color: #c8b6ff; }
+.pig-color-mint    { --pig-color: #a8e6cf; }
+.pig-color-sky     { --pig-color: #8ed6ff; }
+.pig-color-peach   { --pig-color: #ffd6a5; }
+.pig-color-rose    { --pig-color: #ffb3e6; }
+.pig-color-sage    { --pig-color: #b5ead7; }
+.pig-color-sick    { --pig-color: #e63946; }
+
 .btn-outline {
   padding: var(--spacing-xs);
   background: var(--bg-translucent);
