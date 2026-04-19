@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './HomePage.css';
 import PigList from '../../components/PigList/PigList';
 import { getAllPigs, getPassedPigs } from '../../services/pigs.service';
-import { getOutstandingTaskCount } from '../../services/tasks.service';
+import { getAllCareTasks } from '../../services/recurring-tasks.service';
 import { getAllPigTags } from '../../services/pig-tags.service';
 import type { Pig } from '../../services/pigs.types';
 import Loading from '../../components/ui/Loading/Loading';
@@ -13,17 +13,17 @@ const HomePage = () => {
   const [pigs, setPigs] = useState<Pig[]>([]);
   const [passedPigs, setPassedPigs] = useState<Pig[]>([]);
   const [sickPigIds, setSickPigIds] = useState<Set<number>>(new Set());
-  const [taskCount, setTaskCount] = useState(0);
+  const [careCount, setCareCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
   const loadPigs = async () => {
     try {
       setLoading(true);
-      const [allPigs, passed, tasks, allTags] = await Promise.all([
+      const [allPigs, passed, careData, allTags] = await Promise.all([
         getAllPigs(),
         getPassedPigs(),
-        getOutstandingTaskCount(),
+        getAllCareTasks(),
         getAllPigTags(),
       ]);
 
@@ -43,7 +43,7 @@ const HomePage = () => {
       setPigs(sorted);
       setPassedPigs(passed);
       setSickPigIds(sickIds);
-      setTaskCount(tasks);
+      setCareCount(careData.overdue.length + careData.oneOffs.length);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -91,9 +91,9 @@ const HomePage = () => {
           🤒 {sickPigIds.size} sick pig{sickPigIds.size === 1 ? '' : 's'}
         </button>
       )}
-      {taskCount > 0 && (
-        <Link to="/tasks" className="tasksBanner">
-          📝 {taskCount} task{taskCount === 1 ? '' : 's'} to do
+      {careCount > 0 && (
+        <Link to="/health-log" className="tasksBanner">
+          🏥 {careCount} care item{careCount === 1 ? '' : 's'} due
         </Link>
       )}
       <PigList pigs={filteredPigs} passedPigs={filter ? [] : passedPigs} setPigs={setPigs} sickPigIds={sickPigIds} />
