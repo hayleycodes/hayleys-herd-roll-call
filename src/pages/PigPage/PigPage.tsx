@@ -38,9 +38,10 @@ import {
   getPigTags,
   addPigTag,
   removePigTag,
-  getTagLabel,
-  TAG_OPTIONS,
+  getTagDefinitions,
+  createTagDefinition,
 } from '../../services/pig-tags.service';
+import type { TagDefinition } from '../../services/pig-tags.service';
 
 import type { Pig, Task, WeightRecord } from '../../services/pigs.types';
 
@@ -76,6 +77,7 @@ const PigPage = () => {
   const [latestWeight, setLatestWeight] = useState<WeightRecord | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tags, setTags] = useState<string[]>([]);
+  const [tagDefinitions, setTagDefinitions] = useState<TagDefinition[]>([]);
   const [showTagPicker, setShowTagPicker] = useState(false);
   const [customTagInput, setCustomTagInput] = useState('');
   const [customTagEmoji, setCustomTagEmoji] = useState('');
@@ -146,10 +148,13 @@ const PigPage = () => {
   const handleAddCustomTag = async () => {
     const text = customTagInput.trim().replace(/\s+/g, '-');
     if (!pig || !text || tags.includes(text)) return;
-    const tag = customTagEmoji ? `${text} ${customTagEmoji}` : text;
+    const label = customTagEmoji ? `${text} ${customTagEmoji}` : text;
+    const tag = text;
     if (tags.includes(tag)) return;
     await addPigTag(pig.id, tag);
+    await createTagDefinition(tag, label);
     setTags((prev) => [...prev, tag]);
+    setTagDefinitions((prev) => [...prev, { tag, label }]);
     setCustomTagInput('');
     setCustomTagEmoji('');
   };
@@ -201,7 +206,16 @@ const PigPage = () => {
         const pigId = Number(id);
         if (isNaN(pigId)) throw new Error('Invalid pig id');
 
-        const [pigData, healthData, familyData, tagsData, tasksData, weightsData, allPigsData] = await Promise.all([
+        const [
+          pigData,
+          healthData,
+          familyData,
+          tagsData,
+          tasksData,
+          weightsData,
+          allPigsData,
+          tagDefs,
+        ] = await Promise.all([
           getPig(pigId),
           getPigHealth(pigId),
           getPigFamily(pigId),
@@ -209,6 +223,7 @@ const PigPage = () => {
           getTasksForPig(pigId),
           getPigWeights(pigId),
           getAllPigsIncludingPassed(),
+          getTagDefinitions(),
         ]);
 
         setPig(pigData);
@@ -217,6 +232,7 @@ const PigPage = () => {
         setTags(tagsData);
         setTasks(tasksData);
         setAllPigs(allPigsData);
+        setTagDefinitions(tagDefs);
         if (weightsData.length > 0) setLatestWeight(weightsData[0]);
       } catch (err: any) {
         setError(err.message);
@@ -271,12 +287,12 @@ const PigPage = () => {
   const availablePigs = allPigs.filter((p) => !relatedPigIds.has(p.id));
 
   return (
-    <div className={`pigPage ${pig.passed_away && 'memorialMode'} ${isSick && 'sickMode'}`}>
+    <div
+      className={`pigPage ${pig.passed_away && 'memorialMode'} ${isSick && 'sickMode'}`}
+    >
       <Confetti active={showConfetti} origin={confettiOrigin} />
 
-      <div
-        className={`pigDetailCard ${pigColorClass}`}
-      >
+      <div className={`pigDetailCard ${pigColorClass}`}>
         <div
           className="detailCircleWrapper"
           style={{
@@ -319,7 +335,9 @@ const PigPage = () => {
             <EmojiButton
               variant="pig"
               aria-label="Upload photo"
-              onClick={() => document.getElementById('pig-image-upload')?.click()}
+              onClick={() =>
+                document.getElementById('pig-image-upload')?.click()
+              }
             >
               📸
             </EmojiButton>
@@ -368,15 +386,20 @@ const PigPage = () => {
           {tags.length > 0 && (
             <div className="detailTags">
               {tags.map((tag) => (
-                <span key={tag} className={`detailTag${tag === 'sick' ? ' detailTagSick' : ''}`}>
-                  {getTagLabel(tag)}
+                <span
+                  key={tag}
+                  className={`detailTag${tag === 'sick' ? ' detailTagSick' : ''}`}
+                >
+                  {tagDefinitions.find(
+                    (tagDefinition) => tagDefinition.tag === tag
+                  )?.label ?? tag}
                 </span>
               ))}
             </div>
           )}
           {showTagPicker && (
             <div className="tagPicker">
-              {TAG_OPTIONS.map((opt) => {
+              {tagDefinitions.map((opt) => {
                 const active = tags.includes(opt.tag);
                 return (
                   <button
@@ -391,7 +414,7 @@ const PigPage = () => {
                 );
               })}
               {tags
-                .filter((tag) => !TAG_OPTIONS.some((opt) => opt.tag === tag))
+                .filter((tag) => !tagDefinitions.some((opt) => opt.tag === tag))
                 .map((tag) => (
                   <button
                     key={tag}
@@ -433,18 +456,12 @@ const PigPage = () => {
                   )}
                 </div>
                 <Button
-
                   onClick={handleAddCustomTag}
                   disabled={!customTagInput.trim()}
                 >
                   Add
                 </Button>
-                <Button
-
-                  onClick={() => setShowTagPicker(false)}
-                >
-                  Done
-                </Button>
+                <Button onClick={() => setShowTagPicker(false)}>Done</Button>
               </div>
             </div>
           )}
@@ -459,16 +476,8 @@ const PigPage = () => {
                   rows={3}
                 />
                 <div className="descriptionEditActions">
-                  <Button
-  
-                    onClick={handleSaveDescription}
-                  >
-                    Save
-                  </Button>
-                  <Button
-  
-                    onClick={() => setIsEditingDescription(false)}
-                  >
+                  <Button onClick={handleSaveDescription}>Save</Button>
+                  <Button onClick={() => setIsEditingDescription(false)}>
                     Cancel
                   </Button>
                 </div>
@@ -485,9 +494,7 @@ const PigPage = () => {
             {pig.dob && (
               <span>DOB: {new Date(pig.dob).toLocaleDateString()}</span>
             )}
-            {latestWeight && (
-              <span>Weight: {latestWeight.weight_grams}g</span>
-            )}
+            {latestWeight && <span>Weight: {latestWeight.weight_grams}g</span>}
           </div>
         </div>
 
@@ -505,7 +512,12 @@ const PigPage = () => {
         />
       </div>
 
-      <HealthPanel pig={pig} health={health} setHealth={setHealth} sick={isSick} />
+      <HealthPanel
+        pig={pig}
+        health={health}
+        setHealth={setHealth}
+        sick={isSick}
+      />
 
       <TasksPanel tasks={tasks} setTasks={setTasks} pigId={pig.id} />
 
@@ -540,12 +552,10 @@ const PigPage = () => {
           >
             ✕
           </EmojiButton>
-          <div className={`imageLightboxCircle ${lightboxActive ? 'open' : ''}`}>
-            <img
-              src={imageUrl}
-              alt={pig.name}
-              className="imageLightboxImg"
-            />
+          <div
+            className={`imageLightboxCircle ${lightboxActive ? 'open' : ''}`}
+          >
+            <img src={imageUrl} alt={pig.name} className="imageLightboxImg" />
           </div>
         </div>
       )}

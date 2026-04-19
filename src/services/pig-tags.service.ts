@@ -1,33 +1,23 @@
 import { supabase } from '../../utils/supabase-client';
 
-// Cast to any since pig_tags isn't in the generated types yet
+export type TagDefinition = { tag: string; label: string };
+
+// Cast to any since these aren't in the generated types yet
 const pigTagsTable = () => (supabase as any).from('pig_tags');
+const tagDefinitionsTable = () => (supabase as any).from('tag_definitions');
 
-export const TAG_OPTIONS = [
-  { tag: 'shy', label: 'Shy 🫣' },
-  { tag: 'loud', label: 'Loud 📢' },
-  { tag: 'food-obsessed', label: 'Food Obsessed 🥬' },
-  { tag: 'popcorner', label: 'Popcorner 🍿' },
-  { tag: 'zoomy', label: 'Zoomy 💨' },
-  { tag: 'bossy', label: 'Bossy 👑' },
-  { tag: 'sleepy', label: 'Sleepy 😴' },
-  { tag: 'chatty', label: 'Chatty 💬' },
-  { tag: 'dramatic', label: 'Dramatic 🎭' },
-  { tag: 'adventurous', label: 'Adventurous 🗺️' },
-  { tag: 'friendly', label: 'Friendly 🥰' },
-  { tag: 'bully', label: 'Bully 😤' },
-  { tag: 'timid', label: 'Timid 🥺' },
-  { tag: 'confident', label: 'Confident 😎' },
-  { tag: 'brave', label: 'Brave 🦁' },
-  { tag: 'troublemaker', label: 'Troublemaker 😏' },
-  { tag: 'scaredy-pig', label: 'Scaredy Pig 😱' },
-  { tag: 'dumb', label: 'Dumb 🧠' },
-  { tag: 'feral', label: 'Feral 👿' },
-  { tag: 'sick', label: 'Sick 🤒' },
-];
+export const getTagDefinitions = async (): Promise<TagDefinition[]> => {
+  const { data, error } = await tagDefinitionsTable()
+    .select('tag, label')
+    .order('label');
 
-export const getTagLabel = (tag: string): string => {
-  return TAG_OPTIONS.find((t) => t.tag === tag)?.label ?? tag;
+  if (error) throw new Error(error.message);
+  return data ?? [];
+};
+
+export const createTagDefinition = async (tag: string, label: string) => {
+  const { error } = await tagDefinitionsTable().insert({ tag, label });
+  if (error) throw new Error(error.message);
 };
 
 export const getPigTags = async (pigId: number): Promise<string[]> => {

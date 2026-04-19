@@ -162,6 +162,24 @@ export type Database = {
         }
         Relationships: []
       }
+      tag_definitions: {
+        Row: {
+          created_at: string | null
+          label: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string | null
+          label: string
+          tag: string
+        }
+        Update: {
+          created_at?: string | null
+          label?: string
+          tag?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           completed: boolean
