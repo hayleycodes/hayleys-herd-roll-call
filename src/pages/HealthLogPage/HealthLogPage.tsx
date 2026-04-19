@@ -7,15 +7,26 @@ import '../../components/HealthPanel/HealthPanel.css';
 import {
   getAllHealth,
   deletePigHealth,
+  createPigHealth,
 } from '../../services/pig-health.service';
 import type { HealthLogEntry } from '../../services/pig-health.service';
+import {
+  getAllCareTasks,
+  completeOneOffTask,
+  markTaskDone,
+  type OverdueTask,
+  type UpcomingTask,
+  type PendingOneOff,
+} from '../../services/recurring-tasks.service';
 import { getAllPigs } from '../../services/pigs.service';
-import type { Pig, WeightRecord } from '../../services/pigs.types';
+import type { Pig, WeightRecord, HealthRecord } from '../../services/pigs.types';
 import { getPigImageUrl } from '../../services/pig-images.service';
 import { getLatestWeights, getAllWeights, createPigWeight } from '../../services/pig-weights.service';
 import Loading from '../../components/ui/Loading/Loading';
+import Modal from '../../components/ui/Modal/Modal';
 import Panel from '../../components/ui/Panel/Panel';
 import HealthForm from '../../components/HealthForm/HealthForm';
+import CareTaskCard from '../../components/CareTaskCard/CareTaskCard';
 import Button from '../../components/ui/Button/Button';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 
@@ -49,12 +60,17 @@ const HealthLogPage = () => {
   const [editingRecord, setEditingRecord] = useState<HealthLogEntry | null>(
     null
   );
-  const [activeTab, setActiveTab] = useState<'notes' | 'weight'>('notes');
+  const [activeTab, setActiveTab] = useState<'notes' | 'weight' | 'care'>('notes');
+  const [overdueTasks, setOverdueTasks] = useState<OverdueTask[]>([]);
+  const [upcomingTasks, setUpcomingTasks] = useState<UpcomingTask[]>([]);
+  const [oneOffTasks, setOneOffTasks] = useState<PendingOneOff[]>([]);
   const [weights, setWeights] = useState<Map<number, WeightRecord>>(new Map());
   const [allWeights, setAllWeights] = useState<Map<number, WeightRecord[]>>(new Map());
   const [addingPigId, setAddingPigId] = useState<number | null>(null);
   const [gramsInput, setGramsInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [confirmTask, setConfirmTask] = useState<(OverdueTask | UpcomingTask | PendingOneOff) | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -67,14 +83,18 @@ const HealthLogPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [healthData, pigData, weightData, allWeightData] = await Promise.all([
+        const [healthData, pigData, weightData, allWeightData, careData] = await Promise.all([
           loadRecords(0),
           getAllPigs(),
           getLatestWeights(),
           getAllWeights(),
+          getAllCareTasks(),
         ]);
         setRecords(healthData);
-        setPigs(pigData.sort((a, b) => a.name.localeCompare(b.name)));
+        setPigs(pigData.sort((a: Pig, b: Pig) => a.name.localeCompare(b.name)));
+        setOverdueTasks(careData.overdue);
+        setUpcomingTasks(careData.upcoming);
+        setOneOffTasks(careData.oneOffs);
         const weightMap = new Map<number, WeightRecord>();
         for (const w of weightData) {
           weightMap.set(w.pig_id, w);
@@ -108,10 +128,11 @@ const HealthLogPage = () => {
     setRecords(data);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this health record?')) return;
-    await deletePigHealth(id);
-    setRecords((prev) => prev.filter((r) => r.id !== id));
+  const handleDelete = async () => {
+    if (confirmDeleteId === null) return;
+    await deletePigHealth(confirmDeleteId);
+    setRecords((prev) => prev.filter((r) => r.id !== confirmDeleteId));
+    setConfirmDeleteId(null);
   };
 
   const refreshWeights = async () => {
@@ -154,6 +175,43 @@ const HealthLogPage = () => {
     return closest?.weight_grams ?? null;
   };
 
+  const KNOWN_HEALTH_FLAGS: Record<string, keyof Pick<HealthRecord, 'nail_clip' | 'haircut' | 'parasite_treatment'>> = {
+    nail_clip: 'nail_clip',
+    haircut: 'haircut',
+    parasite_treatment: 'parasite_treatment',
+  };
+
+  const getTaskLabel = (taskType: string): string =>
+    taskType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const handleConfirmDone = async () => {
+    if (!confirmTask) return;
+    const task = confirmTask;
+    const isOneOff = task.frequency_days_override === null;
+
+    const healthFlag = KNOWN_HEALTH_FLAGS[task.task_type];
+    if (healthFlag) {
+      await createPigHealth({
+        pig_id: task.pig_id,
+        [healthFlag]: true,
+      } as unknown as HealthRecord);
+    } else {
+      await createPigHealth({
+        pig_id: task.pig_id,
+        notes: getTaskLabel(task.task_type),
+      } as unknown as HealthRecord);
+      if (!isOneOff) await markTaskDone(task.pig_id, task.task_type);
+    }
+    if (isOneOff) await completeOneOffTask(task.id);
+
+    // Refresh care tasks
+    const careData = await getAllCareTasks();
+    setOverdueTasks(careData.overdue);
+    setUpcomingTasks(careData.upcoming);
+    setOneOffTasks(careData.oneOffs);
+    setConfirmTask(null);
+  };
+
   const livingPigs = pigs.filter((p) => !p.passed_away);
 
   useEffect(() => {
@@ -174,8 +232,6 @@ const HealthLogPage = () => {
       { threshold: 0.1 }
     );
 
-    useEffect(() => {});
-
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [hasMore, loadingMore, records.length, loadRecords]);
@@ -185,7 +241,7 @@ const HealthLogPage = () => {
 
   return (
     <div className="healthLogPage" ref={scrollRef}>
-      <Panel heading="Health Log 🏥" theme="green">
+      <Panel heading="Health Information 🏥" theme="green">
         <div className="tabs">
           <button
             className={activeTab === 'notes' ? 'active' : ''}
@@ -198,6 +254,12 @@ const HealthLogPage = () => {
             onClick={() => setActiveTab('weight')}
           >
             Weight ⚖️
+          </button>
+          <button
+            className={activeTab === 'care' ? 'active' : ''}
+            onClick={() => setActiveTab('care')}
+          >
+            Care 📋
           </button>
         </div>
 
@@ -271,7 +333,7 @@ const HealthLogPage = () => {
                       <EmojiButton
                         className="healthCardBtn healthCardBtnDelete"
                         size="sm"
-                        onClick={() => handleDelete(record.id)}
+                        onClick={() => setConfirmDeleteId(record.id)}
                       >
                         🗑️
                       </EmojiButton>
@@ -341,7 +403,87 @@ const HealthLogPage = () => {
             })}
           </div>
         )}
+
+        {activeTab === 'care' && (
+          <div className="careTaskList--global">
+            {overdueTasks.length === 0 && upcomingTasks.length === 0 && oneOffTasks.length === 0 && (
+              <p className="careAllCaughtUp">All caught up! 🎉</p>
+            )}
+
+            {overdueTasks.length > 0 && (
+              <>
+                <h3>Overdue</h3>
+                {overdueTasks.map((task) => (
+                  <CareTaskCard
+                    key={`care-${task.pig_id}-${task.task_type}`}
+                    label={getTaskLabel(task.task_type)}
+                    variant="overdue"
+                    badge={
+                      <span className="careOverdueBadge">
+                        {task.days_overdue > 0 ? `${task.days_overdue}d overdue` : 'Due now'}
+                      </span>
+                    }
+                    pigName={task.pigs?.name}
+                    pigImagePath={task.pigs?.image_path}
+                    pigId={task.pig_id}
+                    onDone={() => setConfirmTask(task)}
+                  />
+                ))}
+              </>
+            )}
+
+            {oneOffTasks.length > 0 && (
+              <>
+                <h3>One-off</h3>
+                {oneOffTasks.map((task) => (
+                  <CareTaskCard
+                    key={task.id}
+                    label={getTaskLabel(task.task_type)}
+                    variant="oneoff"
+                    pigName={task.pigs?.name}
+                    pigImagePath={task.pigs?.image_path}
+                    pigId={task.pig_id}
+                    onDone={() => setConfirmTask(task)}
+                  />
+                ))}
+              </>
+            )}
+
+            {upcomingTasks.length > 0 && (
+              <>
+                <h3>Upcoming</h3>
+                {upcomingTasks.map((task) => (
+                  <CareTaskCard
+                    key={`upcoming-${task.pig_id}-${task.task_type}`}
+                    label={getTaskLabel(task.task_type)}
+                    badge={<span className="careDueBadge">{task.days_left}d left</span>}
+                    pigName={task.pigs?.name}
+                    pigImagePath={task.pigs?.image_path}
+                    pigId={task.pig_id}
+                    onDone={() => setConfirmTask(task)}
+                  />
+                ))}
+              </>
+            )}
+
+            <Modal isOpen={!!confirmTask} onClose={() => setConfirmTask(null)}>
+              <p>Mark {confirmTask?.pigs?.name}'s {getTaskLabel(confirmTask?.task_type ?? '').toLowerCase()} as done?</p>
+              <div className="confirmActions">
+                <button onClick={() => setConfirmTask(null)}>Cancel</button>
+                <button onClick={handleConfirmDone}>Confirm</button>
+              </div>
+            </Modal>
+          </div>
+        )}
       </Panel>
+
+      <Modal isOpen={confirmDeleteId !== null} onClose={() => setConfirmDeleteId(null)}>
+        <p>Delete this health record?</p>
+        <div className="confirmActions">
+          <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+          <button onClick={handleDelete}>Delete</button>
+        </div>
+      </Modal>
     </div>
   );
 };

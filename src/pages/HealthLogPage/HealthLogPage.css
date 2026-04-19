@@ -110,15 +110,12 @@
   margin: 0px calc(0px - var(--spacing-xs));
 }
 
-.tabs button:first-child {
-  border-right: 2px solid #a0caa2;
-}
-
 .tabs button {
   padding: var(--spacing-xs) 0;
-  width: 50%;
+  width: 33.33%;
   background: none;
   border: none;
+  border-right: 2px solid #a0caa2;
   border-bottom: 2px solid transparent;
   cursor: pointer;
   font-family: inherit;
@@ -127,8 +124,36 @@
   opacity: 0.6;
 }
 
+.tabs button:last-child {
+  border-right: none;
+}
+
 .tabs button.active {
   border-bottom-color: #1a4d1a;
   opacity: 1;
   font-weight: var(--font-weight-bold);
+}
+
+/* Care tab */
+
+.careTaskList--global {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+}
+
+.careTaskList--global h3 {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.careAllCaughtUp {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-lg);
+  padding: var(--spacing-md);
 }
