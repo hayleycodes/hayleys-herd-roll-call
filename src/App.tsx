@@ -18,6 +18,7 @@ import FamilyTreePage from './pages/FamilyTreePage/FamilyTreePage.tsx';
 import HealthLogPage from './pages/HealthLogPage/HealthLogPage.tsx';
 import TasksPage from './pages/TasksPage/TasksPage.tsx';
 import WeightsPage from './pages/WeightsPage/WeightsPage.tsx';
+import TagsPage from './pages/TagsPage/TagsPage.tsx';
 import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
@@ -110,6 +111,14 @@ function App() {
             element={
               <PageTransition>
                 <WeightsPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/tags"
+            element={
+              <PageTransition>
+                <TagsPage />
               </PageTransition>
             }
           />

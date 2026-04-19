@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
@@ -386,14 +386,15 @@ const PigPage = () => {
           {tags.length > 0 && (
             <div className="detailTags">
               {tags.map((tag) => (
-                <span
+                <Link
                   key={tag}
-                  className={`detailTag${tag === 'sick' ? ' detailTagSick' : ''}`}
+                  to={`/tags?tag=${encodeURIComponent(tag)}`}
+                  className={`detailTag detailTagLink${tag === 'sick' ? ' detailTagSick' : ''}`}
                 >
                   {tagDefinitions.find(
                     (tagDefinition) => tagDefinition.tag === tag
                   )?.label ?? tag}
-                </span>
+                </Link>
               ))}
             </div>
           )}
