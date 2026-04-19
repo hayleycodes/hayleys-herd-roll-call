@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllPigs, createPigSighting } from '../../services/pigs.service';
+import { addPigMood } from '../../services/pig-moods.service';
 import type { Pig } from '../../services/pigs.types';
 import { getPigColorClass } from '../../constants/colors';
 import RollcallCard from './RollcallCard';
@@ -68,13 +69,14 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
     onClose();
   }, [onClose]);
 
-  const handleSighted = useCallback(async () => {
+  const handleSighted = useCallback(async (moods: string[]) => {
     const pig = queue[currentIndex];
     if (!pig || isAnimating) return;
 
     setIsAnimating(true);
     try {
       await createPigSighting(pig.id);
+      await Promise.all(moods.map((mood) => addPigMood(pig.id, mood)));
       const newSightedCount = sightedCount + 1;
       setSightedCount(newSightedCount);
 
