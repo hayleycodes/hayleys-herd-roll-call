@@ -43,7 +43,7 @@ const TagsPage = () => {
     const next = selectedTags.includes(tag)
       ? selectedTags.filter((t) => t !== tag)
       : [...selectedTags, tag];
-    setSearchParams(next.length ? next.map((t) => ['tag', t]) : []);
+    setSearchParams(next.length ? next.map((t) => ['tag', t] as [string, string]) : []);
   };
 
   if (loading) return <Loading />;

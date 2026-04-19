@@ -86,12 +86,12 @@ const CareHealthPanel = ({
       await createPigHealth({
         pig_id: pig.id,
         [healthFlag]: true,
-      } as HealthRecord);
+      } as unknown as HealthRecord);
     } else {
       await createPigHealth({
         pig_id: pig.id,
         notes: getTaskLabel(task.task_type),
-      } as HealthRecord);
+      } as unknown as HealthRecord);
       if (!isOneOff) await markTaskDone(pig.id, task.task_type);
     }
     if (isOneOff) await completeOneOffTask(task.id);
