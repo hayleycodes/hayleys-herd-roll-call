@@ -5,9 +5,8 @@ import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 
 import './PigPage.css';
 
-import HealthPanel from '../../components/HealthPanel/HealthPanel';
+import CareHealthPanel from '../../components/CareHealthPanel/CareHealthPanel';
 import MoodPanel from '../../components/MoodPanel/MoodPanel';
-import TasksPanel from '../../components/TasksPanel/TasksPanel';
 import FamilyPanel from '../../components/FamilyPanel/FamilyPanel';
 import Loading from '../../components/ui/Loading/Loading';
 import Modal from '../../components/ui/Modal/Modal';
@@ -18,7 +17,9 @@ import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 import { getPigHealth } from '../../services/pig-health.service';
 import { getPigMoods } from '../../services/pig-moods.service';
 import { getPigWeights } from '../../services/pig-weights.service';
-import { getTasksForPig } from '../../services/tasks.service';
+import {
+  getPigRecurringTasks,
+} from '../../services/recurring-tasks.service';
 import {
   compressImage,
   uploadPigImage,
@@ -45,7 +46,7 @@ import {
 } from '../../services/pig-tags.service';
 import type { TagDefinition } from '../../services/pig-tags.service';
 
-import type { Pig, Task, WeightRecord, MoodRecord } from '../../services/pigs.types';
+import type { Pig, WeightRecord, MoodRecord, PigRecurringTask } from '../../services/pigs.types';
 
 const PIG_QUOTES = [
   'Wheek wheek! 🐹',
@@ -78,7 +79,6 @@ const PigPage = () => {
   const [health, setHealth] = useState<any[]>([]);
   const [latestWeight, setLatestWeight] = useState<WeightRecord | null>(null);
   const [moods, setMoods] = useState<MoodRecord[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagDefinitions, setTagDefinitions] = useState<TagDefinition[]>([]);
   const [showTagPicker, setShowTagPicker] = useState(false);
@@ -86,6 +86,8 @@ const PigPage = () => {
   const [customTagEmoji, setCustomTagEmoji] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
+
+  const [recurringTasks, setRecurringTasks] = useState<PigRecurringTask[]>([]);
 
   const [family, setFamily] = useState<PigFamily>({
     parents: [],
@@ -215,32 +217,32 @@ const PigPage = () => {
           healthData,
           familyData,
           tagsData,
-          tasksData,
           weightsData,
           allPigsData,
           tagDefs,
           moodsData,
+          recurringData,
         ] = await Promise.all([
           getPig(pigId),
           getPigHealth(pigId),
           getPigFamily(pigId),
           getPigTags(pigId),
-          getTasksForPig(pigId),
           getPigWeights(pigId),
           getAllPigsIncludingPassed(),
           getTagDefinitions(),
           getPigMoods(pigId),
+          getPigRecurringTasks(pigId),
         ]);
 
         setPig(pigData);
         setHealth(healthData);
         setFamily(familyData);
         setTags(tagsData);
-        setTasks(tasksData);
         setAllPigs(allPigsData);
         setTagDefinitions(tagDefs);
         if (weightsData.length > 0) setLatestWeight(weightsData[0]);
         setMoods(moodsData);
+        setRecurringTasks(recurringData);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -531,14 +533,18 @@ const PigPage = () => {
         />
       </div>
 
-      <HealthPanel
+      <CareHealthPanel
         pig={pig}
         health={health}
         setHealth={setHealth}
         sick={isSick}
+        recurringTasks={recurringTasks}
+        onRecurringUpdate={async () => {
+          const pigId = Number(id);
+          const updated = await getPigRecurringTasks(pigId);
+          setRecurringTasks(updated);
+        }}
       />
-
-      <TasksPanel tasks={tasks} setTasks={setTasks} pigId={pig.id} />
 
       <FamilyPanel
         family={family}
