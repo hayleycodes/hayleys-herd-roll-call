@@ -84,6 +84,44 @@ export type Database = {
           },
         ]
       }
+      pig_recurring_tasks: {
+        Row: {
+          created_at: string | null
+          enabled: boolean | null
+          frequency_days_override: number | null
+          id: number
+          last_completed_at: string | null
+          pig_id: number
+          task_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          enabled?: boolean | null
+          frequency_days_override?: number | null
+          id?: number
+          last_completed_at?: string | null
+          pig_id: number
+          task_type: string
+        }
+        Update: {
+          created_at?: string | null
+          enabled?: boolean | null
+          frequency_days_override?: number | null
+          id?: number
+          last_completed_at?: string | null
+          pig_id?: number
+          task_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pig_recurring_tasks_pig_id_fkey"
+            columns: ["pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pig_relationships: {
         Row: {
           created_at: string | null
@@ -208,38 +246,6 @@ export type Database = {
           tag?: string
         }
         Relationships: []
-      }
-      tasks: {
-        Row: {
-          completed: boolean
-          created_at: string
-          id: number
-          pig_id: number | null
-          title: string
-        }
-        Insert: {
-          completed?: boolean
-          created_at?: string
-          id?: never
-          pig_id?: number | null
-          title: string
-        }
-        Update: {
-          completed?: boolean
-          created_at?: string
-          id?: never
-          pig_id?: number | null
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tasks_pig_id_fkey"
-            columns: ["pig_id"]
-            isOneToOne: false
-            referencedRelation: "pigs"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       weights: {
         Row: {

@@ -39,17 +39,19 @@ export interface WeightRecord {
   recorded_at: string;
 }
 
-export interface Task {
-  id: number;
-  title: string;
-  pig_id: number | null;
-  completed: boolean;
-  created_at: string;
-}
-
 export interface MoodRecord {
   id: number;
   pig_id: number;
   mood: string;
+  created_at: string;
+}
+
+export interface PigRecurringTask {
+  id: number;
+  pig_id: number;
+  task_type: string;
+  enabled: boolean | null;
+  frequency_days_override: number | null;
+  last_completed_at: string | null;
   created_at: string;
 }

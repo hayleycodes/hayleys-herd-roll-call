@@ -1,4 +1,5 @@
 import { supabase } from "../../utils/supabase-client";
+import { markTaskDone } from "./recurring-tasks.service";
 import type { HealthRecord } from "./pigs.types";
 
 export type HealthLogEntry = HealthRecord & {
@@ -43,6 +44,11 @@ export const createPigHealth = async (healthRecord: HealthRecord) => {
     .single();
 
   if (error) throw new Error(error.message);
+
+  // Sync recurring task last_completed_at
+  if (healthRecord.nail_clip) await markTaskDone(healthRecord.pig_id, "nail_clip");
+  if (healthRecord.haircut) await markTaskDone(healthRecord.pig_id, "haircut");
+  if (healthRecord.parasite_treatment) await markTaskDone(healthRecord.pig_id, "parasite_treatment");
 
   return data;
 };
