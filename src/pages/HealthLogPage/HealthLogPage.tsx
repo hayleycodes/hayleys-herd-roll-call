@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './HealthLogPage.css';
 import '../WeightsPage/WeightsPage.css';
@@ -51,6 +51,10 @@ const PigThumbnail = ({ imagePath }: { imagePath: string | null }) => {
 };
 
 const HealthLogPage = () => {
+  const location = useLocation();
+  const initialTab = (location.state as { tab?: string })?.tab === 'care' ? 'care'
+    : (location.state as { tab?: string })?.tab === 'weight' ? 'weight'
+    : 'notes';
   const [records, setRecords] = useState<HealthLogEntry[]>([]);
   const [pigs, setPigs] = useState<Pig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +64,7 @@ const HealthLogPage = () => {
   const [editingRecord, setEditingRecord] = useState<HealthLogEntry | null>(
     null
   );
-  const [activeTab, setActiveTab] = useState<'notes' | 'weight' | 'care'>('notes');
+  const [activeTab, setActiveTab] = useState<'notes' | 'weight' | 'care'>(initialTab);
   const [overdueTasks, setOverdueTasks] = useState<OverdueTask[]>([]);
   const [upcomingTasks, setUpcomingTasks] = useState<UpcomingTask[]>([]);
   const [oneOffTasks, setOneOffTasks] = useState<PendingOneOff[]>([]);

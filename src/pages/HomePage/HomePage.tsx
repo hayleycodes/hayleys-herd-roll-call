@@ -92,7 +92,7 @@ const HomePage = () => {
         </button>
       )}
       {careCount > 0 && (
-        <Link to="/health-log" className="tasksBanner">
+        <Link to="/health-log" state={{ tab: 'care' }} className="tasksBanner">
           🏥 {careCount} care item{careCount === 1 ? '' : 's'} due
         </Link>
       )}
