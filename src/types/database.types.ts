@@ -55,6 +55,35 @@ export type Database = {
           },
         ]
       }
+      pig_moods: {
+        Row: {
+          created_at: string | null
+          id: number
+          mood: string
+          pig_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          mood: string
+          pig_id: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          mood?: string
+          pig_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pig_moods_pig_id_fkey"
+            columns: ["pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pig_relationships: {
         Row: {
           created_at: string | null

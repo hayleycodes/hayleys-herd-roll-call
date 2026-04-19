@@ -1,0 +1,64 @@
+.moodGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.moodGridBtn {
+  padding: 6px 12px;
+  border: 2px dashed color-mix(in srgb, var(--panel-color, #ffa726) 60%, white);
+  border-radius: var(--border-radius-sm);
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.moodGridBtn:hover {
+  background: color-mix(in srgb, var(--panel-color, #ffa726) 25%, white);
+  border-color: var(--panel-color, #ffa726);
+}
+
+.moodGridBtn:active {
+  transform: scale(0.95);
+}
+
+.moodCardList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.moodCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  padding: 8px 12px;
+  background-color: color-mix(in srgb, var(--panel-color, #ffa726) 25%, white);
+}
+
+.moodCardList button {
+  border: none;
+}
+
+.moodEmoji {
+  font-size: var(--font-size-lg);
+}
+
+.moodLabel {
+  font-size: var(--font-size-md);
+}
+
+.moodTime {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+}
+
+.moodDeleteBtn {
+  background: color-mix(in srgb, var(--panel-color, #ffa726) 40%, white);
+  border-color: color-mix(in srgb, var(--panel-color, #ffa726) 40%, white);
+}

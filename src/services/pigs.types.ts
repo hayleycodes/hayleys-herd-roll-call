@@ -46,3 +46,10 @@ export interface Task {
   completed: boolean;
   created_at: string;
 }
+
+export interface MoodRecord {
+  id: number;
+  pig_id: number;
+  mood: string;
+  created_at: string;
+}

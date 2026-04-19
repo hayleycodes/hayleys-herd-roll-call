@@ -25,14 +25,22 @@
   width: 100%;
 }
 
-.detailEyeButton {
+.detailEyeButton,
+.detailMoodButton {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  right: 0px;
   padding: 10px;
   font-size: 36px;
   z-index: 2;
   box-shadow: 0 4px 10px grey;
+}
+
+.detailEyeButton {
+  top: 15px;
+}
+
+.detailMoodButton {
+  top: 90px;
 }
 
 .detailCircleWrapper {
@@ -387,4 +395,38 @@
   object-fit: cover;
   border-radius: 50%;
   border: 4px solid var(--pig-color, var(--border-color));
+}
+
+/* Mood modal overrides */
+.modalSheet:has(.moodModalContent) {
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.moodModalContent {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.moodModalContent .panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.moodModalContent .panelContent {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.moodModalContent .moodCardList {
+  overflow-y: auto;
+  flex: 1;
 }

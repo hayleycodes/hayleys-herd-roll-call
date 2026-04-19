@@ -6,6 +6,7 @@ import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 import './PigPage.css';
 
 import HealthPanel from '../../components/HealthPanel/HealthPanel';
+import MoodPanel from '../../components/MoodPanel/MoodPanel';
 import TasksPanel from '../../components/TasksPanel/TasksPanel';
 import FamilyPanel from '../../components/FamilyPanel/FamilyPanel';
 import Loading from '../../components/ui/Loading/Loading';
@@ -15,6 +16,7 @@ import Button from '../../components/ui/Button/Button';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 
 import { getPigHealth } from '../../services/pig-health.service';
+import { getPigMoods } from '../../services/pig-moods.service';
 import { getPigWeights } from '../../services/pig-weights.service';
 import { getTasksForPig } from '../../services/tasks.service';
 import {
@@ -43,7 +45,7 @@ import {
 } from '../../services/pig-tags.service';
 import type { TagDefinition } from '../../services/pig-tags.service';
 
-import type { Pig, Task, WeightRecord } from '../../services/pigs.types';
+import type { Pig, Task, WeightRecord, MoodRecord } from '../../services/pigs.types';
 
 const PIG_QUOTES = [
   'Wheek wheek! 🐹',
@@ -75,6 +77,7 @@ const PigPage = () => {
 
   const [health, setHealth] = useState<any[]>([]);
   const [latestWeight, setLatestWeight] = useState<WeightRecord | null>(null);
+  const [moods, setMoods] = useState<MoodRecord[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagDefinitions, setTagDefinitions] = useState<TagDefinition[]>([]);
@@ -100,6 +103,7 @@ const PigPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [showMoodModal, setShowMoodModal] = useState(false);
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
   const [updating, setUpdating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -215,6 +219,7 @@ const PigPage = () => {
           weightsData,
           allPigsData,
           tagDefs,
+          moodsData,
         ] = await Promise.all([
           getPig(pigId),
           getPigHealth(pigId),
@@ -224,6 +229,7 @@ const PigPage = () => {
           getPigWeights(pigId),
           getAllPigsIncludingPassed(),
           getTagDefinitions(),
+          getPigMoods(pigId),
         ]);
 
         setPig(pigData);
@@ -234,6 +240,7 @@ const PigPage = () => {
         setAllPigs(allPigsData);
         setTagDefinitions(tagDefs);
         if (weightsData.length > 0) setLatestWeight(weightsData[0]);
+        setMoods(moodsData);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -316,6 +323,17 @@ const PigPage = () => {
               }}
             >
               👀
+            </EmojiButton>
+          )}
+          {!pig.passed_away && (
+            <EmojiButton
+              className="detailMoodButton"
+              size="lg"
+              variant="pig"
+              onClick={() => setShowMoodModal(true)}
+              aria-label="Log mood"
+            >
+              🧠
             </EmojiButton>
           )}
           {!pig.passed_away && !isSick && (
@@ -537,6 +555,12 @@ const PigPage = () => {
           <Button onClick={handleConfirm} disabled={updating}>
             {updating ? 'Saving...' : 'Confirm'}
           </Button>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showMoodModal} onClose={() => setShowMoodModal(false)}>
+        <div className="moodModalContent">
+          <MoodPanel pig={pig} moods={moods} setMoods={setMoods} />
         </div>
       </Modal>
 
