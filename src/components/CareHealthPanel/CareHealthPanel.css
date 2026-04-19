@@ -1,0 +1,159 @@
+/* Section layout */
+
+.careScheduleSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  background: color-mix(in srgb, var(--panel-color, #a0caa2) 12%, white);
+  border-radius: var(--border-radius-sm);
+}
+
+.careRecordsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.careRecordsSection .muted {
+  text-transform: uppercase;
+}
+
+.careSectionHeading {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Recurring care tasks */
+
+.careTaskList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Theme buttons and inputs to match panel */
+
+.careScheduleSection .btn--outline,
+.careAddForm .btn--outline {
+  border-color: var(--panel-color, #a0caa2);
+}
+
+.careAddForm input:focus,
+.careAddForm select:focus {
+  outline: none;
+  border-color: var(--panel-color, #a0caa2);
+}
+
+/* Add care task form */
+
+.careAddToggle {
+  display: flex;
+  justify-content: center;
+}
+
+.careAddForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.careSelect {
+  padding: 6px 8px;
+  border: 2px solid var(--panel-color, #a0caa2);
+  border-radius: var(--border-radius-sm);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-sm);
+  background: white;
+}
+
+.careInput {
+  padding: 6px 8px;
+  border: 2px solid var(--panel-color, #a0caa2);
+  border-radius: var(--border-radius-sm);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-sm);
+  background: white;
+}
+
+.careFreqInput {
+  width: 50px;
+  padding: 2px 4px;
+  border: 2px solid var(--panel-color, #a0caa2);
+  border-radius: var(--border-radius-sm);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-sm);
+}
+
+.careAddFreqLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-sm);
+}
+
+.careAddActions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* Health record cards */
+
+.healthCardList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.healthCard {
+  border-radius: var(--border-radius-sm);
+  padding: 12px;
+  background-color: color-mix(in srgb, var(--panel-color, #a0caa2) 25%, white);
+  text-align: left;
+}
+
+.healthCard p {
+  margin: 4px 0;
+}
+
+.healthCard .healthCardHeader {
+  display: flex;
+}
+
+.healthCard .healthCardIcons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.healthBadge {
+  margin: 0;
+  padding: 4px 8px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+}
+
+.healthCardActions {
+  display: flex;
+  gap: 4px;
+  margin: var(--spacing-xxs) calc(0px - var(--spacing-xxs))
+    calc(0px - var(--spacing-xxs));
+  justify-content: flex-end;
+}
+
+.healthCardBtn {
+  background: color-mix(in srgb, var(--panel-color, #a0caa2) 40%, white);
+  border-color: color-mix(in srgb, var(--panel-color, #a0caa2) 40%, white);
+}
+
+.healthCardEditing {
+  border: 2px dashed var(--panel-color, #a0caa2);
+  opacity: 0.6;
+}

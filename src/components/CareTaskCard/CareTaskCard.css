@@ -1,0 +1,98 @@
+.careTaskCard {
+  padding: 8px 12px;
+  border-radius: var(--border-radius-sm);
+  background-color: color-mix(in srgb, var(--panel-color, #a0caa2) 25%, white);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.careTaskCardOverdue {
+  background-color: color-mix(in srgb, #e63946 15%, white);
+  border: 2px dashed #e63946;
+}
+
+.careTaskCardOverdue .btn--outline {
+  border-color: #e63946;
+  color: #e63946;
+}
+
+.careTaskCard:not(.careTaskCardOverdue) .btn--outline {
+  border-color: var(--panel-color, #a0caa2);
+  color: #1a4d1a;
+}
+
+.careTaskCardOneoff {
+  border: 2px dashed color-mix(in srgb, var(--panel-color, #a0caa2) 60%, black);
+}
+
+.careTaskPig {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  text-decoration: none;
+  color: inherit;
+  width: 30%;
+  flex-shrink: 0;
+}
+
+.careTaskPigName {
+  font-weight: var(--font-weight-bold);
+  color: #1a4d1a;
+  text-align: left;
+}
+
+.careTaskThumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.careTaskThumbPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--accent-yellow);
+  font-size: 14px;
+}
+
+.careTaskBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.careTaskLabel {
+  font-weight: var(--font-weight-bold);
+}
+
+.careTaskMeta {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.careOverdueBadge {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: #e63946;
+  padding: 2px 8px;
+  background: #ffdddd;
+  border-radius: 999px;
+  white-space: nowrap;
+  align-self: center;
+}
+
+.careDueBadge {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  background: white;
+  border-radius: 999px;
+  white-space: nowrap;
+  align-self: center;
+}
