@@ -7,6 +7,7 @@ import EmojiButton from '../ui/EmojiButton/EmojiButton';
 import CareTaskCard from '../CareTaskCard/CareTaskCard';
 import HealthForm from '../HealthForm/HealthForm';
 import { getPigHealth, deletePigHealth, createPigHealth } from '../../services/pig-health.service';
+import { createPigWeight } from '../../services/pig-weights.service';
 import {
   createPigCareTask,
   createOneOffTask,
@@ -16,6 +17,7 @@ import {
 import type {
   Pig,
   HealthRecord,
+  WeightRecord,
   PigRecurringTask,
 } from '../../services/pigs.types';
 
@@ -26,6 +28,8 @@ interface Props {
   sick?: boolean;
   recurringTasks?: PigRecurringTask[];
   onRecurringUpdate?: () => void;
+  latestWeight?: WeightRecord | null;
+  onWeightAdded?: () => void;
 }
 
 const CARE_DEFAULTS = [
@@ -59,12 +63,29 @@ const CareHealthPanel = ({
   sick,
   recurringTasks = [],
   onRecurringUpdate,
+  latestWeight,
+  onWeightAdded,
 }: Props) => {
   const [editingRecord, setEditingRecord] = useState<HealthRecord | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedDefault, setSelectedDefault] = useState('');
   const [customLabel, setCustomLabel] = useState('');
   const [addFrequency, setAddFrequency] = useState(28);
+  const [weightInput, setWeightInput] = useState('');
+  const [savingWeight, setSavingWeight] = useState(false);
+
+  const handleAddWeight = async () => {
+    const grams = parseInt(weightInput, 10);
+    if (!grams || grams <= 0) return;
+    setSavingWeight(true);
+    try {
+      await createPigWeight(pig.id, grams);
+      setWeightInput('');
+      onWeightAdded?.();
+    } finally {
+      setSavingWeight(false);
+    }
+  };
 
   const handleRecordAdded = async () => {
     const updated = await getPigHealth(pig.id);
@@ -233,6 +254,33 @@ const CareHealthPanel = ({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Weight Section */}
+      {!pig.passed_away && (
+        <div className="careWeightSection">
+          <h3 className="careSectionHeading">Weight ⚖️</h3>
+          {latestWeight && (
+            <p className="careWeightLatest">
+              Latest: <strong>{latestWeight.weight_grams}g</strong>
+              <span className="muted"> — {formatTimeSince(latestWeight.recorded_at)}</span>
+            </p>
+          )}
+          <div className="careWeightForm">
+            <input
+              type="number"
+              placeholder="Weight in grams"
+              min="1"
+              value={weightInput}
+              onChange={(e) => setWeightInput(e.target.value)}
+              className="careInput"
+              onKeyDown={(e) => { if (e.key === 'Enter') handleAddWeight(); }}
+            />
+            <Button onClick={handleAddWeight} disabled={savingWeight || !weightInput}>
+              {savingWeight ? 'Saving...' : 'Log weight'}
+            </Button>
+          </div>
         </div>
       )}
 

@@ -544,6 +544,12 @@ const PigPage = () => {
           const updated = await getPigRecurringTasks(pigId);
           setRecurringTasks(updated);
         }}
+        latestWeight={latestWeight}
+        onWeightAdded={async () => {
+          const pigId = Number(id);
+          const weights = await getPigWeights(pigId);
+          if (weights.length > 0) setLatestWeight(weights[0]);
+        }}
       />
 
       <FamilyPanel

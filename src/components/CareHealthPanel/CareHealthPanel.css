@@ -100,6 +100,33 @@
   gap: var(--spacing-xs);
 }
 
+/* Weight section */
+
+.careWeightSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  background: color-mix(in srgb, var(--panel-color, #a0caa2) 12%, white);
+  border-radius: var(--border-radius-sm);
+}
+
+.careWeightLatest {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.careWeightForm {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.careWeightForm .careInput {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Health record cards */
 
 .healthCardList {

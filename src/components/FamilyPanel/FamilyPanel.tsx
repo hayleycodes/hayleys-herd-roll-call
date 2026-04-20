@@ -1,6 +1,12 @@
 import { useState } from 'react';
-import type { PigFamily, PigFamilyMember } from '../../services/pig-relationships.service';
-import { createPigRelationship, deletePigRelationship } from '../../services/pig-relationships.service';
+import type {
+  PigFamily,
+  PigFamilyMember,
+} from '../../services/pig-relationships.service';
+import {
+  createPigRelationship,
+  deletePigRelationship,
+} from '../../services/pig-relationships.service';
 import type { Pig, RelationshipType } from '../../services/pigs.types';
 import PigCard from '../PigList/PigCard/PigCard';
 import PigPicker from '../PigPicker/PigPicker';
@@ -19,12 +25,20 @@ type Props = {
   onRefresh: () => void;
 };
 
-const FamilyPanel = ({ family, currentPigId, availablePigs, onRefresh }: Props) => {
+const FamilyPanel = ({
+  family,
+  currentPigId,
+  availablePigs,
+  onRefresh,
+}: Props) => {
   const [addingSection, setAddingSection] = useState<SectionKey | null>(null);
   const [selectedPigId, setSelectedPigId] = useState<number | ''>('');
   const [submitting, setSubmitting] = useState(false);
 
-  const [deletingMember, setDeletingMember] = useState<{ member: PigFamilyMember; label: string } | null>(null);
+  const [deletingMember, setDeletingMember] = useState<{
+    member: PigFamilyMember;
+    label: string;
+  } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const handleAdd = async (section: SectionKey) => {
@@ -94,7 +108,7 @@ const FamilyPanel = ({ family, currentPigId, availablePigs, onRefresh }: Props) 
     members: PigFamilyMember[],
     emptyText: string,
     relationLabel: string,
-    dropUp = false,
+    dropUp = false
   ) => (
     <>
       <div className="familySectionHeader">
@@ -138,11 +152,17 @@ const FamilyPanel = ({ family, currentPigId, availablePigs, onRefresh }: Props) 
               <EmojiButton
                 className="relationshipDeleteBtn"
                 size="sm"
-                onClick={() => setDeletingMember({ member, label: relationLabel })}
+                onClick={() =>
+                  setDeletingMember({ member, label: relationLabel })
+                }
               >
                 🗑️
               </EmojiButton>
-              <PigCard pig={member.pig} passed={!!member.pig.passed_away} hideLastSeen />
+              <PigCard
+                pig={member.pig}
+                passed={!!member.pig.passed_away}
+                hideLastSeen
+              />
             </div>
           ))}
         </div>
@@ -152,15 +172,43 @@ const FamilyPanel = ({ family, currentPigId, availablePigs, onRefresh }: Props) 
 
   return (
     <Panel heading="Family 🌳" theme="blue">
-      {renderSection('siblings', 'Siblings 🐖🤝🐖', family.siblings, 'No siblings recorded', 'sibling')}
-      {renderSection('parents', 'Parents 🐖⬆️', family.parents, 'No parents recorded', 'parent')}
-      {renderSection('children', 'Children 🐷⬇️', family.children, 'No children recorded', 'child', true)}
-      {renderSection('fosterFamily', 'Foster Family 🫶', family.fosterFamily, 'No foster family recorded', 'foster family', true)}
+      {renderSection(
+        'siblings',
+        'Siblings 🐖🤝🐖',
+        family.siblings,
+        'No siblings recorded',
+        'sibling'
+      )}
+      {renderSection(
+        'parents',
+        'Parents 🐖⬆️',
+        family.parents,
+        'No parents recorded',
+        'parent'
+      )}
+      {renderSection(
+        'children',
+        'Children 🐷⬇️',
+        family.children,
+        'No children recorded',
+        'child',
+        true
+      )}
+      {renderSection(
+        'fosterFamily',
+        'Foster Family 🫶',
+        family.fosterFamily,
+        'No foster family recorded',
+        'foster family',
+        true
+      )}
 
       <Modal isOpen={!!deletingMember} onClose={() => setDeletingMember(null)}>
         {deletingMember && (
           <>
-            <p>Remove {deletingMember.member.pig.name} as {deletingMember.label}?</p>
+            <p>
+              Remove {deletingMember.member.pig.name} as {deletingMember.label}?
+            </p>
             <div className="confirmActions">
               <Button onClick={() => setDeletingMember(null)}>Cancel</Button>
               <Button onClick={handleDelete} disabled={deleting}>
