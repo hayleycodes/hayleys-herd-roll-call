@@ -10,9 +10,9 @@ export const MOOD_OPTIONS = [
   { mood: 'chatty', label: 'Chatty 💬' },
   { mood: 'hyper', label: 'Hyper 🏃' },
   { mood: 'hiding', label: 'Hiding 🫣' },
-  { mood: 'relaxed', label: 'Relaxed 😌' },
   { mood: 'playful', label: 'Playful 🎉' },
   { mood: 'friendly', label: 'Friendly 👋' },
+  { mood: 'out-and-about', label: 'Out and About 🌳' },
   { mood: 'bully', label: 'Bully 🐂' },
 ];
 
