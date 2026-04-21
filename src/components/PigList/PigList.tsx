@@ -20,7 +20,7 @@ type PigListProps = {
 
 const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
-  const [sightingStep, setSightingStep] = useState<'confirm' | 'mood'>('confirm');
+  const [sightingStep, setSightingStep] = useState<'confirm' | 'mood' | 'logged'>('confirm');
   const [updating, setUpdating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiOrigin, setConfettiOrigin] = useState<{ x: number; y: number } | undefined>();
@@ -76,13 +76,16 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
 
   const closeModal = () => {
     setSelectedPig(null);
-    setSightingStep('confirm');
+    setTimeout(() => setSightingStep('confirm'), 300);
   };
 
   const handleSightingMood = async (mood: string) => {
     if (!selectedPig) return;
     await addPigMood(selectedPig.id, mood);
-    closeModal();
+    setSightingStep('logged');
+    setTimeout(() => {
+      closeModal();
+    }, 1200);
   };
 
   const today = new Date().toDateString();
@@ -122,7 +125,7 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
               </Button>
             </div>
           </>
-        ) : (
+        ) : sightingStep === 'mood' ? (
           <>
             <p>How is {selectedPig?.name} feeling?</p>
             <div className="moodGrid">
@@ -140,6 +143,8 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
               <Button onClick={closeModal}>Skip</Button>
             </div>
           </>
+        ) : (
+          <p className="moodLoggedMessage">Mood logged! ✨</p>
         )}
       </Modal>
     </>

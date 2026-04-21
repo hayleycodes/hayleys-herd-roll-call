@@ -62,3 +62,9 @@
   background: color-mix(in srgb, var(--panel-color, #ffa726) 40%, white);
   border-color: color-mix(in srgb, var(--panel-color, #ffa726) 40%, white);
 }
+
+.moodLoggedMessage {
+  font-size: 24px;
+  text-align: center;
+  padding: 20px 0;
+}

@@ -107,7 +107,7 @@ const PigPage = () => {
 
   const [showMoodModal, setShowMoodModal] = useState(false);
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
-  const [sightingStep, setSightingStep] = useState<'confirm' | 'mood'>('confirm');
+  const [sightingStep, setSightingStep] = useState<'confirm' | 'mood' | 'logged'>('confirm');
   const [updating, setUpdating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiOrigin, setConfettiOrigin] = useState<
@@ -141,13 +141,16 @@ const PigPage = () => {
     await addPigMood(pig.id, mood);
     const updated = await getPigMoods(pig.id);
     setMoods(updated);
-    setSelectedPig(null);
-    setSightingStep('confirm');
+    setSightingStep('logged');
+    setTimeout(() => {
+      setSelectedPig(null);
+      setSightingStep('confirm');
+    }, 1200);
   };
 
   const closeSightingModal = () => {
     setSelectedPig(null);
-    setSightingStep('confirm');
+    setTimeout(() => setSightingStep('confirm'), 300);
   };
 
   const handleUpload = async (file: File, pigId: number) => {
@@ -585,7 +588,7 @@ const PigPage = () => {
               </Button>
             </div>
           </>
-        ) : (
+        ) : sightingStep === 'mood' ? (
           <>
             <p>How is {pig.name} feeling?</p>
             <div className="moodGrid">
@@ -603,6 +606,8 @@ const PigPage = () => {
               <Button onClick={closeSightingModal}>Skip</Button>
             </div>
           </>
+        ) : (
+          <p className="moodLoggedMessage">Mood logged! ✨</p>
         )}
       </Modal>
 
