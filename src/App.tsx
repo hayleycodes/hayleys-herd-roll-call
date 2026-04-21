@@ -18,6 +18,7 @@ import FamilyTreePage from './pages/FamilyTreePage/FamilyTreePage.tsx';
 import HealthLogPage from './pages/HealthLogPage/HealthLogPage.tsx';
 import WeightsPage from './pages/WeightsPage/WeightsPage.tsx';
 import TagsPage from './pages/TagsPage/TagsPage.tsx';
+import MoodPage from './pages/MoodPage/MoodPage.tsx';
 import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
@@ -53,11 +54,12 @@ function App() {
             <EmojiButton onClick={() => setIsRollcallOpen(true)}>
               🍎
             </EmojiButton>
+            <Link to="/moods">
+              <EmojiButton>🧠</EmojiButton>
+            </Link>
           </div>
         </div>
-        <EmojiButton onClick={handleLogout}>
-          🪵
-        </EmojiButton>
+        <EmojiButton onClick={handleLogout}>🪵</EmojiButton>
       </header>
 
       <AnimatePresence mode="wait">
@@ -107,6 +109,14 @@ function App() {
             element={
               <PageTransition>
                 <TagsPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/moods"
+            element={
+              <PageTransition>
+                <MoodPage />
               </PageTransition>
             }
           />

@@ -1,0 +1,103 @@
+.moodPage h2 {
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+}
+
+.moodPageList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.moodRow {
+  background: white;
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.moodRowDone {
+  opacity: 0.5;
+}
+
+.moodRowPig {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.moodRowAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--accent-pink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.moodRowImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.moodRowEmoji {
+  font-size: 20px;
+}
+
+.moodRowSpin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.moodRowName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.moodRowLatest {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.moodRowOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.moodRowBtn {
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 2px dashed rgba(0, 0, 0, 0.15);
+  background: white;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  font-size: 13px;
+  transition: 0.15s ease;
+}
+
+.moodRowBtn:hover {
+  background: #fff3e0;
+  border-color: #ffa726;
+}
+
+.moodRowBtn:active {
+  transform: scale(0.95);
+}
