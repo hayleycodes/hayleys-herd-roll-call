@@ -8,12 +8,12 @@ export const MOOD_OPTIONS = [
   { mood: 'sleepy', label: 'Sleepy 😴' },
   { mood: 'hungry', label: 'Hungry 🍽️' },
   { mood: 'chatty', label: 'Chatty 💬' },
-  { mood: 'angry', label: 'Angry 😤' },
   { mood: 'hyper', label: 'Hyper 🏃' },
   { mood: 'hiding', label: 'Hiding 🫣' },
   { mood: 'relaxed', label: 'Relaxed 😌' },
   { mood: 'playful', label: 'Playful 🎉' },
   { mood: 'friendly', label: 'Friendly 👋' },
+  { mood: 'bully', label: 'Bully 🐂' },
 ];
 
 export const getMoodLabel = (mood: string): string => {
@@ -38,7 +38,10 @@ export const getPigMoods = async (pigId: number): Promise<MoodRecord[]> => {
   return data ?? [];
 };
 
-export const addPigMood = async (pigId: number, mood: string): Promise<void> => {
+export const addPigMood = async (
+  pigId: number,
+  mood: string
+): Promise<void> => {
   const { error } = await pigMoodsTable().insert({ pig_id: pigId, mood });
   if (error) throw new Error(error.message);
 };
