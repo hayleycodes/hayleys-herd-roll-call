@@ -17,6 +17,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
+  const [search, setSearch] = useState('');
   const loadPigs = async () => {
     try {
       setLoading(true);
@@ -67,11 +68,14 @@ const HomePage = () => {
   );
   const unseenCount = unseenPigs.length;
 
-  const filteredPigs = filter === 'unseen'
+  const query = search.toLowerCase().trim();
+
+  const filteredPigs = (filter === 'unseen'
     ? unseenPigs
     : filter === 'sick'
       ? pigs.filter((p) => sickPigIds.has(p.id))
-      : pigs;
+      : pigs
+  ).filter((p) => !query || p.name.toLowerCase().includes(query));
 
   return (
     <div>
@@ -96,7 +100,19 @@ const HomePage = () => {
           🏥 {careCount} care item{careCount === 1 ? '' : 's'} due
         </Link>
       )}
-      <PigList pigs={filteredPigs} passedPigs={filter ? [] : passedPigs} setPigs={setPigs} sickPigIds={sickPigIds} />
+      <div className="pigSearchWrapper">
+        <input
+          type="text"
+          className="pigSearch"
+          placeholder="Search pigs..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        {search && (
+          <button className="pigSearchClear" onClick={() => setSearch('')}>✕</button>
+        )}
+      </div>
+      <PigList pigs={filteredPigs} passedPigs={filter || query ? [] : passedPigs} setPigs={setPigs} sickPigIds={sickPigIds} />
     </div>
   );
 };

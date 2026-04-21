@@ -130,6 +130,50 @@ input {
   font-family: var(--primary-font);
 }
 
+.pigSearchWrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  background: white;
+  border-radius: var(--border-radius-sm);
+  border: var(--border-width) var(--border-style) var(--primary);
+}
+
+.pigSearch {
+  flex: 1;
+  font-size: var(--font-size-md);
+  padding: var(--spacing-xs);
+  border: none;
+  background: none;
+  color: var(--text);
+}
+
+.pigSearch:focus {
+  outline: none;
+}
+
+.pigSearch::placeholder {
+  color: var(--primary);
+  opacity: 0.6;
+}
+
+.pigSearchClear {
+  background: var(--primary);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: white;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin-right: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
 textarea {
   padding: var(--spacing-sm);
   border-radius: var(--border-radius-sm);
