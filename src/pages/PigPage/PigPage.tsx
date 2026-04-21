@@ -15,7 +15,7 @@ import Button from '../../components/ui/Button/Button';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 
 import { getPigHealth } from '../../services/pig-health.service';
-import { getPigMoods } from '../../services/pig-moods.service';
+import { getPigMoods, addPigMood, MOOD_OPTIONS } from '../../services/pig-moods.service';
 import { getPigWeights } from '../../services/pig-weights.service';
 import {
   getPigRecurringTasks,
@@ -107,6 +107,7 @@ const PigPage = () => {
 
   const [showMoodModal, setShowMoodModal] = useState(false);
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
+  const [sightingStep, setSightingStep] = useState<'confirm' | 'mood'>('confirm');
   const [updating, setUpdating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiOrigin, setConfettiOrigin] = useState<
@@ -125,14 +126,28 @@ const PigPage = () => {
 
       setPig((prev) => (prev ? { ...prev, last_sighted: now } : null));
 
-      setSelectedPig(null);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 2500);
+      setSightingStep('mood');
     } catch (err) {
       console.error('Failed to save sighting:', err);
     } finally {
       setUpdating(false);
     }
+  };
+
+  const handleSightingMood = async (mood: string) => {
+    if (!pig) return;
+    await addPigMood(pig.id, mood);
+    const updated = await getPigMoods(pig.id);
+    setMoods(updated);
+    setSelectedPig(null);
+    setSightingStep('confirm');
+  };
+
+  const closeSightingModal = () => {
+    setSelectedPig(null);
+    setSightingStep('confirm');
   };
 
   const handleUpload = async (file: File, pigId: number) => {
@@ -559,15 +574,36 @@ const PigPage = () => {
         onRefresh={handleFamilyRefresh}
       />
 
-      <Modal isOpen={!!selectedPig} onClose={() => setSelectedPig(null)}>
-        <p>Mark {pig.name} as seen?</p>
-
-        <div className="confirmActions">
-          <Button onClick={() => setSelectedPig(null)}>Cancel</Button>
-          <Button onClick={handleConfirm} disabled={updating}>
-            {updating ? 'Saving...' : 'Confirm'}
-          </Button>
-        </div>
+      <Modal isOpen={!!selectedPig} onClose={closeSightingModal}>
+        {sightingStep === 'confirm' ? (
+          <>
+            <p>Mark {pig.name} as seen?</p>
+            <div className="confirmActions">
+              <Button onClick={closeSightingModal}>Cancel</Button>
+              <Button onClick={handleConfirm} disabled={updating}>
+                {updating ? 'Saving...' : 'Confirm'}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p>How is {pig.name} feeling?</p>
+            <div className="moodGrid">
+              {MOOD_OPTIONS.map((opt) => (
+                <button
+                  key={opt.mood}
+                  className="moodGridBtn"
+                  onClick={() => handleSightingMood(opt.mood)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <div className="confirmActions">
+              <Button onClick={closeSightingModal}>Skip</Button>
+            </div>
+          </>
+        )}
       </Modal>
 
       <Modal isOpen={showMoodModal} onClose={() => setShowMoodModal(false)}>
