@@ -114,6 +114,7 @@ header .emoji-btn {
 
 header a {
   color: var(--primary-dark);
+  text-decoration: none;
 }
 
 header button:hover {
