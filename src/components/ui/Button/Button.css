@@ -9,3 +9,15 @@
   cursor: pointer;
   transition: 0.2s ease;
 }
+
+.btn--danger {
+  border-color: #e57373;
+  background: #ffebee;
+  color: #c62828;
+}
+
+.btn--success {
+  border-color: #81c784;
+  background: #e8f5e9;
+  color: #2e7d32;
+}

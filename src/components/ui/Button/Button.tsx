@@ -5,6 +5,7 @@ type ButtonProps = {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
+  variant?: "default" | "danger" | "success";
   "aria-label"?: string;
 };
 
@@ -13,11 +14,12 @@ const Button = ({
   onClick,
   type = "button",
   disabled = false,
+  variant = "default",
   "aria-label": ariaLabel,
 }: ButtonProps) => {
   return (
     <button
-      className="btn btn--outline"
+      className={`btn btn--outline${variant !== "default" ? ` btn--${variant}` : ""}`}
       onClick={onClick}
       type={type}
       disabled={disabled}
