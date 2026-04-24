@@ -15,11 +15,13 @@ import Button from '../../components/ui/Button/Button';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 
 import { getPigHealth } from '../../services/pig-health.service';
-import { getPigMoods, addPigMood, MOOD_OPTIONS } from '../../services/pig-moods.service';
-import { getPigWeights } from '../../services/pig-weights.service';
 import {
-  getPigRecurringTasks,
-} from '../../services/recurring-tasks.service';
+  getPigMoods,
+  addPigMood,
+  MOOD_OPTIONS,
+} from '../../services/pig-moods.service';
+import { getPigWeights } from '../../services/pig-weights.service';
+import { getPigRecurringTasks } from '../../services/recurring-tasks.service';
 import {
   compressImage,
   uploadPigImage,
@@ -47,7 +49,12 @@ import {
 } from '../../services/pig-tags.service';
 import type { TagDefinition } from '../../services/pig-tags.service';
 
-import type { Pig, WeightRecord, MoodRecord, PigRecurringTask } from '../../services/pigs.types';
+import type {
+  Pig,
+  WeightRecord,
+  MoodRecord,
+  PigRecurringTask,
+} from '../../services/pigs.types';
 
 const PIG_QUOTES = [
   'Wheek wheek! 🐹',
@@ -108,7 +115,9 @@ const PigPage = () => {
 
   const [showMoodModal, setShowMoodModal] = useState(false);
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
-  const [sightingStep, setSightingStep] = useState<'confirm' | 'mood' | 'logged'>('confirm');
+  const [sightingStep, setSightingStep] = useState<
+    'confirm' | 'mood' | 'logged'
+  >('confirm');
   const [updating, setUpdating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiOrigin, setConfettiOrigin] = useState<
@@ -129,7 +138,12 @@ const PigPage = () => {
 
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 2500);
-      setSightingStep(FEATURE_MOOD ? 'mood' : 'logged');
+      if (FEATURE_MOOD) {
+        setSightingStep('mood');
+      } else {
+        setSightingStep('logged');
+        setTimeout(() => closeSightingModal(), 800);
+      }
     } catch (err) {
       console.error('Failed to save sighting:', err);
     } finally {
@@ -583,8 +597,8 @@ const PigPage = () => {
           <>
             <p>Mark {pig.name} as seen?</p>
             <div className="confirmActions">
-              <Button onClick={closeSightingModal}>Cancel</Button>
-              <Button onClick={handleConfirm} disabled={updating}>
+              <Button variant="danger" onClick={closeSightingModal}>Cancel</Button>
+              <Button variant="success" onClick={handleConfirm} disabled={updating}>
                 {updating ? 'Saving...' : 'Confirm'}
               </Button>
             </div>
@@ -608,7 +622,9 @@ const PigPage = () => {
             </div>
           </>
         ) : (
-          <p className="moodLoggedMessage">Mood logged! ✨</p>
+          <p className="moodLoggedMessage">
+            {FEATURE_MOOD ? 'Mood logged! ✨' : 'Sighting logged! ✨'}
+          </p>
         )}
       </Modal>
 

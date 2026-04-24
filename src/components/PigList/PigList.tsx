@@ -46,7 +46,12 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
       );
 
       setShowConfetti(true);
-      setSightingStep(FEATURE_MOOD ? 'mood' : 'logged');
+      if (FEATURE_MOOD) {
+        setSightingStep('mood');
+      } else {
+        setSightingStep('logged');
+        setTimeout(() => closeModal(), 1200);
+      }
 
       // After confetti plays, fade the card out then re-sort
       setTimeout(() => {
@@ -120,8 +125,8 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
           <>
             <p>Mark {selectedPig?.name} as seen?</p>
             <div className="confirmActions">
-              <Button onClick={closeModal}>Cancel</Button>
-              <Button onClick={handleConfirm} disabled={updating}>
+              <Button variant="danger" onClick={closeModal}>Cancel</Button>
+              <Button variant="success" onClick={handleConfirm} disabled={updating}>
                 {updating ? "Saving..." : "Confirm"}
               </Button>
             </div>
@@ -145,7 +150,7 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
             </div>
           </>
         ) : (
-          <p className="moodLoggedMessage">Mood logged! ✨</p>
+          <p className="moodLoggedMessage">{FEATURE_MOOD ? 'Mood logged! ✨' : 'Sighting logged! ✨'}</p>
         )}
       </Modal>
     </>
