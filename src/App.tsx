@@ -10,6 +10,7 @@ import EmojiButton from './components/ui/EmojiButton/EmojiButton';
 import PageTransition from './components/ui/PageTransition/PageTransition';
 import ScrollToTop from './components/ui/ScrollToTop';
 import RollcallOverlay from './components/Rollcall/RollcallOverlay';
+import { FEATURE_MOOD } from './config/features';
 
 import LoginPage from './pages/LoginPage/LoginPage';
 import HomePage from './pages/HomePage/HomePage';
@@ -54,9 +55,11 @@ function App() {
             <EmojiButton onClick={() => setIsRollcallOpen(true)}>
               🍎
             </EmojiButton>
-            <Link to="/moods">
-              <EmojiButton>🧠</EmojiButton>
-            </Link>
+            {FEATURE_MOOD && (
+              <Link to="/moods">
+                <EmojiButton>🧠</EmojiButton>
+              </Link>
+            )}
           </div>
         </div>
         <EmojiButton onClick={handleLogout}>🪵</EmojiButton>
@@ -112,14 +115,16 @@ function App() {
               </PageTransition>
             }
           />
-          <Route
-            path="/moods"
-            element={
-              <PageTransition>
-                <MoodPage />
-              </PageTransition>
-            }
-          />
+          {FEATURE_MOOD && (
+            <Route
+              path="/moods"
+              element={
+                <PageTransition>
+                  <MoodPage />
+                </PageTransition>
+              }
+            />
+          )}
         </Routes>
       </AnimatePresence>
       <RollcallOverlay

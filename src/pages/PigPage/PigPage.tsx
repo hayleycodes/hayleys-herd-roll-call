@@ -26,6 +26,7 @@ import {
 } from '../../services/pig-images.service';
 import { usePigImage } from '../../hooks/usePigImage';
 import { getPigColorClass } from '../../constants/colors';
+import { FEATURE_MOOD } from '../../config/features';
 
 import {
   savePigImage,
@@ -128,7 +129,7 @@ const PigPage = () => {
 
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 2500);
-      setSightingStep('mood');
+      setSightingStep(FEATURE_MOOD ? 'mood' : 'logged');
     } catch (err) {
       console.error('Failed to save sighting:', err);
     } finally {
@@ -345,7 +346,7 @@ const PigPage = () => {
               👀
             </EmojiButton>
           )}
-          {!pig.passed_away && (
+          {!pig.passed_away && FEATURE_MOOD && (
             <EmojiButton
               className="detailMoodButton"
               size="lg"
@@ -611,11 +612,13 @@ const PigPage = () => {
         )}
       </Modal>
 
-      <Modal isOpen={showMoodModal} onClose={() => setShowMoodModal(false)}>
-        <div className="moodModalContent">
-          <MoodPanel pig={pig} moods={moods} setMoods={setMoods} />
-        </div>
-      </Modal>
+      {FEATURE_MOOD && (
+        <Modal isOpen={showMoodModal} onClose={() => setShowMoodModal(false)}>
+          <div className="moodModalContent">
+            <MoodPanel pig={pig} moods={moods} setMoods={setMoods} />
+          </div>
+        </Modal>
+      )}
 
       {lightboxMounted && imageUrl && (
         <div

@@ -6,6 +6,7 @@ import type { Pig } from "../../services/pigs.types";
 import { createPigSighting } from "../../services/pigs.service";
 import { addPigMood, MOOD_OPTIONS } from "../../services/pig-moods.service";
 import "../../components/MoodPanel/MoodPanel.css";
+import { FEATURE_MOOD } from "../../config/features";
 import PassedPigList from "./PassedPigList/PassedPigList";
 import Modal from "../ui/Modal/Modal";
 import Button from "../ui/Button/Button";
@@ -45,7 +46,7 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
       );
 
       setShowConfetti(true);
-      setSightingStep('mood');
+      setSightingStep(FEATURE_MOOD ? 'mood' : 'logged');
 
       // After confetti plays, fade the card out then re-sort
       setTimeout(() => {
