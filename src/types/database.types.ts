@@ -229,6 +229,48 @@ export type Database = {
         }
         Relationships: []
       }
+      social_order: {
+        Row: {
+          created_at: string | null
+          dominant_pig_id: number
+          id: number
+          notes: string | null
+          observed_at: string | null
+          submissive_pig_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          dominant_pig_id: number
+          id?: never
+          notes?: string | null
+          observed_at?: string | null
+          submissive_pig_id: number
+        }
+        Update: {
+          created_at?: string | null
+          dominant_pig_id?: number
+          id?: never
+          notes?: string | null
+          observed_at?: string | null
+          submissive_pig_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_order_dominant_pig_id_fkey"
+            columns: ["dominant_pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_order_submissive_pig_id_fkey"
+            columns: ["submissive_pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tag_definitions: {
         Row: {
           created_at: string | null

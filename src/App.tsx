@@ -15,6 +15,7 @@ import { FEATURE_MOOD } from './config/features';
 import LoginPage from './pages/LoginPage/LoginPage';
 import HomePage from './pages/HomePage/HomePage';
 import PigPage from './pages/PigPage/PigPage';
+import SocialOrderPage from './pages/SocialOrderPage/SocialOrderPage.tsx';
 import FamilyTreePage from './pages/FamilyTreePage/FamilyTreePage.tsx';
 import HealthLogPage from './pages/HealthLogPage/HealthLogPage.tsx';
 import WeightsPage from './pages/WeightsPage/WeightsPage.tsx';
@@ -46,8 +47,14 @@ function App() {
             <img src={hhLogo} alt="Hayley's Herd" className="headerLogo" />
           </Link>
           <div className="headerLinks">
+            <Link to="/tags">
+              <EmojiButton>🏷️</EmojiButton>
+            </Link>
             <Link to="/tree">
               <EmojiButton>🌳</EmojiButton>
+            </Link>
+            <Link to="/social-order">
+              <EmojiButton>👑</EmojiButton>
             </Link>
             <Link to="/health-log">
               <EmojiButton>🏥</EmojiButton>
@@ -88,6 +95,14 @@ function App() {
             element={
               <PageTransition>
                 <FamilyTreePage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/social-order"
+            element={
+              <PageTransition>
+                <SocialOrderPage />
               </PageTransition>
             }
           />

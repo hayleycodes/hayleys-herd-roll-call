@@ -20,10 +20,7 @@ export interface HealthRecord {
   created_at: string;
 }
 
-export type RelationshipType =
-  | 'parent'
-  | 'sibling'
-  | 'foster_sibling';
+export type RelationshipType = 'parent' | 'sibling' | 'foster_sibling';
 
 export interface PigRelationship {
   id: number;
@@ -54,4 +51,19 @@ export interface PigRecurringTask {
   frequency_days_override: number | null;
   last_completed_at: string | null;
   created_at: string;
+}
+
+export interface SocialOrderPig extends Pig {
+  passed_away: string | null;
+}
+
+export interface SocialOrderItem {
+  id: number;
+  dominant_pig_id: number;
+  submissive_pig_id: number;
+  observed_at: string | null;
+  created_at: string | null;
+  notes: string | null;
+  dominant_pig: SocialOrderPig;
+  submissive_pig: SocialOrderPig;
 }

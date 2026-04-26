@@ -1,12 +1,11 @@
 export const PIG_COLOR_CLASSES = [
-  'pig-color-pink',
-  'pig-color-yellow',
+  'pig-color-seafoam',
   'pig-color-lavender',
   'pig-color-mint',
   'pig-color-sky',
-  'pig-color-peach',
+  'pig-color-coral',
   'pig-color-rose',
-  'pig-color-sage',
+  'pig-color-lemon',
 ];
 
 export const PIG_COLOR_SICK = 'pig-color-sick';

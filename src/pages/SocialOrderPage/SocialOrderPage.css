@@ -1,0 +1,66 @@
+.socialOrderPage {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.socialOrderPage h2 {
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* ---- Form ---- */
+
+#newSocialOrderForm {
+  background: white;
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+#newSocialOrderForm p {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-md);
+}
+
+/* ---- List ---- */
+
+.socialOrderList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.socialOrderItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: white;
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+}
+
+.socialOrderPig {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.socialOrderCrown {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.socialOrderArrow {
+  font-size: var(--font-size-xl);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
