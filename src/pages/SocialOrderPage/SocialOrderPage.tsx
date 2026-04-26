@@ -62,6 +62,7 @@ const SocialOrderPage = () => {
     loadSocialOrder();
   }, []);
 
+  if (error) return <p>{error}</p>;
   if (loading) return <Loading />;
 
   return (
