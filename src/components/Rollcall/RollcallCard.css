@@ -6,16 +6,21 @@
 }
 
 .rollcallCardImage {
-  width: 100vw;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   border: 5px solid var(--pig-color, var(--accent-pink));
   background-color: var(--surface-alt);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @media (min-width: 600px) and (max-width: 999px) {
+    height: 50vh;
+  }
+  @media (min-width: 1000px) {
+    height: 80vh;
+  }
 }
 
 .rollcallCardImg {
@@ -93,11 +98,26 @@
   cursor: default;
 }
 
-.rollcallActions {
+.rollcallCardMain {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 32px;
-  margin-top: 8px;
+
+  .rollcallCardImage {
+    order: -1;
+    width: 100%;
+  }
+
+  @media (min-width: 600px) {
+    flex-wrap: nowrap;
+
+    .rollcallCardImage {
+      order: unset;
+      width: unset;
+    }
+  }
 }
 
 .rollcallActionBtn {

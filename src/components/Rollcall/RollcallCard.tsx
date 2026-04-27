@@ -27,21 +27,7 @@ const RollcallCard = ({ pig, onSighted, onSkipped, disabled }: Props) => {
 
   return (
     <div className={`rollcallCard ${pigColorClass}`}>
-      <div className="rollcallCardImage">
-        {imageLoading && <span className="rollcallCardSpin">🐷</span>}
-        {!imageLoading && !imageUrl && (
-          <span className="rollcallCardEmoji">🐹</span>
-        )}
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt={pig.name}
-            className={`rollcallCardImg ${imageReady ? 'ready' : ''}`}
-          />
-        )}
-      </div>
-      <h2 className="rollcallCardName">{pig.name}</h2>
-      <div className="rollcallActions">
+      <div className="rollcallCardMain">
         <EmojiButton
           className="rollcallActionBtn skip"
           size="lg"
@@ -52,6 +38,19 @@ const RollcallCard = ({ pig, onSighted, onSkipped, disabled }: Props) => {
         >
           🤷‍♀️
         </EmojiButton>
+        <div className="rollcallCardImage">
+          {imageLoading && <span className="rollcallCardSpin">🐷</span>}
+          {!imageLoading && !imageUrl && (
+            <span className="rollcallCardEmoji">🐹</span>
+          )}
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt={pig.name}
+              className={`rollcallCardImg ${imageReady ? 'ready' : ''}`}
+            />
+          )}
+        </div>
         <EmojiButton
           className="rollcallActionBtn sighted"
           size="lg"
@@ -63,6 +62,7 @@ const RollcallCard = ({ pig, onSighted, onSkipped, disabled }: Props) => {
           👀
         </EmojiButton>
       </div>
+      <h2 className="rollcallCardName">{pig.name}</h2>
       {FEATURE_MOOD && (
         <div className="rollcallMoods">
           {MOOD_OPTIONS.map((option) => {

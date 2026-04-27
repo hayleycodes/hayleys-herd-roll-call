@@ -36,6 +36,14 @@
   --overlay-bg: rgba(0, 0, 0, 0.4);
 
   /* =========================
+     BREAKPOINTS
+     (CSS custom properties can't be used in @media, so these are reference values)
+     Usage: @media (min-width: 600px)
+  ========================== */
+  /* --breakpoint-tablet: 600px; */
+  /* --breakpoint-desktop: 1000px; */
+
+  /* =========================
      SPACING
   ========================== */
   --spacing-xxs: 2px;
