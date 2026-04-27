@@ -38,7 +38,10 @@ const HomePage = () => {
         const aSick = sickIds.has(a.id) ? 0 : 1;
         const bSick = sickIds.has(b.id) ? 0 : 1;
         if (aSick !== bSick) return aSick - bSick;
-        return new Date(a.last_sighted ?? 0).getTime() - new Date(b.last_sighted ?? 0).getTime();
+        return (
+          new Date(a.last_sighted ?? 0).getTime() -
+          new Date(b.last_sighted ?? 0).getTime()
+        );
       });
 
       setPigs(sorted);
@@ -56,7 +59,6 @@ const HomePage = () => {
     loadPigs();
   }, []);
 
-
   if (loading) {
     return <Loading />;
   }
@@ -70,49 +72,63 @@ const HomePage = () => {
 
   const query = search.toLowerCase().trim();
 
-  const filteredPigs = (filter === 'unseen'
-    ? unseenPigs
-    : filter === 'sick'
-      ? pigs.filter((p) => sickPigIds.has(p.id))
-      : pigs
+  const filteredPigs = (
+    filter === 'unseen'
+      ? unseenPigs
+      : filter === 'sick'
+        ? pigs.filter((p) => sickPigIds.has(p.id))
+        : pigs
   ).filter((p) => !query || p.name.toLowerCase().includes(query));
 
   return (
     <div>
-      {unseenCount > 0 && (
-        <button
-          className={`unseenBanner${filter === 'unseen' ? ' bannerActive' : ''}`}
-          onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
-        >
-          👀 {unseenCount} pig{unseenCount === 1 ? '' : 's'} not sighted today
-        </button>
-      )}
-      {sickPigIds.size > 0 && (
-        <button
-          className={`sickBanner${filter === 'sick' ? ' bannerActive' : ''}`}
-          onClick={() => setFilter(filter === 'sick' ? null : 'sick')}
-        >
-          🤒 {sickPigIds.size} sick pig{sickPigIds.size === 1 ? '' : 's'}
-        </button>
-      )}
-      {careCount > 0 && (
-        <Link to="/health-log" state={{ tab: 'care' }} className="tasksBanner">
-          🏥 {careCount} care item{careCount === 1 ? '' : 's'} due
-        </Link>
-      )}
-      <div className="pigSearchWrapper">
-        <input
-          type="text"
-          className="pigSearch"
-          placeholder="Search pigs..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        {search && (
-          <button className="pigSearchClear" onClick={() => setSearch('')}>✕</button>
+      <div className="homePageFilters">
+        {unseenCount > 0 && (
+          <button
+            className={`homePageFilter unseenBanner${filter === 'unseen' ? ' bannerActive' : ''}`}
+            onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
+          >
+            👀 {unseenCount} pig{unseenCount === 1 ? '' : 's'} not sighted today
+          </button>
         )}
+        {sickPigIds.size > 0 && (
+          <button
+            className={`homePageFilter  sickBanner${filter === 'sick' ? ' bannerActive' : ''}`}
+            onClick={() => setFilter(filter === 'sick' ? null : 'sick')}
+          >
+            🤒 {sickPigIds.size} sick pig{sickPigIds.size === 1 ? '' : 's'}
+          </button>
+        )}
+        {careCount > 0 && (
+          <Link
+            to="/health-log"
+            state={{ tab: 'care' }}
+            className="homePageFilter tasksBanner"
+          >
+            🏥 {careCount} care item{careCount === 1 ? '' : 's'} due
+          </Link>
+        )}
+        <div className="homePageFilter pigSearchWrapper">
+          <input
+            type="text"
+            className="pigSearch"
+            placeholder="Search pigs..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button className="pigSearchClear" onClick={() => setSearch('')}>
+              ✕
+            </button>
+          )}
+        </div>
       </div>
-      <PigList pigs={filteredPigs} passedPigs={filter || query ? [] : passedPigs} setPigs={setPigs} sickPigIds={sickPigIds} />
+      <PigList
+        pigs={filteredPigs}
+        passedPigs={filter || query ? [] : passedPigs}
+        setPigs={setPigs}
+        sickPigIds={sickPigIds}
+      />
     </div>
   );
 };

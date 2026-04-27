@@ -1,10 +1,31 @@
+.homePageFilters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+
+  .homePageFilter {
+    width: 100%;
+    height: 40px;
+  }
+  @media (min-width: 600px) {
+    flex-direction: row;
+    justify-content: space-between;
+    .homePageFilter {
+      flex-grow: 1;
+    }
+  }
+}
+
 .unseenBanner,
-.sickBanner {
-  display: block;
+.sickBanner,
+.tasksBanner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   text-align: center;
   padding: 8px 12px;
-  margin-bottom: 8px;
   border-radius: var(--border-radius-sm);
   background-color: #e63946;
   opacity: 0.6;
@@ -12,6 +33,7 @@
   font-size: 14px;
   font-weight: bold;
   font-family: var(--primary-font);
+  text-decoration: none;
   border: none;
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -28,19 +50,5 @@
 }
 
 .tasksBanner {
-  display: block;
-  text-align: center;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  border-radius: var(--border-radius-sm);
   background-color: var(--primary);
-  opacity: 0.6;
-  color: black;
-  font-size: 14px;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.tasksBanner:hover {
-  opacity: 0.8;
 }
