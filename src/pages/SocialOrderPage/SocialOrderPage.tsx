@@ -4,12 +4,14 @@ import Loading from '../../components/ui/Loading/Loading';
 import type { Pig, SocialOrderItem } from '../../services/pigs.types';
 import {
   createSocialOrderItem,
+  deleteSocialOrderItem,
   getSocialOrder,
 } from '../../services/pig-social-order.service';
 import { getAllPigs } from '../../services/pigs.service';
 import './SocialOrderPage.css';
 import PigPicker from '../../components/PigPicker/PigPicker';
 import Button from '../../components/ui/Button/Button';
+import Modal from '../../components/ui/Modal/Modal';
 
 const SocialOrderPage = () => {
   const [socialOrder, setSocialOrder] = useState<SocialOrderItem[]>([]);
@@ -18,15 +20,24 @@ const SocialOrderPage = () => {
   const [submissivePigId, setSubmissivePigId] = useState<number | ''>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingItem, setDeletingItem] = useState<SocialOrderItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const dominantPigs = useMemo(
-    () => allPigs.filter((p) => p.id !== submissivePigId),
+    () =>
+      allPigs
+        .filter((p) => p.id !== submissivePigId)
+        .sort((a, b) => a.name.localeCompare(b.name)),
     [allPigs, submissivePigId]
   );
 
   const submissivePigs = useMemo(
-    () => allPigs.filter((p) => p.id !== dominantPigId),
+    () =>
+      allPigs
+        .filter((p) => p.id !== dominantPigId)
+        .sort((a, b) => a.name.localeCompare(b.name)),
     [allPigs, dominantPigId]
   );
 
@@ -46,13 +57,35 @@ const SocialOrderPage = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deletingItem) return;
+    try {
+      setDeleting(true);
+      await deleteSocialOrderItem(deletingItem.id);
+      setSocialOrder((prev) => prev.filter((item) => item.id !== deletingItem.id));
+      setDeletingItem(null);
+    } catch {
+      const updatedOrder = await getSocialOrder();
+      setSocialOrder(updatedOrder);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleAddNewSocialOrder = async () => {
     if (!submissivePigId || !dominantPigId) return;
     try {
       setSubmitting(true);
-      await createSocialOrderItem(submissivePigId, dominantPigId);
+      setFormError(null);
+      await createSocialOrderItem(dominantPigId, submissivePigId);
+      setDominantPigId('');
+      setSubmissivePigId('');
+      const updatedOrder = await getSocialOrder();
+      setSocialOrder(updatedOrder);
     } catch (err) {
-      console.error('Failed to add social order item:', err);
+      setFormError(
+        err instanceof Error ? err.message : 'Failed to add social order item'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -83,6 +116,7 @@ const SocialOrderPage = () => {
           onSelect={setSubmissivePigId}
           theme="purple"
         />
+        {formError && <p className="formError">{formError}</p>}
         <Button
           onClick={() => handleAddNewSocialOrder()}
           disabled={submitting || !submissivePigId || !dominantPigId}
@@ -93,17 +127,39 @@ const SocialOrderPage = () => {
       <div className="socialOrderList">
         {socialOrder.map((relationship) => (
           <div className="socialOrderItem" key={relationship.id}>
-            <div className="socialOrderPig">
+            <button
+              className="socialOrderDelete"
+              onClick={() => setDeletingItem(relationship)}
+              aria-label="Delete"
+            >
+              🗑️
+            </button>
+            <div className="socialOrderPig dominant">
               <span className="socialOrderCrown">👑</span>
               <PigCard pig={relationship.dominant_pig} hideLastSeen />
             </div>
             <span className="socialOrderArrow">▸</span>
-            <div className="socialOrderPig">
+            <div className="socialOrderPig submissive">
               <PigCard pig={relationship.submissive_pig} hideLastSeen />
             </div>
           </div>
         ))}
       </div>
+      <Modal isOpen={!!deletingItem} onClose={() => setDeletingItem(null)}>
+        {deletingItem && (
+          <>
+            <p>
+              Remove {deletingItem.dominant_pig.name} → {deletingItem.submissive_pig.name}?
+            </p>
+            <div className="confirmActions">
+              <Button onClick={() => setDeletingItem(null)}>Cancel</Button>
+              <Button onClick={handleDelete} disabled={deleting}>
+                {deleting ? 'Removing...' : 'Remove'}
+              </Button>
+            </div>
+          </>
+        )}
+      </Modal>
     </div>
   );
 };

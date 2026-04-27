@@ -7,7 +7,7 @@ export const getSocialOrder = async (): Promise<SocialOrderItem[]> => {
     .select(
       '*, dominant_pig:pigs!social_order_dominant_pig_id_fkey(*), submissive_pig:pigs!social_order_submissive_pig_id_fkey(*)'
     )
-    .order('observed_at', { ascending: true, nullsFirst: true });
+    .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
 
@@ -41,5 +41,10 @@ export const createSocialOrderItem = async (
     notes: notes ?? null,
     observed_at: observedAt ?? null,
   });
+  if (error) throw new Error(error.message);
+};
+
+export const deleteSocialOrderItem = async (id: number) => {
+  const { error } = await supabase.from('social_order').delete().eq('id', id);
   if (error) throw new Error(error.message);
 };
