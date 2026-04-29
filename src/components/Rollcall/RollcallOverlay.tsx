@@ -51,10 +51,12 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
       const pigs = await getAllPigs();
       const today = new Date().toDateString();
       const unsighted = pigs.filter(
-        (p: Pig) => !p.last_sighted || new Date(p.last_sighted).toDateString() !== today
+        (p: Pig) =>
+          !p.last_sighted || new Date(p.last_sighted).toDateString() !== today
       );
       const alreadySighted = pigs.filter(
-        (p: Pig) => p.last_sighted && new Date(p.last_sighted).toDateString() === today
+        (p: Pig) =>
+          p.last_sighted && new Date(p.last_sighted).toDateString() === today
       );
       setQueue([...unsighted, ...alreadySighted]);
       setCurrentIndex(0);
@@ -70,35 +72,38 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
     onClose();
   }, [onClose]);
 
-  const handleSighted = useCallback(async (moods: string[]) => {
-    const pig = queue[currentIndex];
-    if (!pig || isAnimating) return;
+  const handleSighted = useCallback(
+    async (moods: string[]) => {
+      const pig = queue[currentIndex];
+      if (!pig || isAnimating) return;
 
-    setIsAnimating(true);
-    try {
-      await createPigSighting(pig.id);
-      if (FEATURE_MOOD && moods.length > 0) {
-        await Promise.all(moods.map((mood) => addPigMood(pig.id, mood)));
-      }
-      const newSightedCount = sightedCount + 1;
-      setSightedCount(newSightedCount);
+      setIsAnimating(true);
+      try {
+        await createPigSighting(pig.id);
+        if (FEATURE_MOOD && moods.length > 0) {
+          await Promise.all(moods.map((mood) => addPigMood(pig.id, mood)));
+        }
+        const newSightedCount = sightedCount + 1;
+        setSightedCount(newSightedCount);
 
-      if (newSightedCount === totalCount) {
-        setComplete(true);
-        setShowConfetti(true);
-        setIsAnimating(false);
-        setTimeout(() => handleClose(), 2500);
-      } else {
-        setExitDirection(-1);
-        setTimeout(() => {
-          setCurrentIndex((prev) => prev + 1);
+        if (newSightedCount === totalCount) {
+          setComplete(true);
+          setShowConfetti(true);
           setIsAnimating(false);
-        }, 300);
+          setTimeout(() => handleClose(), 2500);
+        } else {
+          setExitDirection(-1);
+          setTimeout(() => {
+            setCurrentIndex((prev) => prev + 1);
+            setIsAnimating(false);
+          }, 150);
+        }
+      } catch {
+        setIsAnimating(false);
       }
-    } catch {
-      setIsAnimating(false);
-    }
-  }, [queue, currentIndex, isAnimating, sightedCount, totalCount, handleClose]);
+    },
+    [queue, currentIndex, isAnimating, sightedCount, totalCount, handleClose]
+  );
 
   const handleSkipped = useCallback(() => {
     const pig = queue[currentIndex];
@@ -115,7 +120,7 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
     // Just trigger the animation without incrementing
     setExitDirection(1);
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 300);
+    setTimeout(() => setIsAnimating(false), 150);
   }, [queue, currentIndex, isAnimating]);
 
   if (!mounted) return null;
@@ -124,14 +129,17 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
   const pigColorClass = currentPig ? getPigColorClass(currentPig.id) : '';
 
   return (
-    <div
-      className={`rollcallOverlay ${active ? 'open' : ''} ${pigColorClass}`}
-    >
+    <div className={`rollcallOverlay ${active ? 'open' : ''} ${pigColorClass}`}>
       <div className="rollcallHeader">
         <div className="rollcallProgress">
           {sightedCount} / {totalCount} sighted
         </div>
-        <EmojiButton className="rollcallClose" shape="circle" onClick={handleClose} aria-label="Close rollcall">
+        <EmojiButton
+          className="rollcallClose"
+          shape="circle"
+          onClick={handleClose}
+          aria-label="Close rollcall"
+        >
           ✕
         </EmojiButton>
       </div>
@@ -149,7 +157,7 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
               initial={{ x: 200, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: exitDirection * 200, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              transition={{ duration: 0.15, ease: 'easeInOut' }}
             >
               <RollcallCard
                 pig={currentPig}
