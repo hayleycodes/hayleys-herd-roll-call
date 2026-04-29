@@ -1,12 +1,12 @@
-import imageCompression from "browser-image-compression";
-import { supabase } from "../../utils/supabase-client";
+import imageCompression from 'browser-image-compression';
+import { supabase } from '../../utils/supabase-client';
 
 export const compressImage = async (file: File): Promise<File> => {
   const options = {
-    maxSizeMB: 0.15,
-    maxWidthOrHeight: 600,
+    maxSizeMB: 0.25,
+    maxWidthOrHeight: 900,
     useWebWorker: true,
-    fileType: "image/jpeg",
+    fileType: 'image/jpeg',
   };
 
   const compressedFile = await imageCompression(file, options);
@@ -17,9 +17,9 @@ export const uploadPigImage = async (file: File, pigId: number) => {
   const filePath = `${pigId}/${Date.now()}-${file.name}`;
 
   const { error } = await supabase.storage
-    .from("pig_photos")
+    .from('pig_photos')
     .upload(filePath, file, {
-      cacheControl: "3600",
+      cacheControl: '3600',
       upsert: false,
     });
 
@@ -38,7 +38,7 @@ export const getPigImageUrl = async (path: string, skipCache = false) => {
   }
 
   const { data, error } = await supabase.storage
-    .from("pig_photos")
+    .from('pig_photos')
     .createSignedUrl(path, 60 * 60);
 
   if (error) throw error;
