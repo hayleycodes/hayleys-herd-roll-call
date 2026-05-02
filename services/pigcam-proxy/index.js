@@ -10,7 +10,6 @@ console.log(`RTSP URL configured: ${url ? 'yes' : 'no'}`);
 const handler = proxy({
   url,
   transport: 'tcp',
-  additionalFlags: ['-rtsp_transport', 'tcp'],
   ffmpegBinary: '/usr/bin/ffmpeg',
 });
 
