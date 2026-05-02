@@ -11,6 +11,7 @@ const handler = proxy({
   url,
   transport: 'tcp',
   useNativeFFmpeg: true,
+  additionalFlags: ['-vf', 'scale=640:-1', '-r', '15'],
 });
 
 app.ws('/stream', handler);
