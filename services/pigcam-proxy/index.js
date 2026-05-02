@@ -10,7 +10,7 @@ console.log(`RTSP URL configured: ${url ? 'yes' : 'no'}`);
 const handler = proxy({
   url,
   transport: 'tcp',
-  ffmpegBinary: '/usr/bin/ffmpeg',
+  useNativeFFmpeg: true,
 });
 
 app.ws('/stream', handler);
