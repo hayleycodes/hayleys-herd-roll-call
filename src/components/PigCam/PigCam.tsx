@@ -37,7 +37,7 @@ const PigCam = ({ visible }: { visible: boolean }) => {
   return (
     <div className={`pigCam${visible ? '' : ' pigCamHidden'}`}>
       <div ref={containerRef} />
-      <a href="tapo://open" className="pigCamOpen">
+      <a href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.tplink.iot;end" className="pigCamOpen">
         📲
       </a>
       <button className="pigCamRefresh" onClick={connect}>
