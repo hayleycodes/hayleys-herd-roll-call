@@ -16,9 +16,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: auto;
+  width: 60px;
   text-align: center;
-  padding: 8px 12px;
+  padding: 8px 2px;
   border-radius: var(--border-radius-sm);
   background-color: #e63946;
   opacity: 0.6;
