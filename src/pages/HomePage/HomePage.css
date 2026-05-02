@@ -20,24 +20,23 @@
   text-align: center;
   padding: 8px 2px;
   border-radius: var(--border-radius-sm);
-  background-color: #e63946;
-  opacity: 0.6;
+  background-color: rgba(230, 57, 70, 0.6);
+  border: 2px solid #e63946;
   color: black;
   font-size: 14px;
   font-weight: bold;
   font-family: var(--primary-font);
   text-decoration: none;
-  border: none;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
 
 .filterBtn:hover {
-  opacity: 0.8;
+  background-color: rgba(230, 57, 70, 0.8);
 }
 
 .filterBtn.filterBtnActive {
-  opacity: 1;
+  background-color: #e63946;
 }
 
 .homePageFilters button.pigCamToggle {
