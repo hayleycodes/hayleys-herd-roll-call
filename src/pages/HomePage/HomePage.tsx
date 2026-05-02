@@ -7,6 +7,7 @@ import { getAllPigs, getPassedPigs } from '../../services/pigs.service';
 import { getAllCareTasks } from '../../services/recurring-tasks.service';
 import { getAllPigTags } from '../../services/pig-tags.service';
 import type { Pig } from '../../services/pigs.types';
+import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 import Loading from '../../components/ui/Loading/Loading';
 
 const HomePage = () => {
@@ -83,12 +84,13 @@ const HomePage = () => {
     <div>
       <PigCam visible={camVisible} />
       <div className="homePageFilters">
-        <button
-          className="homePageFilter pigCamToggle"
+        <EmojiButton
+          className="pigCamToggle"
           onClick={() => setCamVisible(!camVisible)}
+          size="sm"
         >
           🎥
-        </button>
+        </EmojiButton>
         {unseenCount > 0 && (
           <button
             className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}
