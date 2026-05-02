@@ -19,8 +19,8 @@ const PigCam = ({ visible }: { visible: boolean }) => {
     containerRef.current.innerHTML = '';
     playerRef.current = new JSMpeg.VideoElement(containerRef.current, WS_URL, {
       autoplay: true,
-      videoBufferSize: 128 * 1024,
-      disableWebAssembly: false,
+      videoBufferSize: 512 * 1024,
+      disableWebAssembly: true,
     });
   }, []);
 
