@@ -1,24 +1,33 @@
+.pigCamSticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  background: var(--bg);
+  padding: 0.5rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    padding 0.3s ease;
+}
+
+.pigCamSticky.pigCamHidden {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 .pigCam {
   width: 100%;
   max-width: 675px;
   aspect-ratio: 16 / 9;
-  margin: 0 auto 1rem;
+  margin: 0 auto;
   border-radius: 12px;
   overflow: hidden;
   position: relative;
-  max-height: 50vh;
-  opacity: 1;
-  transition:
-    max-height 0.3s ease,
-    opacity 0.3s ease,
-    margin-bottom 0.3s ease;
   border: var(--border-width) solid var(--primary);
-}
-
-.pigCamHidden {
-  max-height: 0;
-  opacity: 0;
-  margin-bottom: 0;
 }
 
 .pigCamRefresh {
