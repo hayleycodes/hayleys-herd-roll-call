@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import './HomePage.css';
 import PigCam from '../../components/PigCam/PigCam';
@@ -14,15 +13,15 @@ const HomePage = () => {
   const [pigs, setPigs] = useState<Pig[]>([]);
   const [passedPigs, setPassedPigs] = useState<Pig[]>([]);
   const [sickPigIds, setSickPigIds] = useState<Set<number>>(new Set());
-  const [careCount, setCareCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
   const [search, setSearch] = useState('');
+  const [camVisible, setCamVisible] = useState(true);
   const loadPigs = async () => {
     try {
       setLoading(true);
-      const [allPigs, passed, careData, allTags] = await Promise.all([
+      const [allPigs, passed, , allTags] = await Promise.all([
         getAllPigs(),
         getPassedPigs(),
         getAllCareTasks(),
@@ -48,7 +47,6 @@ const HomePage = () => {
       setPigs(sorted);
       setPassedPigs(passed);
       setSickPigIds(sickIds);
-      setCareCount(careData.overdue.length + careData.oneOffs.length);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -83,32 +81,21 @@ const HomePage = () => {
 
   return (
     <div>
-      <PigCam />
+      <PigCam visible={camVisible} />
       <div className="homePageFilters">
+        <button
+          className="homePageFilter pigCamToggle"
+          onClick={() => setCamVisible(!camVisible)}
+        >
+          🎥
+        </button>
         {unseenCount > 0 && (
           <button
             className={`homePageFilter unseenBanner${filter === 'unseen' ? ' bannerActive' : ''}`}
             onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
           >
-            👀 {unseenCount} pig{unseenCount === 1 ? '' : 's'} not sighted today
+            👀 {unseenCount}
           </button>
-        )}
-        {sickPigIds.size > 0 && (
-          <button
-            className={`homePageFilter  sickBanner${filter === 'sick' ? ' bannerActive' : ''}`}
-            onClick={() => setFilter(filter === 'sick' ? null : 'sick')}
-          >
-            🤒 {sickPigIds.size} sick pig{sickPigIds.size === 1 ? '' : 's'}
-          </button>
-        )}
-        {careCount > 0 && (
-          <Link
-            to="/health-log"
-            state={{ tab: 'care' }}
-            className="homePageFilter tasksBanner"
-          >
-            🏥 {careCount} care item{careCount === 1 ? '' : 's'} due
-          </Link>
         )}
         <div className="homePageFilter pigSearchWrapper">
           <input

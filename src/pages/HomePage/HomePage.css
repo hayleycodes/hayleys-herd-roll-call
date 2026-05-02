@@ -1,29 +1,29 @@
 .homePageFilters {
   display: flex;
-  flex-direction: column;
   gap: 8px;
   width: 100%;
 
   .homePageFilter {
-    width: 100%;
     height: 40px;
+    &.pigSearchWrapper {
+      flex-grow: 1;
+    }
   }
-  @media (min-width: 600px) {
+  /* @media (min-width: 600px) {
     flex-direction: row;
     justify-content: space-between;
     .homePageFilter {
       flex-grow: 1;
     }
-  }
+  } */
 }
 
 .unseenBanner,
-.sickBanner,
-.tasksBanner {
+.sickBanner {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: auto;
   text-align: center;
   padding: 8px 12px;
   border-radius: var(--border-radius-sm);
@@ -49,6 +49,13 @@
   opacity: 1;
 }
 
-.tasksBanner {
-  background-color: var(--primary);
+.pigCamToggle {
+  background: var(--primary);
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--border-radius-sm);
 }

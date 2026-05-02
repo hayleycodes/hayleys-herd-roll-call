@@ -1,32 +1,42 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import JSMpeg from '@cycjimmy/jsmpeg-player';
 import './PigCam.css';
 
 const WS_URL = import.meta.env.VITE_PIGCAM_WS_URL || 'ws://localhost:3001/stream';
 
-const PigCam = () => {
+const PigCam = ({ visible }: { visible: boolean }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
 
-  useEffect(() => {
+  const connect = useCallback(() => {
     if (!containerRef.current) return;
 
+    try {
+      playerRef.current?.destroy();
+    } catch {}
+
+    containerRef.current.innerHTML = '';
     playerRef.current = new JSMpeg.VideoElement(containerRef.current, WS_URL, {
       autoplay: true,
-      videoBufferSize: 512 * 1024,
+      videoBufferSize: 128 * 1024,
       disableWebAssembly: false,
     });
+  }, []);
+
+  useEffect(() => {
+    connect();
 
     return () => {
       try {
         playerRef.current?.destroy();
       } catch {}
     };
-  }, []);
+  }, [connect]);
 
   return (
-    <div className="pigCam">
+    <div className={`pigCam${visible ? '' : ' pigCamHidden'}`}>
       <div ref={containerRef} />
+      <button className="pigCamRefresh" onClick={connect}>↻</button>
     </div>
   );
 };
