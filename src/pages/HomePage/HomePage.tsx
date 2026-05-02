@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import './HomePage.css';
+import PigCam from '../../components/PigCam/PigCam';
 import PigList from '../../components/PigList/PigList';
 import { getAllPigs, getPassedPigs } from '../../services/pigs.service';
 import { getAllCareTasks } from '../../services/recurring-tasks.service';
@@ -82,6 +83,7 @@ const HomePage = () => {
 
   return (
     <div>
+      <PigCam />
       <div className="homePageFilters">
         {unseenCount > 0 && (
           <button
