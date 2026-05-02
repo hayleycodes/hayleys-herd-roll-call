@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef } from 'react';
 import JSMpeg from '@cycjimmy/jsmpeg-player';
 import './PigCam.css';
 
-const WS_URL = import.meta.env.VITE_PIGCAM_WS_URL || 'ws://localhost:3001/stream';
+const WS_URL =
+  import.meta.env.VITE_PIGCAM_WS_URL || 'ws://localhost:3001/stream';
 
 const PigCam = ({ visible }: { visible: boolean }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,7 +37,12 @@ const PigCam = ({ visible }: { visible: boolean }) => {
   return (
     <div className={`pigCam${visible ? '' : ' pigCamHidden'}`}>
       <div ref={containerRef} />
-      <button className="pigCamRefresh" onClick={connect}>↻</button>
+      <a href="tapo://open" className="pigCamOpen">
+        📲
+      </a>
+      <button className="pigCamRefresh" onClick={connect}>
+        ↻
+      </button>
     </div>
   );
 };

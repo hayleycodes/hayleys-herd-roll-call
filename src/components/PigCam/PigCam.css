@@ -36,6 +36,22 @@
   z-index: 1;
 }
 
+.pigCamOpen {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 1.1rem;
+  z-index: 1;
+}
+
 .pigCam div,
 .pigCam canvas {
   width: 100% !important;
