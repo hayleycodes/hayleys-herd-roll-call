@@ -91,7 +91,7 @@ const HomePage = () => {
         </button>
         {unseenCount > 0 && (
           <button
-            className={`homePageFilter unseenBanner${filter === 'unseen' ? ' bannerActive' : ''}`}
+            className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}
             onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
           >
             👀 {unseenCount}
