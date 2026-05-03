@@ -19,6 +19,7 @@ const HomePage = () => {
   const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
   const [search, setSearch] = useState('');
   const [camVisible, setCamVisible] = useState(true);
+  const [rotated, setRotated] = useState(false);
   const loadPigs = async () => {
     try {
       setLoading(true);
@@ -81,45 +82,56 @@ const HomePage = () => {
   ).filter((p) => !query || p.name.toLowerCase().includes(query));
 
   return (
-    <div>
-      <PigCam visible={camVisible} />
-      <div className="homePageFilters">
-        <EmojiButton
-          className="pigCamToggle"
-          onClick={() => setCamVisible(!camVisible)}
-          size="sm"
-        >
-          🎥
-        </EmojiButton>
-        {unseenCount > 0 && (
-          <button
-            className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}
-            onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
+    <div className={rotated ? 'homePage rotatedMode' : 'homePage'}>
+      <PigCam visible={rotated || camVisible} />
+      <div className="homePageRight">
+        <div className="homePageFilters">
+          {!rotated && (
+            <EmojiButton
+              className="pigCamToggle"
+              onClick={() => setCamVisible(!camVisible)}
+              size="sm"
+            >
+              🎥
+            </EmojiButton>
+          )}
+          <EmojiButton
+            className="rotateToggle"
+            onClick={() => setRotated(!rotated)}
+            size="sm"
           >
-            👀 {unseenCount}
-          </button>
-        )}
-        <div className="homePageFilter pigSearchWrapper">
-          <input
-            type="text"
-            className="pigSearch"
-            placeholder="Search pigs..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {search && (
-            <button className="pigSearchClear" onClick={() => setSearch('')}>
-              ✕
+            {rotated ? '✕' : '📺'}
+          </EmojiButton>
+          {unseenCount > 0 && (
+            <button
+              className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}
+              onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
+            >
+              👀 {unseenCount}
             </button>
           )}
+          <div className="homePageFilter pigSearchWrapper">
+            <input
+              type="text"
+              className="pigSearch"
+              placeholder="Search pigs..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button className="pigSearchClear" onClick={() => setSearch('')}>
+                ✕
+              </button>
+            )}
+          </div>
         </div>
+        <PigList
+          pigs={filteredPigs}
+          passedPigs={filter || query ? [] : passedPigs}
+          setPigs={setPigs}
+          sickPigIds={sickPigIds}
+        />
       </div>
-      <PigList
-        pigs={filteredPigs}
-        passedPigs={filter || query ? [] : passedPigs}
-        setPigs={setPigs}
-        sickPigIds={sickPigIds}
-      />
     </div>
   );
 };

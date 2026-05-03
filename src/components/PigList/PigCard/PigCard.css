@@ -4,6 +4,7 @@
   align-items: center;
   text-align: center;
   position: relative;
+  container-type: inline-size;
   transition:
     opacity 0.5s ease,
     transform 0.5s ease;
@@ -112,6 +113,16 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   word-break: break-word;
+}
+
+@container (max-width: 120px) {
+  .pigCardName {
+    font-size: var(--font-size-sm);
+  }
+  .pigCardLabel {
+    padding: 3px;
+    margin-top: -14px;
+  }
 }
 
 .pigCardRelationship {
