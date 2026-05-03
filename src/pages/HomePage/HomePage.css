@@ -90,10 +90,46 @@
 
 .rotatedMode .homePageRight {
   flex: 1;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.rotatedMode .homePageRightScroll {
   overflow-y: auto;
   height: 100%;
   padding: 8px 8px 8px 0px;
-  transform: translateZ(0);
+}
+
+.rotatedMode .modalOverlay {
+  position: absolute;
+}
+
+.rotatedMode .modalSheet {
+  position: absolute;
+  padding: 12px;
+  container-type: inline-size;
+}
+
+@container (max-width: 300px) {
+  p {
+    font-size: 16px;
+  }
+
+  .confirmActions button {
+    font-size: 0 !important;
+    padding: 8px 12px;
+  }
+
+  .confirmActions .btn--danger::after {
+    content: '❌';
+    font-size: 20px;
+  }
+
+  .confirmActions .btn--success::after {
+    content: '✅';
+    font-size: 20px;
+  }
 }
 
 .rotatedMode .pigList {

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import PigCard from "./PigCard/PigCard";
 import "./PigList.css";
@@ -17,9 +18,10 @@ type PigListProps = {
   passedPigs: Pig[];
   setPigs: React.Dispatch<React.SetStateAction<Pig[]>>;
   sickPigIds?: Set<number>;
+  modalContainer?: RefObject<HTMLDivElement | null>;
 };
 
-const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
+const PigList = ({ pigs, passedPigs, setPigs, sickPigIds, modalContainer }: PigListProps) => {
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
   const [sightingStep, setSightingStep] = useState<'confirm' | 'mood' | 'logged'>('confirm');
   const [updating, setUpdating] = useState(false);
@@ -120,39 +122,44 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds }: PigListProps) => {
 
       <PassedPigList passedPigs={passedPigs} />
 
-      <Modal isOpen={!!selectedPig} onClose={closeModal}>
-        {sightingStep === 'confirm' ? (
-          <>
-            <p>Mark {selectedPig?.name} as seen?</p>
-            <div className="confirmActions">
-              <Button variant="danger" onClick={closeModal}>Cancel</Button>
-              <Button variant="success" onClick={handleConfirm} disabled={updating}>
-                {updating ? "Saving..." : "Confirm"}
-              </Button>
-            </div>
-          </>
-        ) : sightingStep === 'mood' ? (
-          <>
-            <p>How is {selectedPig?.name} feeling?</p>
-            <div className="moodGrid">
-              {MOOD_OPTIONS.map((opt) => (
-                <button
-                  key={opt.mood}
-                  className="moodGridBtn"
-                  onClick={() => handleSightingMood(opt.mood)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            <div className="confirmActions">
-              <Button onClick={closeModal}>Skip</Button>
-            </div>
-          </>
-        ) : (
-          <p className="moodLoggedMessage">{FEATURE_MOOD ? 'Mood logged! ✨' : 'Sighting logged! ✨'}</p>
-        )}
-      </Modal>
+      {(() => {
+        const modal = (
+          <Modal isOpen={!!selectedPig} onClose={closeModal}>
+            {sightingStep === 'confirm' ? (
+              <>
+                <p>Mark {selectedPig?.name} as seen?</p>
+                <div className="confirmActions">
+                  <Button variant="danger" onClick={closeModal}>Cancel</Button>
+                  <Button variant="success" onClick={handleConfirm} disabled={updating}>
+                    {updating ? "Saving..." : "Confirm"}
+                  </Button>
+                </div>
+              </>
+            ) : sightingStep === 'mood' ? (
+              <>
+                <p>How is {selectedPig?.name} feeling?</p>
+                <div className="moodGrid">
+                  {MOOD_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.mood}
+                      className="moodGridBtn"
+                      onClick={() => handleSightingMood(opt.mood)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="confirmActions">
+                  <Button onClick={closeModal}>Skip</Button>
+                </div>
+              </>
+            ) : (
+              <p className="moodLoggedMessage">{FEATURE_MOOD ? 'Mood logged! ✨' : 'Sighting logged! ✨'}</p>
+            )}
+          </Modal>
+        );
+        return modalContainer?.current ? createPortal(modal, modalContainer.current) : modal;
+      })()}
     </>
   );
 };

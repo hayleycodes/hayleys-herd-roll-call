@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import './HomePage.css';
 import PigCam from '../../components/PigCam/PigCam';
@@ -20,6 +20,7 @@ const HomePage = () => {
   const [search, setSearch] = useState('');
   const [camVisible, setCamVisible] = useState(true);
   const [rotated, setRotated] = useState(false);
+  const modalContainerRef = useRef<HTMLDivElement>(null);
   const loadPigs = async () => {
     try {
       setLoading(true);
@@ -85,45 +86,49 @@ const HomePage = () => {
     <div className={rotated ? 'homePage rotatedMode' : 'homePage'}>
       <PigCam visible={rotated || camVisible} rotated={rotated} onRotateToggle={() => setRotated(!rotated)} />
       <div className="homePageRight">
-        <div className="homePageFilters">
-          {!rotated && (
-            <EmojiButton
-              className="pigCamToggle"
-              onClick={() => setCamVisible(!camVisible)}
-              size="sm"
-            >
-              🎥
-            </EmojiButton>
-          )}
-          {unseenCount > 0 && (
-            <button
-              className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}
-              onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
-            >
-              👀 {unseenCount}
-            </button>
-          )}
-          <div className="homePageFilter pigSearchWrapper">
-            <input
-              type="text"
-              className="pigSearch"
-              placeholder="Search pigs..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            {search && (
-              <button className="pigSearchClear" onClick={() => setSearch('')}>
-                ✕
+        <div ref={modalContainerRef} className="homePageModalTarget" />
+        <div className="homePageRightScroll">
+          <div className="homePageFilters">
+            {!rotated && (
+              <EmojiButton
+                className="pigCamToggle"
+                onClick={() => setCamVisible(!camVisible)}
+                size="sm"
+              >
+                🎥
+              </EmojiButton>
+            )}
+            {unseenCount > 0 && (
+              <button
+                className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}
+                onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
+              >
+                👀 {unseenCount}
               </button>
             )}
+            <div className="homePageFilter pigSearchWrapper">
+              <input
+                type="text"
+                className="pigSearch"
+                placeholder="Search pigs..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <button className="pigSearchClear" onClick={() => setSearch('')}>
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
+          <PigList
+            pigs={filteredPigs}
+            passedPigs={filter || query ? [] : passedPigs}
+            setPigs={setPigs}
+            sickPigIds={sickPigIds}
+            modalContainer={modalContainerRef}
+          />
         </div>
-        <PigList
-          pigs={filteredPigs}
-          passedPigs={filter || query ? [] : passedPigs}
-          setPigs={setPigs}
-          sickPigIds={sickPigIds}
-        />
       </div>
     </div>
   );
