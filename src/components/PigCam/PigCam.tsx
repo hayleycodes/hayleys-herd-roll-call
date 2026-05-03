@@ -5,7 +5,13 @@ import './PigCam.css';
 const WS_URL =
   import.meta.env.VITE_PIGCAM_WS_URL || 'ws://localhost:3001/stream';
 
-const PigCam = ({ visible }: { visible: boolean }) => {
+type PigCamProps = {
+  visible: boolean;
+  rotated?: boolean;
+  onRotateToggle?: () => void;
+};
+
+const PigCam = ({ visible, rotated, onRotateToggle }: PigCamProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
 
@@ -38,12 +44,20 @@ const PigCam = ({ visible }: { visible: boolean }) => {
     <div className={`pigCamSticky${visible ? '' : ' pigCamHidden'}`}>
       <div className="pigCam">
         <div ref={containerRef} />
-        <a href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.tplink.iot;end" className="pigCamOpen">
+        <a
+          href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.tplink.iot;end"
+          className="pigCamOpen"
+        >
           📲
         </a>
         <button className="pigCamRefresh" onClick={connect}>
-          ↻
+          🔄
         </button>
+        {onRotateToggle && (
+          <button className="pigCamRotate" onClick={onRotateToggle}>
+            {rotated ? '✕' : '📺'}
+          </button>
+        )}
       </div>
     </div>
   );

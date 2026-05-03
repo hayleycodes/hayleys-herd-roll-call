@@ -83,7 +83,7 @@ const HomePage = () => {
 
   return (
     <div className={rotated ? 'homePage rotatedMode' : 'homePage'}>
-      <PigCam visible={rotated || camVisible} />
+      <PigCam visible={rotated || camVisible} rotated={rotated} onRotateToggle={() => setRotated(!rotated)} />
       <div className="homePageRight">
         <div className="homePageFilters">
           {!rotated && (
@@ -95,13 +95,6 @@ const HomePage = () => {
               🎥
             </EmojiButton>
           )}
-          <EmojiButton
-            className="rotateToggle"
-            onClick={() => setRotated(!rotated)}
-            size="sm"
-          >
-            {rotated ? '✕' : '📺'}
-          </EmojiButton>
           {unseenCount > 0 && (
             <button
               className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}

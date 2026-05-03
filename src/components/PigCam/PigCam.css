@@ -7,16 +7,18 @@
   padding: 0.5rem 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition:
-    max-height 0.3s ease,
-    opacity 0.3s ease,
-    padding 0.3s ease;
+    max-height 0.6s ease,
+    padding 0.6s ease,
+    opacity 0.3s ease;
+  max-height: 500px;
+  overflow: hidden;
 }
 
 .pigCamSticky.pigCamHidden {
   max-height: 0;
-  opacity: 0;
   padding: 0;
-  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .pigCam {
@@ -30,12 +32,11 @@
   border: var(--border-width) solid var(--primary);
 }
 
-.pigCamRefresh {
+.pigCamRefresh,
+.pigCamOpen,
+.pigCamRotate {
   position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+  background: rgba(255, 255, 255, 0.5);
   border: none;
   border-radius: 50%;
   width: 2rem;
@@ -43,22 +44,25 @@
   cursor: pointer;
   font-size: 1.1rem;
   z-index: 1;
-}
-
-.pigCamOpen {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  font-size: 1.1rem;
-  z-index: 1;
+}
+
+.pigCamRefresh {
+  bottom: 0.5rem;
+  right: 0.5rem;
+}
+
+.pigCamOpen {
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.pigCamRotate {
+  bottom: 0.5rem;
+  left: 0.5rem;
 }
 
 .pigCam div,
