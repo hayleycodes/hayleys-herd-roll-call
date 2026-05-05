@@ -91,11 +91,6 @@ header .headerLink {
   align-items: center;
 }
 
-.headerLeft > div {
-  display: flex;
-  align-items: center;
-}
-
 header h1 {
   font-size: var(--font-size-xl);
   margin: 0px;
@@ -125,6 +120,7 @@ h3 {
 
 .headerLinks {
   display: flex;
+  align-items: center;
   gap: var(--spacing-xxs);
 }
 

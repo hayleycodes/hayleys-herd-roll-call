@@ -46,7 +46,7 @@ function App() {
           <Link to="/" className="headerLink">
             <img src={hhLogo} alt="Hayley's Herd" className="headerLogo" />
           </Link>
-          <div className="headerLinks">
+          <nav className="headerLinks" aria-label="Primary">
             <Link to="/tree">
               <EmojiButton>🌳</EmojiButton>
             </Link>
@@ -64,7 +64,7 @@ function App() {
                 <EmojiButton>🧠</EmojiButton>
               </Link>
             )}
-          </div>
+          </nav>
         </div>
         <EmojiButton onClick={handleLogout}>🪵</EmojiButton>
       </header>
