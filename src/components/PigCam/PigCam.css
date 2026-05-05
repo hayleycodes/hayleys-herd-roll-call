@@ -3,7 +3,7 @@
   top: var(--header-height);
   z-index: 10;
   width: calc(100% + 2 * var(--wrapper-padding));
-  margin: 0 calc(-1 * var(--wrapper-padding));
+  margin: -20px calc(-1 * var(--wrapper-padding)) 0;
   padding: 0.5rem var(--wrapper-padding);
   transition:
     max-height 0.6s ease,
