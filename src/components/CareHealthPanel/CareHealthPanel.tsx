@@ -199,7 +199,7 @@ const CareHealthPanel = ({
 
           {!showAddForm ? (
             <div className="careAddToggle">
-              <Button onClick={() => setShowAddForm(true)}>+ Add care task</Button>
+              <Button variant="health" onClick={() => setShowAddForm(true)}>+ Add care task</Button>
             </div>
           ) : (
             <div className="careAddForm">
@@ -243,6 +243,7 @@ const CareHealthPanel = ({
               )}
               <div className="careAddActions">
                 <Button
+                  variant="health"
                   onClick={handleAddTask}
                   disabled={!selectedDefault || ((selectedDefault === '__custom' || selectedDefault === '__oneoff') && !customLabel.trim())}
                 >
@@ -277,7 +278,7 @@ const CareHealthPanel = ({
               className="careInput"
               onKeyDown={(e) => { if (e.key === 'Enter') handleAddWeight(); }}
             />
-            <Button onClick={handleAddWeight} disabled={savingWeight || !weightInput}>
+            <Button variant="health" onClick={handleAddWeight} disabled={savingWeight || !weightInput}>
               {savingWeight ? 'Saving...' : 'Log weight'}
             </Button>
           </div>

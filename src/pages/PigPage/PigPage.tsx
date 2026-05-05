@@ -566,39 +566,47 @@ const PigPage = () => {
         />
       </div>
 
-      <CareHealthPanel
-        pig={pig}
-        health={health}
-        setHealth={setHealth}
-        sick={isSick}
-        recurringTasks={recurringTasks}
-        onRecurringUpdate={async () => {
-          const pigId = Number(id);
-          const updated = await getPigRecurringTasks(pigId);
-          setRecurringTasks(updated);
-        }}
-        latestWeight={latestWeight}
-        onWeightAdded={async () => {
-          const pigId = Number(id);
-          const weights = await getPigWeights(pigId);
-          if (weights.length > 0) setLatestWeight(weights[0]);
-        }}
-      />
+      <div className="pigPageRight">
+        <CareHealthPanel
+          pig={pig}
+          health={health}
+          setHealth={setHealth}
+          sick={isSick}
+          recurringTasks={recurringTasks}
+          onRecurringUpdate={async () => {
+            const pigId = Number(id);
+            const updated = await getPigRecurringTasks(pigId);
+            setRecurringTasks(updated);
+          }}
+          latestWeight={latestWeight}
+          onWeightAdded={async () => {
+            const pigId = Number(id);
+            const weights = await getPigWeights(pigId);
+            if (weights.length > 0) setLatestWeight(weights[0]);
+          }}
+        />
 
-      <FamilyPanel
-        family={family}
-        currentPigId={pig.id}
-        availablePigs={availablePigs}
-        onRefresh={handleFamilyRefresh}
-      />
+        <FamilyPanel
+          family={family}
+          currentPigId={pig.id}
+          availablePigs={availablePigs}
+          onRefresh={handleFamilyRefresh}
+        />
+      </div>
 
       <Modal isOpen={!!selectedPig} onClose={closeSightingModal}>
         {sightingStep === 'confirm' ? (
           <>
             <p>Mark {pig.name} as seen?</p>
             <div className="confirmActions">
-              <Button variant="danger" onClick={closeSightingModal}>Cancel</Button>
-              <Button variant="success" onClick={handleConfirm} disabled={updating}>
+              <Button variant="danger" onClick={closeSightingModal}>
+                Cancel
+              </Button>
+              <Button
+                variant="success"
+                onClick={handleConfirm}
+                disabled={updating}
+              >
                 {updating ? 'Saving...' : 'Confirm'}
               </Button>
             </div>

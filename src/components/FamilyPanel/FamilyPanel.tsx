@@ -133,6 +133,7 @@ const FamilyPanel = ({
             theme="blue"
           />
           <Button
+            variant="family"
             onClick={() => handleAdd(section)}
             disabled={submitting || !selectedPigId}
           >

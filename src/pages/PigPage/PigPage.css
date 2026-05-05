@@ -5,6 +5,22 @@
   flex-direction: column;
   gap: var(--spacing-xs);
   position: relative;
+  @media (min-width: 800px) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.pigPageRight {
+  width: 100%;
+
+  @media (min-width: 800px) {
+    flex-grow: 1;
+    padding-left: var(--spacing-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
 }
 
 .sickMode::before {
@@ -23,6 +39,12 @@
   align-items: center;
   position: relative;
   width: 100%;
+
+  @media (min-width: 800px) {
+    width: 40%;
+    position: sticky;
+    top: var(--spacing-xs);
+  }
 }
 
 .detailEyeButton,
@@ -46,8 +68,38 @@
 .detailCircleWrapper {
   position: relative;
   width: 100%;
+  container-type: inline-size;
   transition: transform 0.1s ease-out;
   will-change: transform;
+  @media (min-width: 800px) {
+    transform: none !important;
+    transition: none;
+    margin-bottom: 0px !important;
+  }
+}
+
+/* Nudge buttons further into the circle as the container grows,
+   so they stay slightly overlapped with the photo at every size. */
+@container (min-width: 450px) {
+  .detailEyeButton {
+    right: 5%;
+    top: 8%;
+  }
+  .detailMoodButton {
+    right: 5%;
+    top: calc(8% + 75px);
+  }
+}
+
+@container (min-width: 650px) {
+  .detailEyeButton {
+    right: 8%;
+    top: 11%;
+  }
+  .detailMoodButton {
+    right: 8%;
+    top: calc(11% + 80px);
+  }
 }
 
 .pigSpeechBubble {

@@ -47,9 +47,6 @@ function App() {
             <img src={hhLogo} alt="Hayley's Herd" className="headerLogo" />
           </Link>
           <div className="headerLinks">
-            <Link to="/tags">
-              <EmojiButton>🏷️</EmojiButton>
-            </Link>
             <Link to="/tree">
               <EmojiButton>🌳</EmojiButton>
             </Link>

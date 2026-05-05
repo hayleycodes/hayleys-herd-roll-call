@@ -38,7 +38,8 @@
 /* Theme buttons and inputs to match panel */
 
 .careScheduleSection .btn--outline,
-.careAddForm .btn--outline {
+.careAddForm .btn--outline,
+.careWeightForm .btn--outline {
   border-color: var(--panel-color, #a0caa2);
 }
 
@@ -119,7 +120,7 @@
 .careWeightForm {
   display: flex;
   gap: var(--spacing-xs);
-  align-items: center;
+  align-items: stretch;
 }
 
 .careWeightForm .careInput {

@@ -5,7 +5,7 @@ type ButtonProps = {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
-  variant?: "default" | "danger" | "success";
+  variant?: "default" | "danger" | "success" | "health" | "family";
   "aria-label"?: string;
 };
 
