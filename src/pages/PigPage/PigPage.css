@@ -43,7 +43,7 @@
   @media (min-width: 800px) {
     width: 40%;
     position: sticky;
-    top: var(--spacing-xs);
+    top: 70px;
   }
 }
 

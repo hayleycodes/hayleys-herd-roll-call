@@ -1,17 +1,19 @@
 .pigCamSticky {
   position: sticky;
-  top: 0;
+  top: var(--header-height);
   z-index: 10;
-  width: 100%;
-  background: var(--bg);
-  padding: 0.5rem 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: calc(100% + 2 * var(--wrapper-padding));
+  margin: 0 calc(-1 * var(--wrapper-padding));
+  padding: 0.5rem var(--wrapper-padding);
   transition:
     max-height 0.6s ease,
     padding 0.6s ease,
     opacity 0.3s ease;
   max-height: 500px;
   overflow: hidden;
+  animation: stickyGlassify linear both;
+  animation-timeline: scroll(root);
+  animation-range: 0 60px;
 }
 
 .pigCamSticky.pigCamHidden {
