@@ -79,10 +79,10 @@
 
 .socialOrderCrown {
   position: absolute;
-  top: -12px;
+  top: -25px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 20px;
+  font-size: 40px;
   z-index: 2;
   pointer-events: none;
 }
