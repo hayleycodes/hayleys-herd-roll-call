@@ -1,12 +1,12 @@
-import { supabase } from "../../utils/supabase-client";
-import type { Pig } from "./pigs.types";
+import { supabase } from '../../utils/supabase-client';
+import type { Pig } from './pigs.types';
 
 export const getAllPigs = async (): Promise<Pig[]> => {
   const { data, error } = await supabase
-    .from("pigs")
-    .select("*")
-    .is("passed_away", null)
-    .order("last_sighted", { ascending: true, nullsFirst: true });
+    .from('pigs')
+    .select('*')
+    .is('passed_away', null)
+    .order('last_sighted', { ascending: true, nullsFirst: true });
 
   if (error) throw new Error(error.message);
 
@@ -15,9 +15,9 @@ export const getAllPigs = async (): Promise<Pig[]> => {
 
 export const getAllPigsIncludingPassed = async (): Promise<Pig[]> => {
   const { data, error } = await supabase
-    .from("pigs")
-    .select("*")
-    .order("name", { ascending: true });
+    .from('pigs')
+    .select('*')
+    .order('name', { ascending: true });
 
   if (error) throw new Error(error.message);
 
@@ -26,41 +26,41 @@ export const getAllPigsIncludingPassed = async (): Promise<Pig[]> => {
 
 export const getPig = async (id: number): Promise<Pig> => {
   const { data, error } = await supabase
-    .from("pigs")
-    .select("*")
-    .eq("id", id)
+    .from('pigs')
+    .select('*')
+    .eq('id', id)
     .single();
 
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Pig not found");
+  if (!data) throw new Error('Pig not found');
 
   return data;
 };
 
 export const updateDescription = async (
   id: number,
-  description: string,
+  description: string
 ): Promise<Pig> => {
   const { data, error } = await supabase
-    .from("pigs")
+    .from('pigs')
     .update({ description })
-    .eq("id", id)
+    .eq('id', id)
     .select()
     .single();
 
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Pig not found");
+  if (!data) throw new Error('Pig not found');
 
   return data;
 };
 
 export const createPigSighting = async (id: number) => {
   const { data, error } = await supabase
-    .from("pigs")
+    .from('pigs')
     .update({
       last_sighted: new Date().toISOString(),
     })
-    .eq("id", id)
+    .eq('id', id)
     .select();
 
   if (error) throw new Error(error.message);
@@ -70,9 +70,9 @@ export const createPigSighting = async (id: number) => {
 
 export const savePigImage = async (pigId: number, imagePath: string) => {
   const { data, error } = await supabase
-    .from("pigs")
+    .from('pigs')
     .update({ image_path: imagePath })
-    .eq("id", pigId)
+    .eq('id', pigId)
     .select()
     .single();
 
@@ -83,9 +83,9 @@ export const savePigImage = async (pigId: number, imagePath: string) => {
 
 export const getPassedPigs = async (): Promise<Pig[]> => {
   const { data, error } = await supabase
-    .from("pigs")
-    .select("*")
-    .not("passed_away", "is", null);
+    .from('pigs')
+    .select('*')
+    .not('passed_away', 'is', null);
 
   if (error) throw new Error(error.message);
 

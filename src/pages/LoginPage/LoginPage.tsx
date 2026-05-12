@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { supabase } from "../../../utils/supabase-client";
-import "./LoginPage.css";
-import Input from "../../components/ui/Input/Input";
-import Button from "../../components/ui/Button/Button";
-import logo from "../../assets/hh.png";
+import { useState } from 'react';
+import { supabase } from '../../../utils/supabase-client';
+import './LoginPage.css';
+import Input from '../../components/ui/Input/Input';
+import Button from '../../components/ui/Button/Button';
+import logo from '../../assets/hh.png';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {

@@ -36,7 +36,10 @@ const PigMoodRow = ({
               src={imageUrl}
               alt={pig.name}
               className="moodRowImage"
-              style={{ opacity: imageReady ? 1 : 0, transition: 'opacity 0.3s ease' }}
+              style={{
+                opacity: imageReady ? 1 : 0,
+                transition: 'opacity 0.3s ease',
+              }}
             />
           ) : (
             <span className="moodRowEmoji">🐹</span>
@@ -45,7 +48,8 @@ const PigMoodRow = ({
         <span className="moodRowName">{pig.name}</span>
         {latestMood && (
           <span className="moodRowLatest">
-            {MOOD_OPTIONS.find((m) => m.mood === latestMood.mood)?.label ?? latestMood.mood}
+            {MOOD_OPTIONS.find((m) => m.mood === latestMood.mood)?.label ??
+              latestMood.mood}
           </span>
         )}
       </div>
@@ -66,7 +70,9 @@ const PigMoodRow = ({
 
 const MoodPage = () => {
   const [pigs, setPigs] = useState<Pig[]>([]);
-  const [moodsByPig, setMoodsByPig] = useState<Map<number, MoodRecord[]>>(new Map());
+  const [moodsByPig, setMoodsByPig] = useState<Map<number, MoodRecord[]>>(
+    new Map()
+  );
   const [donePigs, setDonePigs] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,7 +136,9 @@ const MoodPage = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
         {search && (
-          <button className="pigSearchClear" onClick={() => setSearch('')}>✕</button>
+          <button className="pigSearchClear" onClick={() => setSearch('')}>
+            ✕
+          </button>
         )}
       </div>
       <div className="moodPageList">

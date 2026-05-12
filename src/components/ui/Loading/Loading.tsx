@@ -1,5 +1,5 @@
-import "./Loading.css";
-import hhLogo from "../../../assets/hh.png";
+import './Loading.css';
+import hhLogo from '../../../assets/hh.png';
 
 const Loading = () => {
   return (

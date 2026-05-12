@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import './WeightPanel.css';
-import { getPigWeights, createPigWeight } from '../../services/pig-weights.service';
+import {
+  getPigWeights,
+  createPigWeight,
+} from '../../services/pig-weights.service';
 import type { Pig, WeightRecord } from '../../services/pigs.types';
 import Panel from '../ui/Panel/Panel';
 import Button from '../ui/Button/Button';

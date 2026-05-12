@@ -1,5 +1,5 @@
-import { supabase } from "../../utils/supabase-client";
-import type { Pig, RelationshipType } from "./pigs.types";
+import { supabase } from '../../utils/supabase-client';
+import type { Pig, RelationshipType } from './pigs.types';
 
 export type PigFamilyMember = {
   pig: Pig;
@@ -17,21 +17,21 @@ export type PigFamilyEdge =
   | {
       pig: Pig;
       relationshipId: number;
-      relationship: "parent";
-      direction: "up" | "down";
+      relationship: 'parent';
+      direction: 'up' | 'down';
     }
   | {
       pig: Pig;
       relationshipId: number;
-      relationship: "sibling" | "foster_sibling";
-      direction: "peer";
+      relationship: 'sibling' | 'foster_sibling';
+      direction: 'peer';
     };
 
 export const getPigFamilyEdges = async (
-  pigId: number,
+  pigId: number
 ): Promise<PigFamilyEdge[]> => {
   const { data, error } = await supabase
-    .from("pig_relationships")
+    .from('pig_relationships')
     .select(
       `
       id,
@@ -40,7 +40,7 @@ export const getPigFamilyEdges = async (
       relationship_type,
       a:pigs!pig_id_a (id, name, description, created_at, dob, last_sighted, image_path, passed_away),
       b:pigs!pig_id_b (id, name, description, created_at, dob, last_sighted, image_path, passed_away)
-    `,
+    `
     )
     .or(`pig_id_a.eq.${pigId},pig_id_b.eq.${pigId}`);
 
@@ -53,24 +53,24 @@ export const getPigFamilyEdges = async (
     if (!other) return [];
 
     switch (r.relationship_type) {
-      case "parent":
+      case 'parent':
         return [
           {
             pig: other,
             relationshipId: r.id,
-            relationship: "parent",
-            direction: isA ? "down" : "up",
+            relationship: 'parent',
+            direction: isA ? 'down' : 'up',
           },
         ];
 
-      case "sibling":
-      case "foster_sibling":
+      case 'sibling':
+      case 'foster_sibling':
         return [
           {
             pig: other,
             relationshipId: r.id,
             relationship: r.relationship_type,
-            direction: "peer",
+            direction: 'peer',
           },
         ];
       default:
@@ -90,21 +90,21 @@ export const getPigFamily = async (pigId: number): Promise<PigFamily> => {
   edges.forEach((edge) => {
     const member = { pig: edge.pig, relationshipId: edge.relationshipId };
 
-    if (edge.relationship === "parent") {
-      if (edge.direction === "up") {
+    if (edge.relationship === 'parent') {
+      if (edge.direction === 'up') {
         parents.push(member);
-      } else if (edge.direction === "down") {
+      } else if (edge.direction === 'down') {
         children.push(member);
       }
       return;
     }
 
-    if (edge.relationship === "sibling") {
+    if (edge.relationship === 'sibling') {
       siblings.push(member);
       return;
     }
 
-    if (edge.relationship === "foster_sibling") {
+    if (edge.relationship === 'foster_sibling') {
       fosterFamily.push(member);
       return;
     }
@@ -121,20 +121,24 @@ export const getPigFamily = async (pigId: number): Promise<PigFamily> => {
 export const createPigRelationship = async (
   pigIdA: number,
   pigIdB: number,
-  relationshipType: RelationshipType,
+  relationshipType: RelationshipType
 ) => {
   const { error } = await supabase
-    .from("pig_relationships")
-    .insert({ pig_id_a: pigIdA, pig_id_b: pigIdB, relationship_type: relationshipType });
+    .from('pig_relationships')
+    .insert({
+      pig_id_a: pigIdA,
+      pig_id_b: pigIdB,
+      relationship_type: relationshipType,
+    });
 
   if (error) throw new Error(error.message);
 };
 
 export const deletePigRelationship = async (id: number) => {
   const { error } = await supabase
-    .from("pig_relationships")
+    .from('pig_relationships')
     .delete()
-    .eq("id", id);
+    .eq('id', id);
 
   if (error) throw new Error(error.message);
 };

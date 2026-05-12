@@ -1,6 +1,6 @@
-import type { Pig } from "../../../services/pigs.types";
-import PigCard from "../PigCard/PigCard";
-import "./PassedPigList.css";
+import type { Pig } from '../../../services/pigs.types';
+import PigCard from '../PigCard/PigCard';
+import './PassedPigList.css';
 
 type PigListProps = {
   passedPigs: Pig[];

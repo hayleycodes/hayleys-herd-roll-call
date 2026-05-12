@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import "./Modal.css";
+import { useEffect, useState } from 'react';
+import './Modal.css';
 
 type ModalProps = {
   isOpen: boolean;
@@ -16,7 +16,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
 
     if (isOpen) {
       setMounted(true);
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
       // A 10ms delay is usually enough to force the browser
       // to paint the 'hidden' state first
       timeout = setTimeout(() => {
@@ -24,7 +24,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
       }, 10);
     } else {
       setActive(false);
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
       timeout = setTimeout(() => {
         setMounted(false);
       }, 300); // Matches your CSS transition time
@@ -32,16 +32,16 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
 
     return () => {
       clearTimeout(timeout);
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     };
   }, [isOpen]);
 
   if (!mounted) return null;
 
   return (
-    <div className={`modalOverlay ${active ? "open" : ""}`} onClick={onClose}>
+    <div className={`modalOverlay ${active ? 'open' : ''}`} onClick={onClose}>
       <div
-        className={`modalSheet ${active ? "open" : ""}`}
+        className={`modalSheet ${active ? 'open' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

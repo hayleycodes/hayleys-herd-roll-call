@@ -22,7 +22,9 @@ const SocialOrderPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [deletingItem, setDeletingItem] = useState<SocialOrderItem | null>(null);
+  const [deletingItem, setDeletingItem] = useState<SocialOrderItem | null>(
+    null
+  );
   const [deleting, setDeleting] = useState(false);
 
   const dominantPigs = useMemo(
@@ -62,7 +64,9 @@ const SocialOrderPage = () => {
     try {
       setDeleting(true);
       await deleteSocialOrderItem(deletingItem.id);
-      setSocialOrder((prev) => prev.filter((item) => item.id !== deletingItem.id));
+      setSocialOrder((prev) =>
+        prev.filter((item) => item.id !== deletingItem.id)
+      );
       setDeletingItem(null);
     } catch {
       const updatedOrder = await getSocialOrder();
@@ -149,7 +153,8 @@ const SocialOrderPage = () => {
         {deletingItem && (
           <>
             <p>
-              Remove {deletingItem.dominant_pig.name} → {deletingItem.submissive_pig.name}?
+              Remove {deletingItem.dominant_pig.name} →{' '}
+              {deletingItem.submissive_pig.name}?
             </p>
             <div className="confirmActions">
               <Button onClick={() => setDeletingItem(null)}>Cancel</Button>

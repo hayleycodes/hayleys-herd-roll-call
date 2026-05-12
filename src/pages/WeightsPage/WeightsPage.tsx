@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './WeightsPage.css';
 import { getAllPigs } from '../../services/pigs.service';
-import { getLatestWeights, createPigWeight } from '../../services/pig-weights.service';
+import {
+  getLatestWeights,
+  createPigWeight,
+} from '../../services/pig-weights.service';
 import { getPigImageUrl } from '../../services/pig-images.service';
 import type { Pig, WeightRecord } from '../../services/pigs.types';
 import Loading from '../../components/ui/Loading/Loading';
@@ -18,13 +21,9 @@ const PigThumbnail = ({ imagePath }: { imagePath: string | null }) => {
     getPigImageUrl(imagePath).then(({ signedUrl }) => setUrl(signedUrl));
   }, [imagePath]);
 
-  if (!url)
-    return <div className="weightThumb weightThumbPlaceholder">🐹</div>;
+  if (!url) return <div className="weightThumb weightThumbPlaceholder">🐹</div>;
   return (
-    <div
-      className="weightThumb"
-      style={{ backgroundImage: `url(${url})` }}
-    />
+    <div className="weightThumb" style={{ backgroundImage: `url(${url})` }} />
   );
 };
 
@@ -105,8 +104,12 @@ const WeightsPage = () => {
                     <PigThumbnail imagePath={pig.image_path} />
                     <div className="weightsCardInfo">
                       <span className="weightsName">{pig.name}</span>
-                      <span className={`weightsValue ${!record ? 'muted' : ''}`}>
-                        {record ? `${record.weight_grams}g` : 'No weight recorded'}
+                      <span
+                        className={`weightsValue ${!record ? 'muted' : ''}`}
+                      >
+                        {record
+                          ? `${record.weight_grams}g`
+                          : 'No weight recorded'}
                       </span>
                     </div>
                   </Link>
@@ -125,7 +128,10 @@ const WeightsPage = () => {
                 {isAdding && (
                   <form
                     className="weightsInlineForm"
-                    onSubmit={(e) => { e.preventDefault(); handleAdd(pig.id); }}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleAdd(pig.id);
+                    }}
                   >
                     <input
                       type="number"

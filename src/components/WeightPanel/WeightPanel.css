@@ -5,7 +5,7 @@
   margin-bottom: var(--spacing-sm);
 }
 
-.weightForm input[type="number"] {
+.weightForm input[type='number'] {
   flex: 1;
   padding: var(--spacing-xs);
   border: 2px solid var(--primary);

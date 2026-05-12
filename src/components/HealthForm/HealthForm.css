@@ -112,7 +112,17 @@
 }
 
 @keyframes formFlash {
-  0% { background-color: #fff; }
-  40% { background-color: color-mix(in srgb, var(--panel-color, #a0caa2) 25%, white); }
-  100% { background-color: #fff; }
+  0% {
+    background-color: #fff;
+  }
+  40% {
+    background-color: color-mix(
+      in srgb,
+      var(--panel-color, #a0caa2) 25%,
+      white
+    );
+  }
+  100% {
+    background-color: #fff;
+  }
 }

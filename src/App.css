@@ -58,7 +58,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: calc(-1 * var(--wrapper-padding)) calc(-1 * var(--wrapper-padding)) 20px;
+  margin: calc(-1 * var(--wrapper-padding)) calc(-1 * var(--wrapper-padding))
+    20px;
   width: calc(100% + 2 * var(--wrapper-padding));
   height: var(--header-height);
   padding: 0 var(--spacing-sm);

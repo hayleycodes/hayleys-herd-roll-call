@@ -84,7 +84,11 @@ const HomePage = () => {
 
   return (
     <div className={rotated ? 'homePage rotatedMode' : 'homePage'}>
-      <PigCam visible={rotated || camVisible} rotated={rotated} onRotateToggle={() => setRotated(!rotated)} />
+      <PigCam
+        visible={rotated || camVisible}
+        rotated={rotated}
+        onRotateToggle={() => setRotated(!rotated)}
+      />
       <div className="homePageRight">
         <div ref={modalContainerRef} className="homePageModalTarget" />
         <div className="homePageRightScroll">
@@ -115,7 +119,10 @@ const HomePage = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
               {search && (
-                <button className="pigSearchClear" onClick={() => setSearch('')}>
+                <button
+                  className="pigSearchClear"
+                  onClick={() => setSearch('')}
+                >
                   ✕
                 </button>
               )}

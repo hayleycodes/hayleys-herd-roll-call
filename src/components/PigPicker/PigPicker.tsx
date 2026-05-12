@@ -98,7 +98,9 @@ const PigPicker = ({
         </button>
       )}
       {dropdownOpen && (
-        <div className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}${alignRight ? '' : ' pigPickerMenu--left'}`}>
+        <div
+          className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}${alignRight ? '' : ' pigPickerMenu--left'}`}
+        >
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
               <button

@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-import type { Pig } from "../../../services/pigs.types";
-import "./PassedPigCard.css";
-import { getPigImageUrl } from "../../../services/pig-images.service";
-import { useEffect, useState } from "react";
+import { Link } from 'react-router-dom';
+import type { Pig } from '../../../services/pigs.types';
+import './PassedPigCard.css';
+import { getPigImageUrl } from '../../../services/pig-images.service';
+import { useEffect, useState } from 'react';
 
 type Props = {
   pig: Pig;

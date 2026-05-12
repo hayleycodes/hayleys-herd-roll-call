@@ -1,17 +1,17 @@
-import { useState, type RefObject } from "react";
-import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
-import PigCard from "./PigCard/PigCard";
-import "./PigList.css";
-import type { Pig } from "../../services/pigs.types";
-import { createPigSighting } from "../../services/pigs.service";
-import { addPigMood, MOOD_OPTIONS } from "../../services/pig-moods.service";
-import "../../components/MoodPanel/MoodPanel.css";
-import { FEATURE_MOOD } from "../../config/features";
-import PassedPigList from "./PassedPigList/PassedPigList";
-import Modal from "../ui/Modal/Modal";
-import Button from "../ui/Button/Button";
-import Confetti from "../ui/Confetti/Confetti";
+import { useState, type RefObject } from 'react';
+import { createPortal } from 'react-dom';
+import { motion } from 'framer-motion';
+import PigCard from './PigCard/PigCard';
+import './PigList.css';
+import type { Pig } from '../../services/pigs.types';
+import { createPigSighting } from '../../services/pigs.service';
+import { addPigMood, MOOD_OPTIONS } from '../../services/pig-moods.service';
+import '../../components/MoodPanel/MoodPanel.css';
+import { FEATURE_MOOD } from '../../config/features';
+import PassedPigList from './PassedPigList/PassedPigList';
+import Modal from '../ui/Modal/Modal';
+import Button from '../ui/Button/Button';
+import Confetti from '../ui/Confetti/Confetti';
 
 type PigListProps = {
   pigs: Pig[];
@@ -21,12 +21,22 @@ type PigListProps = {
   modalContainer?: RefObject<HTMLDivElement | null>;
 };
 
-const PigList = ({ pigs, passedPigs, setPigs, sickPigIds, modalContainer }: PigListProps) => {
+const PigList = ({
+  pigs,
+  passedPigs,
+  setPigs,
+  sickPigIds,
+  modalContainer,
+}: PigListProps) => {
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
-  const [sightingStep, setSightingStep] = useState<'confirm' | 'mood' | 'logged'>('confirm');
+  const [sightingStep, setSightingStep] = useState<
+    'confirm' | 'mood' | 'logged'
+  >('confirm');
   const [updating, setUpdating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [confettiOrigin, setConfettiOrigin] = useState<{ x: number; y: number } | undefined>();
+  const [confettiOrigin, setConfettiOrigin] = useState<
+    { x: number; y: number } | undefined
+  >();
   const [fadingPigId, setFadingPigId] = useState<number | null>(null);
 
   const handleConfirm = async () => {
@@ -42,9 +52,7 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds, modalContainer }: PigL
 
       // Update the timestamp but don't re-sort yet
       setPigs((prev) =>
-        prev.map((p) =>
-          p.id === sightedId ? { ...p, last_sighted: now } : p,
-        ),
+        prev.map((p) => (p.id === sightedId ? { ...p, last_sighted: now } : p))
       );
 
       setShowConfetti(true);
@@ -69,9 +77,11 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds, modalContainer }: PigL
               const bSick = sickPigIds.has(b.id) ? 0 : 1;
               if (aSick !== bSick) return aSick - bSick;
             }
-            return new Date(a.last_sighted ?? 0).getTime() -
-              new Date(b.last_sighted ?? 0).getTime();
-          }),
+            return (
+              new Date(a.last_sighted ?? 0).getTime() -
+              new Date(b.last_sighted ?? 0).getTime()
+            );
+          })
         );
         setShowConfetti(false);
       }, 1800);
@@ -113,8 +123,14 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds, modalContainer }: PigL
               pig={pig}
               fading={pig.id === fadingPigId}
               sick={sickPigIds?.has(pig.id)}
-              notSightedToday={!pig.last_sighted || new Date(pig.last_sighted).toDateString() !== today}
-              onEyeClick={(origin) => { setSelectedPig(pig); setConfettiOrigin(origin); }}
+              notSightedToday={
+                !pig.last_sighted ||
+                new Date(pig.last_sighted).toDateString() !== today
+              }
+              onEyeClick={(origin) => {
+                setSelectedPig(pig);
+                setConfettiOrigin(origin);
+              }}
             />
           </motion.div>
         ))}
@@ -129,9 +145,15 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds, modalContainer }: PigL
               <>
                 <p>Mark {selectedPig?.name} as seen?</p>
                 <div className="confirmActions">
-                  <Button variant="danger" onClick={closeModal}>Cancel</Button>
-                  <Button variant="success" onClick={handleConfirm} disabled={updating}>
-                    {updating ? "Saving..." : "Confirm"}
+                  <Button variant="danger" onClick={closeModal}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="success"
+                    onClick={handleConfirm}
+                    disabled={updating}
+                  >
+                    {updating ? 'Saving...' : 'Confirm'}
                   </Button>
                 </div>
               </>
@@ -154,11 +176,15 @@ const PigList = ({ pigs, passedPigs, setPigs, sickPigIds, modalContainer }: PigL
                 </div>
               </>
             ) : (
-              <p className="moodLoggedMessage">{FEATURE_MOOD ? 'Mood logged! ✨' : 'Sighting logged! ✨'}</p>
+              <p className="moodLoggedMessage">
+                {FEATURE_MOOD ? 'Mood logged! ✨' : 'Sighting logged! ✨'}
+              </p>
             )}
           </Modal>
         );
-        return modalContainer?.current ? createPortal(modal, modalContainer.current) : modal;
+        return modalContainer?.current
+          ? createPortal(modal, modalContainer.current)
+          : modal;
       })()}
     </>
   );

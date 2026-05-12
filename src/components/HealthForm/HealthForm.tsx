@@ -96,7 +96,10 @@ const HealthForm = (props: Props) => {
   };
 
   return (
-    <div className={`healthForm ${isEditing ? 'healthFormEditing' : ''}`} key={editingRecord?.id ?? 'new'}>
+    <div
+      className={`healthForm ${isEditing ? 'healthFormEditing' : ''}`}
+      key={editingRecord?.id ?? 'new'}
+    >
       <textarea
         placeholder="Notes..."
         value={notes}
@@ -133,7 +136,9 @@ const HealthForm = (props: Props) => {
         </div>
       </div>
 
-      {error && <p style={{ color: 'red', margin: 0, fontSize: 12 }}>{error}</p>}
+      {error && (
+        <p style={{ color: 'red', margin: 0, fontSize: 12 }}>{error}</p>
+      )}
       <div className="healthFormButtons">
         {showDropdown && (
           <PigPicker
@@ -144,14 +149,12 @@ const HealthForm = (props: Props) => {
             theme="green"
           />
         )}
-        {isEditing && (
-          <Button onClick={handleCancel}>
-            Cancel
-          </Button>
-        )}
+        {isEditing && <Button onClick={handleCancel}>Cancel</Button>}
         <Button
           onClick={handleSubmit}
-          disabled={submitting || !(isEditing ? editingRecord.pig_id : selectedPigId)}
+          disabled={
+            submitting || !(isEditing ? editingRecord.pig_id : selectedPigId)
+          }
         >
           {submitting ? 'Saving...' : isEditing ? 'Save' : 'Add record'}
         </Button>

@@ -1,9 +1,9 @@
-import "./Input.css";
+import './Input.css';
 
 type InputProps = {
   value: string;
   onChange: (value: string) => void;
-  type?: "text" | "email" | "password";
+  type?: 'text' | 'email' | 'password';
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
@@ -13,7 +13,7 @@ type InputProps = {
 const Input = ({
   value,
   onChange,
-  type = "text",
+  type = 'text',
   placeholder,
   disabled = false,
   required = false,

@@ -30,7 +30,7 @@
   background-position: center;
   background-repeat: no-repeat;
   opacity: 0.95;
- box-shadow: 0 0 8px 8px white inset; 
+  box-shadow: 0 0 8px 8px white inset;
 }
 
 .passedAwayCard a {
@@ -40,7 +40,7 @@
 
 /* --- THE CLOUD SHAPE (PUFFS) --- */
 .passedAwayCard::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 15px;
   background: white;
@@ -60,7 +60,7 @@
 
 /* --- THE SOFT GROUND SHADOW --- */
 .passedAwayCard::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -10px;
   left: 15%;

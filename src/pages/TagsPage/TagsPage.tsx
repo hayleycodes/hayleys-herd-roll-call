@@ -5,7 +5,10 @@ import './TagsPage.css';
 import PigCard from '../../components/PigList/PigCard/PigCard';
 import Loading from '../../components/ui/Loading/Loading';
 import { getAllPigs } from '../../services/pigs.service';
-import { getAllPigTags, getTagDefinitions } from '../../services/pig-tags.service';
+import {
+  getAllPigTags,
+  getTagDefinitions,
+} from '../../services/pig-tags.service';
 import type { TagDefinition } from '../../services/pig-tags.service';
 import type { Pig } from '../../services/pigs.types';
 
@@ -43,7 +46,9 @@ const TagsPage = () => {
     const next = selectedTags.includes(tag)
       ? selectedTags.filter((t) => t !== tag)
       : [...selectedTags, tag];
-    setSearchParams(next.length ? next.map((t) => ['tag', t] as [string, string]) : []);
+    setSearchParams(
+      next.length ? next.map((t) => ['tag', t] as [string, string]) : []
+    );
   };
 
   if (loading) return <Loading />;
@@ -56,12 +61,13 @@ const TagsPage = () => {
   }
   const availableTags = tagDefinitions.filter((d) => usedTags.has(d.tag));
 
-  const filteredPigs = selectedTags.length > 0
-    ? pigs.filter((p) => {
-        const pigTags = tagsByPig.get(p.id) ?? [];
-        return selectedTags.every((t) => pigTags.includes(t));
-      })
-    : [];
+  const filteredPigs =
+    selectedTags.length > 0
+      ? pigs.filter((p) => {
+          const pigTags = tagsByPig.get(p.id) ?? [];
+          return selectedTags.every((t) => pigTags.includes(t));
+        })
+      : [];
 
   return (
     <div className="tagsPage">

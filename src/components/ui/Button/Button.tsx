@@ -1,25 +1,25 @@
-import "./Button.css";
+import './Button.css';
 
 type ButtonProps = {
   children: React.ReactNode;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  type?: "button" | "submit" | "reset";
+  type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
-  variant?: "default" | "danger" | "success" | "health" | "family";
-  "aria-label"?: string;
+  variant?: 'default' | 'danger' | 'success' | 'health' | 'family';
+  'aria-label'?: string;
 };
 
 const Button = ({
   children,
   onClick,
-  type = "button",
+  type = 'button',
   disabled = false,
-  variant = "default",
-  "aria-label": ariaLabel,
+  variant = 'default',
+  'aria-label': ariaLabel,
 }: ButtonProps) => {
   return (
     <button
-      className={`btn btn--outline${variant !== "default" ? ` btn--${variant}` : ""}`}
+      className={`btn btn--outline${variant !== 'default' ? ` btn--${variant}` : ''}`}
       onClick={onClick}
       type={type}
       disabled={disabled}

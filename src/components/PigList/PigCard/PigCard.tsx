@@ -100,7 +100,10 @@ const PigCard = ({
           </div>
         </div>
         <div className="pigCardLabel">
-          <h3 className="pigCardName">{sick && '🤒 '}{pig.name}</h3>
+          <h3 className="pigCardName">
+            {sick && '🤒 '}
+            {pig.name}
+          </h3>
           {relationship && (
             <span className="pigCardRelationship">{relationship}</span>
           )}
