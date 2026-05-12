@@ -1,6 +1,6 @@
-import { differenceInDays } from "date-fns";
-import { supabase } from "../../utils/supabase-client";
-import type { PigRecurringTask } from "./pigs.types";
+import { differenceInDays } from 'date-fns';
+import { supabase } from '../../utils/supabase-client';
+import type { PigRecurringTask } from './pigs.types';
 
 // --- Per-pig recurring tasks ---
 
@@ -8,16 +8,18 @@ export const getPigRecurringTasks = async (
   pigId: number
 ): Promise<PigRecurringTask[]> => {
   const { data, error } = await supabase
-    .from("pig_recurring_tasks")
-    .select("*")
-    .eq("pig_id", pigId)
-    .order("created_at", { ascending: true });
+    .from('pig_recurring_tasks')
+    .select('*')
+    .eq('pig_id', pigId)
+    .order('created_at', { ascending: true });
 
   if (error) throw new Error(error.message);
   return (data as PigRecurringTask[]) ?? [];
 };
 
-type TaskWithPig = PigRecurringTask & { pigs: { name: string; image_path: string | null } };
+type TaskWithPig = PigRecurringTask & {
+  pigs: { name: string; image_path: string | null };
+};
 
 export type OverdueTask = TaskWithPig & {
   days_overdue: number;
@@ -35,8 +37,8 @@ export const getAllCareTasks = async (): Promise<{
   oneOffs: PendingOneOff[];
 }> => {
   const { data, error } = await supabase
-    .from("pig_recurring_tasks")
-    .select("*, pigs(name, image_path)");
+    .from('pig_recurring_tasks')
+    .select('*, pigs(name, image_path)');
 
   if (error) throw new Error(error.message);
   if (!data) return { overdue: [], upcoming: [], oneOffs: [] };
@@ -76,14 +78,14 @@ export const createPigCareTask = async (
 ): Promise<PigRecurringTask> => {
   // Backfill last_completed_at from health records for known types
   let lastCompleted: string | null = null;
-  const healthTypes = ["nail_clip", "haircut", "parasite_treatment"];
+  const healthTypes = ['nail_clip', 'haircut', 'parasite_treatment'];
   if (healthTypes.includes(taskType)) {
     const { data: healthData } = await supabase
-      .from("health_data")
-      .select("created_at")
-      .eq("pig_id", pigId)
+      .from('health_data')
+      .select('created_at')
+      .eq('pig_id', pigId)
       .eq(taskType, true)
-      .order("created_at", { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(1);
 
     if (healthData && healthData.length > 0) {
@@ -92,7 +94,7 @@ export const createPigCareTask = async (
   }
 
   const { data, error } = await supabase
-    .from("pig_recurring_tasks")
+    .from('pig_recurring_tasks')
     .upsert(
       {
         pig_id: pigId,
@@ -101,7 +103,7 @@ export const createPigCareTask = async (
         enabled: true,
         last_completed_at: lastCompleted,
       },
-      { onConflict: "pig_id,task_type" }
+      { onConflict: 'pig_id,task_type' }
     )
     .select()
     .single();
@@ -115,10 +117,10 @@ export const deletePigCareTask = async (
   taskType: string
 ): Promise<void> => {
   const { error } = await supabase
-    .from("pig_recurring_tasks")
+    .from('pig_recurring_tasks')
     .delete()
-    .eq("pig_id", pigId)
-    .eq("task_type", taskType);
+    .eq('pig_id', pigId)
+    .eq('task_type', taskType);
 
   if (error) throw new Error(error.message);
 };
@@ -128,7 +130,7 @@ export const createOneOffTask = async (
   taskType: string
 ): Promise<PigRecurringTask> => {
   const { data, error } = await supabase
-    .from("pig_recurring_tasks")
+    .from('pig_recurring_tasks')
     .insert({
       pig_id: pigId,
       task_type: taskType,
@@ -144,9 +146,9 @@ export const createOneOffTask = async (
 
 export const completeOneOffTask = async (id: number): Promise<void> => {
   const { error } = await supabase
-    .from("pig_recurring_tasks")
+    .from('pig_recurring_tasks')
     .delete()
-    .eq("id", id);
+    .eq('id', id);
 
   if (error) throw new Error(error.message);
 };
@@ -157,17 +159,17 @@ export const markTaskDone = async (
 ): Promise<void> => {
   // Update recurring tasks
   await supabase
-    .from("pig_recurring_tasks")
+    .from('pig_recurring_tasks')
     .update({ last_completed_at: new Date().toISOString() })
-    .eq("pig_id", pigId)
-    .eq("task_type", taskType)
-    .not("frequency_days_override", "is", null);
+    .eq('pig_id', pigId)
+    .eq('task_type', taskType)
+    .not('frequency_days_override', 'is', null);
 
   // Delete matching one-off tasks (they're done)
   await supabase
-    .from("pig_recurring_tasks")
+    .from('pig_recurring_tasks')
     .delete()
-    .eq("pig_id", pigId)
-    .eq("task_type", taskType)
-    .is("frequency_days_override", null);
+    .eq('pig_id', pigId)
+    .eq('task_type', taskType)
+    .is('frequency_days_override', null);
 };

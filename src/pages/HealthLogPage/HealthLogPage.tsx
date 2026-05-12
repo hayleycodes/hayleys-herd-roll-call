@@ -19,9 +19,17 @@ import {
   type PendingOneOff,
 } from '../../services/recurring-tasks.service';
 import { getAllPigs } from '../../services/pigs.service';
-import type { Pig, WeightRecord, HealthRecord } from '../../services/pigs.types';
+import type {
+  Pig,
+  WeightRecord,
+  HealthRecord,
+} from '../../services/pigs.types';
 import { getPigImageUrl } from '../../services/pig-images.service';
-import { getLatestWeights, getAllWeights, createPigWeight } from '../../services/pig-weights.service';
+import {
+  getLatestWeights,
+  getAllWeights,
+  createPigWeight,
+} from '../../services/pig-weights.service';
 import Loading from '../../components/ui/Loading/Loading';
 import Modal from '../../components/ui/Modal/Modal';
 import Panel from '../../components/ui/Panel/Panel';
@@ -52,9 +60,12 @@ const PigThumbnail = ({ imagePath }: { imagePath: string | null }) => {
 
 const HealthLogPage = () => {
   const location = useLocation();
-  const initialTab = (location.state as { tab?: string })?.tab === 'care' ? 'care'
-    : (location.state as { tab?: string })?.tab === 'weight' ? 'weight'
-    : 'notes';
+  const initialTab =
+    (location.state as { tab?: string })?.tab === 'care'
+      ? 'care'
+      : (location.state as { tab?: string })?.tab === 'weight'
+        ? 'weight'
+        : 'notes';
   const [records, setRecords] = useState<HealthLogEntry[]>([]);
   const [pigs, setPigs] = useState<Pig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,16 +75,25 @@ const HealthLogPage = () => {
   const [editingRecord, setEditingRecord] = useState<HealthLogEntry | null>(
     null
   );
-  const [activeTab, setActiveTab] = useState<'notes' | 'weight' | 'care'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'notes' | 'weight' | 'care'>(
+    initialTab
+  );
   const [overdueTasks, setOverdueTasks] = useState<OverdueTask[]>([]);
   const [upcomingTasks, setUpcomingTasks] = useState<UpcomingTask[]>([]);
   const [oneOffTasks, setOneOffTasks] = useState<PendingOneOff[]>([]);
   const [weights, setWeights] = useState<Map<number, WeightRecord>>(new Map());
-  const [allWeights, setAllWeights] = useState<Map<number, WeightRecord[]>>(new Map());
+  const [allWeights, setAllWeights] = useState<Map<number, WeightRecord[]>>(
+    new Map()
+  );
   const [addingPigId, setAddingPigId] = useState<number | null>(null);
   const [gramsInput, setGramsInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [confirmTask, setConfirmTask] = useState<(OverdueTask | UpcomingTask | PendingOneOff) | null>(null);
+  const [confirmTask, setConfirmTask] = useState<
+    (OverdueTask | UpcomingTask | PendingOneOff) | null
+  >(null);
+  const [confirmSkipTask, setConfirmSkipTask] = useState<
+    OverdueTask | UpcomingTask | null
+  >(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -87,13 +107,14 @@ const HealthLogPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [healthData, pigData, weightData, allWeightData, careData] = await Promise.all([
-          loadRecords(0),
-          getAllPigs(),
-          getLatestWeights(),
-          getAllWeights(),
-          getAllCareTasks(),
-        ]);
+        const [healthData, pigData, weightData, allWeightData, careData] =
+          await Promise.all([
+            loadRecords(0),
+            getAllPigs(),
+            getLatestWeights(),
+            getAllWeights(),
+            getAllCareTasks(),
+          ]);
         setRecords(healthData);
         setPigs(pigData.sort((a: Pig, b: Pig) => a.name.localeCompare(b.name)));
         setOverdueTasks(careData.overdue);
@@ -179,7 +200,10 @@ const HealthLogPage = () => {
     return closest?.weight_grams ?? null;
   };
 
-  const KNOWN_HEALTH_FLAGS: Record<string, keyof Pick<HealthRecord, 'nail_clip' | 'haircut' | 'parasite_treatment'>> = {
+  const KNOWN_HEALTH_FLAGS: Record<
+    string,
+    keyof Pick<HealthRecord, 'nail_clip' | 'haircut' | 'parasite_treatment'>
+  > = {
     nail_clip: 'nail_clip',
     haircut: 'haircut',
     parasite_treatment: 'parasite_treatment',
@@ -214,6 +238,16 @@ const HealthLogPage = () => {
     setUpcomingTasks(careData.upcoming);
     setOneOffTasks(careData.oneOffs);
     setConfirmTask(null);
+  };
+
+  const handleConfirmSkip = async () => {
+    if (!confirmSkipTask) return;
+    await markTaskDone(confirmSkipTask.pig_id, confirmSkipTask.task_type);
+    const careData = await getAllCareTasks();
+    setOverdueTasks(careData.overdue);
+    setUpcomingTasks(careData.upcoming);
+    setOneOffTasks(careData.oneOffs);
+    setConfirmSkipTask(null);
   };
 
   const livingPigs = pigs.filter((p) => !p.passed_away);
@@ -289,7 +323,9 @@ const HealthLogPage = () => {
                       to={`/pigs/${record.pig_id}`}
                       className="healthLogCardLink"
                     >
-                      <PigThumbnail imagePath={record.pigs?.image_path ?? null} />
+                      <PigThumbnail
+                        imagePath={record.pigs?.image_path ?? null}
+                      />
 
                       <div className="healthLogCardBody">
                         <div>
@@ -318,7 +354,10 @@ const HealthLogPage = () => {
                             </span>
                           )}
                           {(() => {
-                            const weight = getWeightAtTime(record.pig_id, record.created_at);
+                            const weight = getWeightAtTime(
+                              record.pig_id,
+                              record.created_at
+                            );
                             return weight ? (
                               <span className="healthBadge">⚖️ {weight}g</span>
                             ) : null;
@@ -367,8 +406,12 @@ const HealthLogPage = () => {
                       <PigThumbnail imagePath={pig.image_path} />
                       <div className="weightsCardInfo">
                         <span className="weightsName">{pig.name}</span>
-                        <span className={`weightsValue ${!record ? 'muted' : ''}`}>
-                          {record ? `${record.weight_grams}g` : 'No weight recorded'}
+                        <span
+                          className={`weightsValue ${!record ? 'muted' : ''}`}
+                        >
+                          {record
+                            ? `${record.weight_grams}g`
+                            : 'No weight recorded'}
                         </span>
                       </div>
                     </Link>
@@ -387,7 +430,10 @@ const HealthLogPage = () => {
                   {isAdding && (
                     <form
                       className="weightsInlineForm"
-                      onSubmit={(e) => { e.preventDefault(); handleAddWeight(pig.id); }}
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleAddWeight(pig.id);
+                      }}
                     >
                       <input
                         type="number"
@@ -397,7 +443,10 @@ const HealthLogPage = () => {
                         min="1"
                         autoFocus
                       />
-                      <Button type="submit" disabled={submitting || !gramsInput}>
+                      <Button
+                        type="submit"
+                        disabled={submitting || !gramsInput}
+                      >
                         {submitting ? 'Saving...' : 'Save'}
                       </Button>
                     </form>
@@ -410,9 +459,11 @@ const HealthLogPage = () => {
 
         {activeTab === 'care' && (
           <div className="careTaskList--global">
-            {overdueTasks.length === 0 && upcomingTasks.length === 0 && oneOffTasks.length === 0 && (
-              <p className="careAllCaughtUp">All caught up! 🎉</p>
-            )}
+            {overdueTasks.length === 0 &&
+              upcomingTasks.length === 0 &&
+              oneOffTasks.length === 0 && (
+                <p className="careAllCaughtUp">All caught up! 🎉</p>
+              )}
 
             {overdueTasks.length > 0 && (
               <>
@@ -424,12 +475,15 @@ const HealthLogPage = () => {
                     variant="overdue"
                     badge={
                       <span className="careOverdueBadge">
-                        {task.days_overdue > 0 ? `${task.days_overdue}d overdue` : 'Due now'}
+                        {task.days_overdue > 0
+                          ? `${task.days_overdue}d overdue`
+                          : 'Due now'}
                       </span>
                     }
                     pigName={task.pigs?.name}
                     pigImagePath={task.pigs?.image_path}
                     pigId={task.pig_id}
+                    onSkip={() => setConfirmSkipTask(task)}
                     onDone={() => setConfirmTask(task)}
                   />
                 ))}
@@ -460,10 +514,15 @@ const HealthLogPage = () => {
                   <CareTaskCard
                     key={`upcoming-${task.pig_id}-${task.task_type}`}
                     label={getTaskLabel(task.task_type)}
-                    badge={<span className="careDueBadge">{task.days_left}d left</span>}
+                    badge={
+                      <span className="careDueBadge">
+                        {task.days_left}d left
+                      </span>
+                    }
                     pigName={task.pigs?.name}
                     pigImagePath={task.pigs?.image_path}
                     pigId={task.pig_id}
+                    onSkip={() => setConfirmSkipTask(task)}
                     onDone={() => setConfirmTask(task)}
                   />
                 ))}
@@ -471,21 +530,57 @@ const HealthLogPage = () => {
             )}
 
             <Modal isOpen={!!confirmTask} onClose={() => setConfirmTask(null)}>
-              <p>Mark {confirmTask?.pigs?.name}'s {getTaskLabel(confirmTask?.task_type ?? '').toLowerCase()} as done?</p>
+              <p>
+                Mark {confirmTask?.pigs?.name}'s{' '}
+                {getTaskLabel(confirmTask?.task_type ?? '').toLowerCase()} as
+                done?
+              </p>
               <div className="confirmActions">
-                <button onClick={() => setConfirmTask(null)}>Cancel</button>
-                <button onClick={handleConfirmDone}>Confirm</button>
+                <Button variant="danger" onClick={() => setConfirmTask(null)}>
+                  Cancel
+                </Button>
+                <Button variant="success" onClick={handleConfirmDone}>
+                  Confirm
+                </Button>
+              </div>
+            </Modal>
+
+            <Modal
+              isOpen={!!confirmSkipTask}
+              onClose={() => setConfirmSkipTask(null)}
+            >
+              <p>
+                Skip {confirmSkipTask?.pigs?.name}'s{' '}
+                {getTaskLabel(confirmSkipTask?.task_type ?? '').toLowerCase()}?
+              </p>
+              <div className="confirmActions">
+                <Button
+                  variant="danger"
+                  onClick={() => setConfirmSkipTask(null)}
+                >
+                  Cancel
+                </Button>
+                <Button variant="success" onClick={handleConfirmSkip}>
+                  Confirm
+                </Button>
               </div>
             </Modal>
           </div>
         )}
       </Panel>
 
-      <Modal isOpen={confirmDeleteId !== null} onClose={() => setConfirmDeleteId(null)}>
+      <Modal
+        isOpen={confirmDeleteId !== null}
+        onClose={() => setConfirmDeleteId(null)}
+      >
         <p>Delete this health record?</p>
         <div className="confirmActions">
-          <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
-          <button onClick={handleDelete}>Delete</button>
+          <Button variant="danger" onClick={() => setConfirmDeleteId(null)}>
+            Cancel
+          </Button>
+          <Button variant="success" onClick={handleDelete}>
+            Delete
+          </Button>
         </div>
       </Modal>
     </div>

@@ -10,6 +10,7 @@ interface Props {
   pigName?: string;
   pigImagePath?: string | null;
   pigId?: number;
+  onSkip?: () => void;
   onDone?: () => void;
   variant?: 'default' | 'overdue' | 'oneoff';
 }
@@ -36,10 +37,16 @@ const CareTaskCard = ({
   pigName,
   pigImagePath,
   pigId,
+  onSkip,
   onDone,
   variant = 'default',
 }: Props) => {
-  const variantClass = variant === 'overdue' ? ' careTaskCardOverdue' : variant === 'oneoff' ? ' careTaskCardOneoff' : '';
+  const variantClass =
+    variant === 'overdue'
+      ? ' careTaskCardOverdue'
+      : variant === 'oneoff'
+        ? ' careTaskCardOneoff'
+        : '';
 
   return (
     <div className={`careTaskCard${variantClass}`}>
@@ -54,8 +61,15 @@ const CareTaskCard = ({
         {meta && <span className="careTaskMeta">{meta}</span>}
         {badge}
       </div>
+      {onSkip && (
+        <button className="btn btn--outline" onClick={onSkip}>
+          Skip
+        </button>
+      )}
       {onDone && (
-        <button className="btn btn--outline" onClick={onDone}>Done</button>
+        <button className="btn btn--outline" onClick={onDone}>
+          Done
+        </button>
       )}
     </div>
   );

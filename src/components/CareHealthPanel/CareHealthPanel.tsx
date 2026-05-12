@@ -4,9 +4,14 @@ import './CareHealthPanel.css';
 import Panel from '../ui/Panel/Panel';
 import Button from '../ui/Button/Button';
 import EmojiButton from '../ui/EmojiButton/EmojiButton';
+import Modal from '../ui/Modal/Modal';
 import CareTaskCard from '../CareTaskCard/CareTaskCard';
 import HealthForm from '../HealthForm/HealthForm';
-import { getPigHealth, deletePigHealth, createPigHealth } from '../../services/pig-health.service';
+import {
+  getPigHealth,
+  deletePigHealth,
+  createPigHealth,
+} from '../../services/pig-health.service';
 import { createPigWeight } from '../../services/pig-weights.service';
 import {
   createPigCareTask,
@@ -41,9 +46,13 @@ const CARE_DEFAULTS = [
 const CARE_LABEL_MAP = new Map(CARE_DEFAULTS.map((d) => [d.taskType, d.label]));
 
 const getTaskLabel = (taskType: string): string =>
-  CARE_LABEL_MAP.get(taskType) ?? taskType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  CARE_LABEL_MAP.get(taskType) ??
+  taskType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-const KNOWN_HEALTH_FLAGS: Record<string, keyof Pick<HealthRecord, 'nail_clip' | 'haircut' | 'parasite_treatment'>> = {
+const KNOWN_HEALTH_FLAGS: Record<
+  string,
+  keyof Pick<HealthRecord, 'nail_clip' | 'haircut' | 'parasite_treatment'>
+> = {
   nail_clip: 'nail_clip',
   haircut: 'haircut',
   parasite_treatment: 'parasite_treatment',
@@ -73,6 +82,9 @@ const CareHealthPanel = ({
   const [addFrequency, setAddFrequency] = useState(28);
   const [weightInput, setWeightInput] = useState('');
   const [savingWeight, setSavingWeight] = useState(false);
+  const [confirmSkipTask, setConfirmSkipTask] =
+    useState<PigRecurringTask | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const handleAddWeight = async () => {
     const grams = parseInt(weightInput, 10);
@@ -93,15 +105,17 @@ const CareHealthPanel = ({
     onRecurringUpdate?.();
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this health record?')) return;
-    await deletePigHealth(id);
+  const handleConfirmDelete = async () => {
+    if (confirmDeleteId === null) return;
+    await deletePigHealth(confirmDeleteId);
     const updated = await getPigHealth(pig.id);
     setHealth(updated);
+    setConfirmDeleteId(null);
   };
 
   const handleMarkCareDone = async (task: PigRecurringTask) => {
     const isOneOff = task.frequency_days_override === null;
+
     const healthFlag = KNOWN_HEALTH_FLAGS[task.task_type];
     if (healthFlag) {
       await createPigHealth({
@@ -121,11 +135,24 @@ const CareHealthPanel = ({
     onRecurringUpdate?.();
   };
 
-  const scheduledTasks = recurringTasks.filter((t) => t.frequency_days_override !== null);
-  const oneOffTasks = recurringTasks.filter((t) => t.frequency_days_override === null);
+  const handleConfirmSkip = async () => {
+    if (!confirmSkipTask) return;
+    await markTaskDone(pig.id, confirmSkipTask.task_type);
+    setConfirmSkipTask(null);
+    onRecurringUpdate?.();
+  };
+
+  const scheduledTasks = recurringTasks.filter(
+    (t) => t.frequency_days_override !== null
+  );
+  const oneOffTasks = recurringTasks.filter(
+    (t) => t.frequency_days_override === null
+  );
 
   const existingTypes = new Set(scheduledTasks.map((t) => t.task_type));
-  const availableDefaults = CARE_DEFAULTS.filter((d) => !existingTypes.has(d.taskType));
+  const availableDefaults = CARE_DEFAULTS.filter(
+    (d) => !existingTypes.has(d.taskType)
+  );
 
   const handleAddTask = async () => {
     if (selectedDefault === '__oneoff') {
@@ -152,7 +179,11 @@ const CareHealthPanel = ({
   };
 
   return (
-    <Panel heading="Health & Care 🏥" theme={sick ? 'custom' : 'green'} color={sick ? '#e8a317' : undefined}>
+    <Panel
+      heading="Health & Care 🏥"
+      theme={sick ? 'custom' : 'green'}
+      color={sick ? '#e8a317' : undefined}
+    >
       {/* Care Schedule Section */}
       {!pig.passed_away && (
         <div className="careScheduleSection">
@@ -161,13 +192,19 @@ const CareHealthPanel = ({
             <div className="careTaskList">
               {scheduledTasks.map((task) => {
                 const daysSince = task.last_completed_at
-                  ? differenceInDays(new Date(), new Date(task.last_completed_at))
+                  ? differenceInDays(
+                      new Date(),
+                      new Date(task.last_completed_at)
+                    )
                   : null;
-                const overdue = daysSince !== null
-                  ? daysSince >= task.frequency_days_override!
-                  : true;
+                const overdue =
+                  daysSince !== null
+                    ? daysSince >= task.frequency_days_override!
+                    : true;
                 const badgeText = overdue
-                  ? (daysSince !== null ? `${daysSince - task.frequency_days_override!}d overdue` : 'Due now')
+                  ? daysSince !== null
+                    ? `${daysSince - task.frequency_days_override!}d overdue`
+                    : 'Due now'
                   : `${task.frequency_days_override! - (daysSince ?? 0)}d left`;
 
                 return (
@@ -177,10 +214,15 @@ const CareHealthPanel = ({
                     meta={`${task.last_completed_at ? formatTimeSince(task.last_completed_at) : 'Never done'} · every ${task.frequency_days_override}d`}
                     variant={overdue ? 'overdue' : 'default'}
                     badge={
-                      <span className={overdue ? 'careOverdueBadge' : 'careDueBadge'}>
+                      <span
+                        className={
+                          overdue ? 'careOverdueBadge' : 'careDueBadge'
+                        }
+                      >
                         {badgeText}
                       </span>
                     }
+                    onSkip={() => setConfirmSkipTask(task)}
                     onDone={() => handleMarkCareDone(task)}
                   />
                 );
@@ -199,7 +241,9 @@ const CareHealthPanel = ({
 
           {!showAddForm ? (
             <div className="careAddToggle">
-              <Button variant="health" onClick={() => setShowAddForm(true)}>+ Add care task</Button>
+              <Button variant="health" onClick={() => setShowAddForm(true)}>
+                + Add care task
+              </Button>
             </div>
           ) : (
             <div className="careAddForm">
@@ -207,19 +251,24 @@ const CareHealthPanel = ({
                 value={selectedDefault}
                 onChange={(e) => {
                   setSelectedDefault(e.target.value);
-                  const def = CARE_DEFAULTS.find((d) => d.taskType === e.target.value);
+                  const def = CARE_DEFAULTS.find(
+                    (d) => d.taskType === e.target.value
+                  );
                   if (def) setAddFrequency(def.frequencyDays);
                 }}
                 className="careSelect"
               >
                 <option value="">Select task...</option>
                 {availableDefaults.map((d) => (
-                  <option key={d.taskType} value={d.taskType}>{d.label}</option>
+                  <option key={d.taskType} value={d.taskType}>
+                    {d.label}
+                  </option>
                 ))}
                 <option value="__custom">Custom recurring...</option>
                 <option value="__oneoff">One-off task...</option>
               </select>
-              {(selectedDefault === '__custom' || selectedDefault === '__oneoff') && (
+              {(selectedDefault === '__custom' ||
+                selectedDefault === '__oneoff') && (
                 <input
                   type="text"
                   placeholder="Task name..."
@@ -235,7 +284,9 @@ const CareHealthPanel = ({
                     type="number"
                     min="1"
                     value={addFrequency}
-                    onChange={(e) => setAddFrequency(parseInt(e.target.value, 10) || 1)}
+                    onChange={(e) =>
+                      setAddFrequency(parseInt(e.target.value, 10) || 1)
+                    }
                     className="careFreqInput"
                   />
                   days
@@ -245,11 +296,22 @@ const CareHealthPanel = ({
                 <Button
                   variant="health"
                   onClick={handleAddTask}
-                  disabled={!selectedDefault || ((selectedDefault === '__custom' || selectedDefault === '__oneoff') && !customLabel.trim())}
+                  disabled={
+                    !selectedDefault ||
+                    ((selectedDefault === '__custom' ||
+                      selectedDefault === '__oneoff') &&
+                      !customLabel.trim())
+                  }
                 >
                   Add
                 </Button>
-                <Button onClick={() => { setShowAddForm(false); setSelectedDefault(''); setCustomLabel(''); }}>
+                <Button
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setSelectedDefault('');
+                    setCustomLabel('');
+                  }}
+                >
                   Cancel
                 </Button>
               </div>
@@ -265,7 +327,10 @@ const CareHealthPanel = ({
           {latestWeight && (
             <p className="careWeightLatest">
               Latest: <strong>{latestWeight.weight_grams}g</strong>
-              <span className="muted"> — {formatTimeSince(latestWeight.recorded_at)}</span>
+              <span className="muted">
+                {' '}
+                — {formatTimeSince(latestWeight.recorded_at)}
+              </span>
             </p>
           )}
           <div className="careWeightForm">
@@ -276,9 +341,15 @@ const CareHealthPanel = ({
               value={weightInput}
               onChange={(e) => setWeightInput(e.target.value)}
               className="careInput"
-              onKeyDown={(e) => { if (e.key === 'Enter') handleAddWeight(); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddWeight();
+              }}
             />
-            <Button variant="health" onClick={handleAddWeight} disabled={savingWeight || !weightInput}>
+            <Button
+              variant="health"
+              onClick={handleAddWeight}
+              disabled={savingWeight || !weightInput}
+            >
               {savingWeight ? 'Saving...' : 'Log weight'}
             </Button>
           </div>
@@ -303,7 +374,10 @@ const CareHealthPanel = ({
         ) : (
           <div className="healthCardList">
             {health.map((record) => (
-              <div key={record.id} className={`healthCard ${editingRecord?.id === record.id ? 'healthCardEditing' : ''}`}>
+              <div
+                key={record.id}
+                className={`healthCard ${editingRecord?.id === record.id ? 'healthCardEditing' : ''}`}
+              >
                 <div className="healthCardHeader">
                   {!record.passed_away && (
                     <span className="muted">
@@ -314,15 +388,23 @@ const CareHealthPanel = ({
                   )}
 
                   <div className="healthCardIcons">
-                    {record.nail_clip && <p className="healthBadge">💅 Nail clip</p>}
-                    {record.haircut && <p className="healthBadge">✂️ Haircut</p>}
-                    {record.parasite_treatment && <p className="healthBadge">🐛 Parasite treatment</p>}
+                    {record.nail_clip && (
+                      <p className="healthBadge">💅 Nail clip</p>
+                    )}
+                    {record.haircut && (
+                      <p className="healthBadge">✂️ Haircut</p>
+                    )}
+                    {record.parasite_treatment && (
+                      <p className="healthBadge">🐛 Parasite treatment</p>
+                    )}
                   </div>
                 </div>
 
                 <div>
                   {record.passed_away ? (
-                    <p>💀 {new Date(record.passed_away).toLocaleDateString()}</p>
+                    <p>
+                      💀 {new Date(record.passed_away).toLocaleDateString()}
+                    </p>
                   ) : (
                     record.notes && <p>{record.notes}</p>
                   )}
@@ -340,7 +422,7 @@ const CareHealthPanel = ({
                     <EmojiButton
                       className="healthCardBtn healthCardBtnDelete"
                       size="sm"
-                      onClick={() => handleDelete(record.id)}
+                      onClick={() => setConfirmDeleteId(record.id)}
                     >
                       🗑️
                     </EmojiButton>
@@ -351,6 +433,39 @@ const CareHealthPanel = ({
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={!!confirmSkipTask}
+        onClose={() => setConfirmSkipTask(null)}
+      >
+        <p>
+          Skip {pig.name}'s{' '}
+          {getTaskLabel(confirmSkipTask?.task_type ?? '').toLowerCase()}?
+        </p>
+        <div className="confirmActions">
+          <Button variant="danger" onClick={() => setConfirmSkipTask(null)}>
+            Cancel
+          </Button>
+          <Button variant="success" onClick={handleConfirmSkip}>
+            Confirm
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={confirmDeleteId !== null}
+        onClose={() => setConfirmDeleteId(null)}
+      >
+        <p>Delete this health record?</p>
+        <div className="confirmActions">
+          <Button variant="danger" onClick={() => setConfirmDeleteId(null)}>
+            Cancel
+          </Button>
+          <Button variant="success" onClick={handleConfirmDelete}>
+            Delete
+          </Button>
+        </div>
+      </Modal>
     </Panel>
   );
 };
