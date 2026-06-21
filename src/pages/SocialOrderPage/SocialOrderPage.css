@@ -3,15 +3,138 @@
   margin: 0 auto;
 }
 
-.socialOrderPage h2 {
+/* ---- Tabs ---- */
+
+.socialOrderPage .tabs {
+  margin: calc(0px - var(--spacing-xs)) calc(0px - var(--spacing-xs))
+    var(--spacing-xxs);
+}
+
+.socialOrderPage .tabs button {
+  width: 50%;
+  padding: var(--spacing-xs) 0;
+  background: none;
+  border: none;
+  border-right: 2px solid var(--primary);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  opacity: 0.6;
+}
+
+.socialOrderPage .tabs button:last-child {
+  border-right: none;
+}
+
+.socialOrderPage .tabs button.active {
+  border-bottom-color: var(--primary-dark);
+  opacity: 1;
+  font-weight: var(--font-weight-bold);
+}
+
+/* ---- Pecking order ---- */
+
+.peckingEmpty {
   text-align: center;
-  margin-bottom: var(--spacing-sm);
+}
+
+.peckingList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.peckingRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: color-mix(in srgb, var(--primary) 12%, white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.peckingRow.peckingTop {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.peckingRank {
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-muted);
+}
+
+.peckingTop .peckingRank {
+  font-size: var(--font-size-xl);
+}
+
+.peckingPigCard {
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.peckingRow .peckingPigCard {
+  flex: 1;
+  min-width: 0;
+  max-width: 96px;
+}
+
+.peckingRecord {
+  margin-left: auto;
+  display: flex;
+  gap: var(--spacing-xs);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+}
+
+.peckingWins {
+  color: #2e7d32;
+}
+
+.peckingLosses {
+  color: #c62828;
+}
+
+.peckingTop .peckingWins {
+  color: #7ee787;
+}
+
+.peckingTop .peckingLosses {
+  color: #ff9aa2;
+}
+
+/* ---- Unranked ---- */
+
+.peckingUnranked {
+  margin-top: var(--spacing-lg);
+}
+
+.peckingUnrankedHeading {
+  text-align: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.peckingUnrankedList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  opacity: 0.5;
 }
 
 /* ---- Form ---- */
 
 #newSocialOrderForm {
-  background: white;
+  background: color-mix(in srgb, var(--primary) 12%, white);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
@@ -45,7 +168,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  background: white;
+  background: color-mix(in srgb, var(--primary) 12%, white);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-sm);
 }

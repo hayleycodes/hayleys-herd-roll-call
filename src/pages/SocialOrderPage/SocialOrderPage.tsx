@@ -8,10 +8,12 @@ import {
   getSocialOrder,
 } from '../../services/pig-social-order.service';
 import { getAllPigs } from '../../services/pigs.service';
+import { computePeckingOrder } from '../../services/social-order-ranking';
 import './SocialOrderPage.css';
 import PigPicker from '../../components/PigPicker/PigPicker';
 import Button from '../../components/ui/Button/Button';
 import Modal from '../../components/ui/Modal/Modal';
+import Panel from '../../components/ui/Panel/Panel';
 
 const SocialOrderPage = () => {
   const [socialOrder, setSocialOrder] = useState<SocialOrderItem[]>([]);
@@ -26,6 +28,14 @@ const SocialOrderPage = () => {
     null
   );
   const [deleting, setDeleting] = useState(false);
+  const [activeTab, setActiveTab] = useState<'ranking' | 'observations'>(
+    'ranking'
+  );
+
+  const { ranked, unranked } = useMemo(
+    () => computePeckingOrder(allPigs, socialOrder),
+    [allPigs, socialOrder]
+  );
 
   const dominantPigs = useMemo(
     () =>
@@ -104,51 +114,115 @@ const SocialOrderPage = () => {
 
   return (
     <div className="socialOrderPage">
-      <h2>Social Order</h2>
-      <div id="newSocialOrderForm">
-        <p>Dominant</p>
-        <PigPicker
-          pigs={dominantPigs}
-          selectedPigId={dominantPigId}
-          onSelect={setDominantPigId}
-          theme="purple"
-        />
-        <p>Submissive</p>
-        <PigPicker
-          pigs={submissivePigs}
-          selectedPigId={submissivePigId}
-          onSelect={setSubmissivePigId}
-          theme="purple"
-        />
-        {formError && <p className="formError">{formError}</p>}
-        <Button
-          onClick={() => handleAddNewSocialOrder()}
-          disabled={submitting || !submissivePigId || !dominantPigId}
+      <Panel heading="Social Order 👑" theme="purple">
+      <div className="tabs">
+        <button
+          className={activeTab === 'ranking' ? 'active' : ''}
+          onClick={() => setActiveTab('ranking')}
         >
-          {submitting ? 'Saving...' : 'Add'}
-        </Button>
+          Pecking Order 👑
+        </button>
+        <button
+          className={activeTab === 'observations' ? 'active' : ''}
+          onClick={() => setActiveTab('observations')}
+        >
+          Observations 👀
+        </button>
       </div>
-      <div className="socialOrderList">
-        {socialOrder.map((relationship) => (
-          <div className="socialOrderItem" key={relationship.id}>
-            <button
-              className="socialOrderDelete"
-              onClick={() => setDeletingItem(relationship)}
-              aria-label="Delete"
+
+      {activeTab === 'ranking' && (
+        <div className="peckingOrder">
+          {ranked.length === 0 ? (
+            <p className="muted peckingEmpty">
+              No dominance observations yet. Add some in the Observations tab.
+            </p>
+          ) : (
+            <ol className="peckingList">
+              {ranked.map((entry) => (
+                <li
+                  className={`peckingRow${entry.rank === 1 ? ' peckingTop' : ''}`}
+                  key={entry.pig.id}
+                >
+                  <span className="peckingRank">
+                    {entry.rank === 1 ? '👑' : entry.rank}
+                  </span>
+                  <div className="peckingPigCard">
+                    <PigCard pig={entry.pig} hideLastSeen />
+                  </div>
+                  <span className="peckingRecord">
+                    <span className="peckingWins">▲ {entry.dominates}</span>
+                    <span className="peckingLosses">▼ {entry.yieldsTo}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
+
+          {unranked.length > 0 && (
+            <div className="peckingUnranked">
+              <p className="muted peckingUnrankedHeading">Not ranked yet</p>
+              <div className="peckingUnrankedList">
+                {unranked.map((pig) => (
+                  <div className="peckingPigCard" key={pig.id}>
+                    <PigCard pig={pig} hideLastSeen />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'observations' && (
+        <>
+          <div id="newSocialOrderForm">
+            <p>Dominant</p>
+            <PigPicker
+              pigs={dominantPigs}
+              selectedPigId={dominantPigId}
+              onSelect={setDominantPigId}
+              theme="purple"
+            />
+            <p>Submissive</p>
+            <PigPicker
+              pigs={submissivePigs}
+              selectedPigId={submissivePigId}
+              onSelect={setSubmissivePigId}
+              theme="purple"
+            />
+            {formError && <p className="formError">{formError}</p>}
+            <Button
+              onClick={() => handleAddNewSocialOrder()}
+              disabled={submitting || !submissivePigId || !dominantPigId}
             >
-              🗑️
-            </button>
-            <div className="socialOrderPig dominant">
-              <span className="socialOrderCrown">👑</span>
-              <PigCard pig={relationship.dominant_pig} hideLastSeen />
-            </div>
-            <span className="socialOrderArrow">▸</span>
-            <div className="socialOrderPig submissive">
-              <PigCard pig={relationship.submissive_pig} hideLastSeen />
-            </div>
+              {submitting ? 'Saving...' : 'Add'}
+            </Button>
           </div>
-        ))}
-      </div>
+          <div className="socialOrderList">
+            {socialOrder.map((relationship) => (
+              <div className="socialOrderItem" key={relationship.id}>
+                <button
+                  className="socialOrderDelete"
+                  onClick={() => setDeletingItem(relationship)}
+                  aria-label="Delete"
+                >
+                  🗑️
+                </button>
+                <div className="socialOrderPig dominant">
+                  <span className="socialOrderCrown">👑</span>
+                  <PigCard pig={relationship.dominant_pig} hideLastSeen />
+                </div>
+                <span className="socialOrderArrow">▸</span>
+                <div className="socialOrderPig submissive">
+                  <PigCard pig={relationship.submissive_pig} hideLastSeen />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      </Panel>
+
       <Modal isOpen={!!deletingItem} onClose={() => setDeletingItem(null)}>
         {deletingItem && (
           <>
