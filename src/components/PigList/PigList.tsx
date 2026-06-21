@@ -127,11 +127,11 @@ const PigList = ({
     );
 
     // After the confetti plays, fade the card out then re-sort it to the bottom.
-    setTimeout(() => setFadingPigId(pig.id), 1200);
+    setTimeout(() => setFadingPigId(pig.id), 800);
     setTimeout(() => {
       setFadingPigId(null);
       resortPigs();
-    }, 1800);
+    }, 1200);
 
     if (FEATURE_MOOD) {
       setSightingStep('mood');
