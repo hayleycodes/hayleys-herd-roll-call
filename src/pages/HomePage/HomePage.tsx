@@ -10,7 +10,11 @@ import type { Pig } from '../../services/pigs.types';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 import Loading from '../../components/ui/Loading/Loading';
 
-const HomePage = () => {
+type HomePageProps = {
+  refreshKey?: number;
+};
+
+const HomePage = ({ refreshKey }: HomePageProps) => {
   const [pigs, setPigs] = useState<Pig[]>([]);
   const [passedPigs, setPassedPigs] = useState<Pig[]>([]);
   const [sickPigIds, setSickPigIds] = useState<Set<number>>(new Set());
@@ -59,7 +63,7 @@ const HomePage = () => {
 
   useEffect(() => {
     loadPigs();
-  }, []);
+  }, [refreshKey]);
 
   if (loading) {
     return <Loading />;

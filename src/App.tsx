@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { supabase } from '../utils/supabase-client';
 import { useAuth } from './hooks/useAuth';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
@@ -27,6 +27,16 @@ function App() {
   const { session, loading } = useAuth();
   const location = useLocation();
   const [isRollcallOpen, setIsRollcallOpen] = useState(false);
+  const [homeRefreshKey, setHomeRefreshKey] = useState(0);
+  const sightedDuringRollcall = useRef(false);
+
+  const handleRollcallClose = () => {
+    setIsRollcallOpen(false);
+    if (sightedDuringRollcall.current) {
+      setHomeRefreshKey((k) => k + 1);
+      sightedDuringRollcall.current = false;
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -75,7 +85,7 @@ function App() {
             path="/"
             element={
               <PageTransition>
-                <HomePage />
+                <HomePage refreshKey={homeRefreshKey} />
               </PageTransition>
             }
           />
@@ -141,7 +151,10 @@ function App() {
       </AnimatePresence>
       <RollcallOverlay
         isOpen={isRollcallOpen}
-        onClose={() => setIsRollcallOpen(false)}
+        onClose={handleRollcallClose}
+        onSighted={() => {
+          sightedDuringRollcall.current = true;
+        }}
       />
     </div>
   );

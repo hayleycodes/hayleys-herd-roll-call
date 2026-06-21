@@ -13,9 +13,10 @@ import './RollcallOverlay.css';
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  onSighted?: () => void;
 };
 
-const RollcallOverlay = ({ isOpen, onClose }: Props) => {
+const RollcallOverlay = ({ isOpen, onClose, onSighted }: Props) => {
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(false);
   const [queue, setQueue] = useState<Pig[]>([]);
@@ -80,6 +81,7 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
       setIsAnimating(true);
       try {
         await createPigSighting(pig.id);
+        onSighted?.();
         if (FEATURE_MOOD && moods.length > 0) {
           await Promise.all(moods.map((mood) => addPigMood(pig.id, mood)));
         }
@@ -102,7 +104,15 @@ const RollcallOverlay = ({ isOpen, onClose }: Props) => {
         setIsAnimating(false);
       }
     },
-    [queue, currentIndex, isAnimating, sightedCount, totalCount, handleClose]
+    [
+      queue,
+      currentIndex,
+      isAnimating,
+      sightedCount,
+      totalCount,
+      handleClose,
+      onSighted,
+    ]
   );
 
   const handleSkipped = useCallback(() => {
