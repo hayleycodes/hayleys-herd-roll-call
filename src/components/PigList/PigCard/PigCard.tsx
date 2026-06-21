@@ -16,6 +16,7 @@ type Props = {
   notSightedToday?: boolean;
   hideLastSeen?: boolean;
   sighted?: boolean;
+  highlightUnseen?: boolean;
   onEyeClick?: (origin: { x: number; y: number }) => void;
   onUndoClick?: () => void;
 };
@@ -29,6 +30,7 @@ const PigCard = ({
   notSightedToday,
   hideLastSeen,
   sighted,
+  highlightUnseen,
   onEyeClick,
   onUndoClick,
 }: Props) => {
@@ -79,7 +81,7 @@ const PigCard = ({
               </EmojiButton>
             ) : (
               <EmojiButton
-                className={`eyeButton${eyeUnseen ? ' eyeButtonUnseen' : ''}`}
+                className={`eyeButton${eyeUnseen ? ' eyeButtonUnseen' : ''}${eyeUnseen && highlightUnseen ? ' eyeButtonUnseenActive' : ''}`}
                 size="sm"
                 variant="pig"
                 aria-label={`Mark ${pig.name} as seen`}

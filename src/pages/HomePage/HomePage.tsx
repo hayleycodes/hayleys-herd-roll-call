@@ -133,6 +133,7 @@ const HomePage = () => {
             passedPigs={filter || query ? [] : passedPigs}
             setPigs={setPigs}
             sickPigIds={sickPigIds}
+            unseenFilterActive={filter === 'unseen'}
             modalContainer={modalContainerRef}
           />
         </div>

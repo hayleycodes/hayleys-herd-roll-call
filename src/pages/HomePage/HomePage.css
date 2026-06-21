@@ -20,7 +20,7 @@
   text-align: center;
   padding: 8px 2px;
   border-radius: var(--border-radius-sm);
-  background-color: rgba(230, 57, 70, 0.6);
+  background-color: #fff;
   border: 2px solid #e63946;
   color: black;
   font-size: 14px;
@@ -31,12 +31,17 @@
   transition: opacity 0.2s ease;
 }
 
-.filterBtn:hover {
-  background-color: rgba(230, 57, 70, 0.8);
-}
+/* .filterBtn:hover:not(.filterBtnActive) {
+  background-color: #ffe5e7;
+} */
 
 .filterBtn.filterBtnActive {
-  background-color: #e63946;
+  background-color: #ff6b6b;
+  border-color: #fff;
+}
+
+.filterBtn.filterBtnActive:hover {
+  background-color: #ff6b6b;
 }
 
 .homePageFilters button.pigCamToggle {

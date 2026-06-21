@@ -231,8 +231,12 @@
 }
 
 .eyeButtonUnseen {
+  border-color: #fff;
+}
+
+.eyeButtonUnseenActive {
   background-color: #ff6b6b;
-  border-color: #ff6b6b;
+  border-color: #fff;
 }
 
 .undoButton {
