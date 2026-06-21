@@ -17,6 +17,7 @@ type Props = {
   hideLastSeen?: boolean;
   sighted?: boolean;
   highlightUnseen?: boolean;
+  crowned?: boolean;
   onEyeClick?: (origin: { x: number; y: number }) => void;
   onUndoClick?: () => void;
 };
@@ -31,6 +32,7 @@ const PigCard = ({
   hideLastSeen,
   sighted,
   highlightUnseen,
+  crowned,
   onEyeClick,
   onUndoClick,
 }: Props) => {
@@ -65,6 +67,7 @@ const PigCard = ({
     >
       <Link to={`/pigs/${pig.id}`} className="pigCardLink">
         <div className="pigCardCircleWrapper">
+          {crowned && <span className="pigCardCrown">👑</span>}
           {onEyeClick &&
             (sighted ? (
               <EmojiButton

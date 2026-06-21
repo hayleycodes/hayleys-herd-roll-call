@@ -6,6 +6,7 @@ import PigList from '../../components/PigList/PigList';
 import { getAllPigs, getPassedPigs } from '../../services/pigs.service';
 import { getAllCareTasks } from '../../services/recurring-tasks.service';
 import { getAllPigTags } from '../../services/pig-tags.service';
+import { getTopPigIds } from '../../services/pig-social-order.service';
 import type { Pig } from '../../services/pigs.types';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 import Loading from '../../components/ui/Loading/Loading';
@@ -18,6 +19,7 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
   const [pigs, setPigs] = useState<Pig[]>([]);
   const [passedPigs, setPassedPigs] = useState<Pig[]>([]);
   const [sickPigIds, setSickPigIds] = useState<Set<number>>(new Set());
+  const [topPigIds, setTopPigIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
@@ -28,11 +30,12 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
   const loadPigs = async () => {
     try {
       setLoading(true);
-      const [allPigs, passed, , allTags] = await Promise.all([
+      const [allPigs, passed, , allTags, topIds] = await Promise.all([
         getAllPigs(),
         getPassedPigs(),
         getAllCareTasks(),
         getAllPigTags(),
+        getTopPigIds(),
       ]);
 
       const sickIds = new Set<number>();
@@ -54,6 +57,7 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
       setPigs(sorted);
       setPassedPigs(passed);
       setSickPigIds(sickIds);
+      setTopPigIds(topIds);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -137,6 +141,7 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
             passedPigs={filter || query ? [] : passedPigs}
             setPigs={setPigs}
             sickPigIds={sickPigIds}
+            topPigIds={topPigIds}
             unseenFilterActive={filter === 'unseen'}
             modalContainer={modalContainerRef}
           />

@@ -1,5 +1,7 @@
 import { supabase } from '../../utils/supabase-client';
 import type { SocialOrderItem } from './pigs.types';
+import { getAllPigs } from './pigs.service';
+import { computePeckingOrder } from './social-order-ranking';
 
 export const getSocialOrder = async (): Promise<SocialOrderItem[]> => {
   const { data, error } = await supabase
@@ -47,4 +49,13 @@ export const createSocialOrderItem = async (
 export const deleteSocialOrderItem = async (id: number) => {
   const { error } = await supabase.from('social_order').delete().eq('id', id);
   if (error) throw new Error(error.message);
+};
+
+/** Ids of the herd's top-ranked pig(s) — rank 1 with a positive Copeland score. */
+export const getTopPigIds = async (): Promise<Set<number>> => {
+  const [items, pigs] = await Promise.all([getSocialOrder(), getAllPigs()]);
+  const { ranked } = computePeckingOrder(pigs, items);
+  return new Set(
+    ranked.filter((e) => e.rank === 1 && e.score > 0).map((e) => e.pig.id)
+  );
 };

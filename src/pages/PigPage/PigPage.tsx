@@ -38,6 +38,7 @@ import {
   createPigSighting,
 } from '../../services/pigs.service';
 
+import { getTopPigIds } from '../../services/pig-social-order.service';
 import { getPigFamily } from '../../services/pig-relationships.service';
 import type { PigFamily } from '../../services/pig-relationships.service';
 import {
@@ -104,6 +105,7 @@ const PigPage = () => {
     fosterFamily: [],
   });
   const [allPigs, setAllPigs] = useState<Pig[]>([]);
+  const [isTopPig, setIsTopPig] = useState(false);
 
   const [scrollScale, setScrollScale] = useState(1);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -255,6 +257,7 @@ const PigPage = () => {
           tagDefs,
           moodsData,
           recurringData,
+          topIds,
         ] = await Promise.all([
           getPig(pigId),
           getPigHealth(pigId),
@@ -265,9 +268,11 @@ const PigPage = () => {
           getTagDefinitions(),
           getPigMoods(pigId),
           getPigRecurringTasks(pigId),
+          getTopPigIds(),
         ]);
 
         setPig(pigData);
+        setIsTopPig(topIds.has(pigId));
         setHealth(healthData);
         setFamily(familyData);
         setTags(tagsData);
@@ -343,6 +348,7 @@ const PigPage = () => {
             marginBottom: `${-(1 - scrollScale) * 100}%`,
           }}
         >
+          {isTopPig && <span className="detailCrown">👑</span>}
           {!pig.passed_away && (
             <EmojiButton
               className="eyeButton detailEyeButton"

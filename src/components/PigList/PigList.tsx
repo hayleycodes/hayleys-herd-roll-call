@@ -21,6 +21,7 @@ type PigListProps = {
   passedPigs: Pig[];
   setPigs: React.Dispatch<React.SetStateAction<Pig[]>>;
   sickPigIds?: Set<number>;
+  topPigIds?: Set<number>;
   unseenFilterActive?: boolean;
   modalContainer?: RefObject<HTMLDivElement | null>;
 };
@@ -30,6 +31,7 @@ const PigList = ({
   passedPigs,
   setPigs,
   sickPigIds,
+  topPigIds,
   unseenFilterActive,
   modalContainer,
 }: PigListProps) => {
@@ -197,6 +199,7 @@ const PigList = ({
                 new Date(pig.last_sighted).toDateString() !== today
               }
               sighted={sightedPigs.has(pig.id)}
+              crowned={topPigIds?.has(pig.id)}
               highlightUnseen={unseenFilterActive}
               onEyeClick={(origin) => handleSighting(pig, origin)}
               onUndoClick={() => handleUndo(pig)}
