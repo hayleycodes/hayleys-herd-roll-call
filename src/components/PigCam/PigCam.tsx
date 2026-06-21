@@ -44,18 +44,12 @@ const PigCam = ({ visible, rotated, onRotateToggle }: PigCamProps) => {
     <div className={`pigCamSticky${visible ? '' : ' pigCamHidden'}`}>
       <div className="pigCam">
         <div ref={containerRef} />
-        <a
-          href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.tplink.iot;end"
-          className="pigCamOpen"
-        >
-          📲
-        </a>
         <button className="pigCamRefresh" onClick={connect}>
-          🔄
+            ↻
         </button>
         {onRotateToggle && (
           <button className="pigCamRotate" onClick={onRotateToggle}>
-            {rotated ? '✕' : '📺'}
+            {rotated ? '✕' : '⛶'}
           </button>
         )}
       </div>
