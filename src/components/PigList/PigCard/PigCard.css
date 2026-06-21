@@ -234,3 +234,21 @@
   background-color: #ff6b6b;
   border-color: #ff6b6b;
 }
+
+.undoButton {
+  animation: undoPop 0.25s ease;
+}
+
+@keyframes undoPop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

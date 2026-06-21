@@ -15,7 +15,9 @@ type Props = {
   sick?: boolean;
   notSightedToday?: boolean;
   hideLastSeen?: boolean;
+  sighted?: boolean;
   onEyeClick?: (origin: { x: number; y: number }) => void;
+  onUndoClick?: () => void;
 };
 
 const PigCard = ({
@@ -26,7 +28,9 @@ const PigCard = ({
   sick,
   notSightedToday,
   hideLastSeen,
+  sighted,
   onEyeClick,
+  onUndoClick,
 }: Props) => {
   const { imageUrl, imageLoading, imageReady } = usePigImage(pig.image_path);
   const [wiggling, setWiggling] = useState(false);
@@ -59,23 +63,38 @@ const PigCard = ({
     >
       <Link to={`/pigs/${pig.id}`} className="pigCardLink">
         <div className="pigCardCircleWrapper">
-          {onEyeClick && (
-            <EmojiButton
-              className={`eyeButton${eyeUnseen ? ' eyeButtonUnseen' : ''}`}
-              size="sm"
-              variant="pig"
-              onClick={(e) => {
-                e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                onEyeClick({
-                  x: rect.left + rect.width / 2,
-                  y: rect.top + rect.height / 2,
-                });
-              }}
-            >
-              👀
-            </EmojiButton>
-          )}
+          {onEyeClick &&
+            (sighted ? (
+              <EmojiButton
+                className="eyeButton undoButton"
+                size="sm"
+                variant="pig"
+                aria-label={`Undo sighting for ${pig.name}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onUndoClick?.();
+                }}
+              >
+                ↩️
+              </EmojiButton>
+            ) : (
+              <EmojiButton
+                className={`eyeButton${eyeUnseen ? ' eyeButtonUnseen' : ''}`}
+                size="sm"
+                variant="pig"
+                aria-label={`Mark ${pig.name} as seen`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  onEyeClick({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2,
+                  });
+                }}
+              >
+                👀
+              </EmojiButton>
+            ))}
           {/* {notSightedToday && <span className="pigCardUnseen">👻</span>} */}
           <div
             ref={circleRef}

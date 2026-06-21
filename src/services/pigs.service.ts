@@ -68,6 +68,21 @@ export const createPigSighting = async (id: number) => {
   return data;
 };
 
+export const setPigLastSighted = async (
+  id: number,
+  lastSighted: string | null
+) => {
+  const { data, error } = await supabase
+    .from('pigs')
+    .update({ last_sighted: lastSighted })
+    .eq('id', id)
+    .select();
+
+  if (error) throw new Error(error.message);
+
+  return data;
+};
+
 export const savePigImage = async (pigId: number, imagePath: string) => {
   const { data, error } = await supabase
     .from('pigs')

@@ -1,10 +1,13 @@
-import { useState, type RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import PigCard from './PigCard/PigCard';
 import './PigList.css';
 import type { Pig } from '../../services/pigs.types';
-import { createPigSighting } from '../../services/pigs.service';
+import {
+  createPigSighting,
+  setPigLastSighted,
+} from '../../services/pigs.service';
 import { addPigMood, MOOD_OPTIONS } from '../../services/pig-moods.service';
 import '../../components/MoodPanel/MoodPanel.css';
 import { FEATURE_MOOD } from '../../config/features';
@@ -29,72 +32,130 @@ const PigList = ({
   modalContainer,
 }: PigListProps) => {
   const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
-  const [sightingStep, setSightingStep] = useState<
-    'confirm' | 'mood' | 'logged'
-  >('confirm');
-  const [updating, setUpdating] = useState(false);
+  const [sightingStep, setSightingStep] = useState<'mood' | 'logged'>('mood');
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiOrigin, setConfettiOrigin] = useState<
     { x: number; y: number } | undefined
   >();
   const [fadingPigId, setFadingPigId] = useState<number | null>(null);
+  // Pigs sighted this session, mapped to their previous last_sighted value so
+  // the sighting can be undone.
+  const [sightedPigs, setSightedPigs] = useState<Map<number, string | null>>(
+    new Map()
+  );
+  // Per-pig timers that revert the undo button back to the eye after a minute.
+  const undoTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(
+    new Map()
+  );
 
-  const handleConfirm = async () => {
-    if (!selectedPig) return;
+  // Clear any pending timers on unmount.
+  useEffect(() => {
+    const timers = undoTimers.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
+    };
+  }, []);
 
-    const sightedId = selectedPig.id;
+  const resortPigs = () => {
+    setPigs((prev) =>
+      [...prev].sort((a, b) => {
+        if (sickPigIds) {
+          const aSick = sickPigIds.has(a.id) ? 0 : 1;
+          const bSick = sickPigIds.has(b.id) ? 0 : 1;
+          if (aSick !== bSick) return aSick - bSick;
+        }
+        return (
+          new Date(a.last_sighted ?? 0).getTime() -
+          new Date(b.last_sighted ?? 0).getTime()
+        );
+      })
+    );
+  };
+
+  const clearSighted = (pigId: number) => {
+    const timer = undoTimers.current.get(pigId);
+    if (timer) clearTimeout(timer);
+    undoTimers.current.delete(pigId);
+    setSightedPigs((prev) => {
+      const next = new Map(prev);
+      next.delete(pigId);
+      return next;
+    });
+  };
+
+  const handleSighting = async (
+    pig: Pig,
+    origin: { x: number; y: number }
+  ) => {
     const now = new Date().toISOString();
+    const prevLastSighted = pig.last_sighted ?? null;
+
+    setConfettiOrigin(origin);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 1800);
+
+    setSightedPigs((prev) => new Map(prev).set(pig.id, prevLastSighted));
+    setPigs((prev) =>
+      prev.map((p) => (p.id === pig.id ? { ...p, last_sighted: now } : p))
+    );
 
     try {
-      setUpdating(true);
-
-      await createPigSighting(sightedId);
-
-      // Update the timestamp but don't re-sort yet
-      setPigs((prev) =>
-        prev.map((p) => (p.id === sightedId ? { ...p, last_sighted: now } : p))
-      );
-
-      setShowConfetti(true);
-      if (FEATURE_MOOD) {
-        setSightingStep('mood');
-      } else {
-        setSightingStep('logged');
-        setTimeout(() => closeModal(), 1200);
-      }
-
-      // After confetti plays, fade the card out then re-sort
-      setTimeout(() => {
-        setFadingPigId(sightedId);
-      }, 1200);
-
-      setTimeout(() => {
-        setFadingPigId(null);
-        setPigs((prev) =>
-          [...prev].sort((a, b) => {
-            if (sickPigIds) {
-              const aSick = sickPigIds.has(a.id) ? 0 : 1;
-              const bSick = sickPigIds.has(b.id) ? 0 : 1;
-              if (aSick !== bSick) return aSick - bSick;
-            }
-            return (
-              new Date(a.last_sighted ?? 0).getTime() -
-              new Date(b.last_sighted ?? 0).getTime()
-            );
-          })
-        );
-        setShowConfetti(false);
-      }, 1800);
+      await createPigSighting(pig.id);
     } catch (err) {
       console.error(err);
-    } finally {
-      setUpdating(false);
+      // Roll back the optimistic update on failure
+      clearSighted(pig.id);
+      setPigs((prev) =>
+        prev.map((p) =>
+          p.id === pig.id ? { ...p, last_sighted: prevLastSighted } : p
+        )
+      );
+      return;
+    }
+
+    // Revert the undo button back to the eye after a minute.
+    const existing = undoTimers.current.get(pig.id);
+    if (existing) clearTimeout(existing);
+    undoTimers.current.set(
+      pig.id,
+      setTimeout(() => clearSighted(pig.id), 60000)
+    );
+
+    // After the confetti plays, fade the card out then re-sort it to the bottom.
+    setTimeout(() => setFadingPigId(pig.id), 1200);
+    setTimeout(() => {
+      setFadingPigId(null);
+      resortPigs();
+    }, 1800);
+
+    if (FEATURE_MOOD) {
+      setSightingStep('mood');
+      setSelectedPig(pig);
+    }
+  };
+
+  const handleUndo = async (pig: Pig) => {
+    const prevLastSighted = sightedPigs.get(pig.id) ?? null;
+
+    clearSighted(pig.id);
+    setPigs((prev) =>
+      prev.map((p) =>
+        p.id === pig.id ? { ...p, last_sighted: prevLastSighted } : p
+      )
+    );
+    resortPigs();
+
+    try {
+      await setPigLastSighted(pig.id, prevLastSighted);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const closeModal = () => {
     setSelectedPig(null);
-    setTimeout(() => setSightingStep('confirm'), 300);
+    setTimeout(() => setSightingStep('mood'), 300);
   };
 
   const handleSightingMood = async (mood: string) => {
@@ -127,10 +188,9 @@ const PigList = ({
                 !pig.last_sighted ||
                 new Date(pig.last_sighted).toDateString() !== today
               }
-              onEyeClick={(origin) => {
-                setSelectedPig(pig);
-                setConfettiOrigin(origin);
-              }}
+              sighted={sightedPigs.has(pig.id)}
+              onEyeClick={(origin) => handleSighting(pig, origin)}
+              onUndoClick={() => handleUndo(pig)}
             />
           </motion.div>
         ))}
@@ -141,23 +201,7 @@ const PigList = ({
       {(() => {
         const modal = (
           <Modal isOpen={!!selectedPig} onClose={closeModal}>
-            {sightingStep === 'confirm' ? (
-              <>
-                <p>Mark {selectedPig?.name} as seen?</p>
-                <div className="confirmActions">
-                  <Button variant="danger" onClick={closeModal}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="success"
-                    onClick={handleConfirm}
-                    disabled={updating}
-                  >
-                    {updating ? 'Saving...' : 'Confirm'}
-                  </Button>
-                </div>
-              </>
-            ) : sightingStep === 'mood' ? (
+            {sightingStep === 'mood' ? (
               <>
                 <p>How is {selectedPig?.name} feeling?</p>
                 <div className="moodGrid">
