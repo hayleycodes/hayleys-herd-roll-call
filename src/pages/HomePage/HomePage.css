@@ -73,6 +73,7 @@
   align-items: center;
   justify-content: center;
   background: none;
+  margin-top: calc(0px - var(--header-height));
 }
 
 .rotatedMode .pigCam {
@@ -93,6 +94,7 @@
   height: 100%;
   position: relative;
   overflow: hidden;
+  padding: var(--spacing-xs);
 }
 
 .rotatedMode .homePageRightScroll {
