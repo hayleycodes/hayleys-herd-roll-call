@@ -8,7 +8,10 @@ import {
   getSocialOrder,
 } from '../../services/pig-social-order.service';
 import { getAllPigs } from '../../services/pigs.service';
-import { computePeckingOrder } from '../../services/social-order-ranking';
+import {
+  computePeckingOrder,
+  type PeckingEntry,
+} from '../../services/social-order-ranking';
 import './SocialOrderPage.css';
 import PigPicker from '../../components/PigPicker/PigPicker';
 import Button from '../../components/ui/Button/Button';
@@ -36,6 +39,17 @@ const SocialOrderPage = () => {
     () => computePeckingOrder(allPigs, socialOrder),
     [allPigs, socialOrder]
   );
+
+  // Group consecutive entries that share a rank so ties render side by side.
+  const rankGroups = useMemo(() => {
+    const groups: PeckingEntry[][] = [];
+    for (const entry of ranked) {
+      const last = groups[groups.length - 1];
+      if (last && last[0].rank === entry.rank) last.push(entry);
+      else groups.push([entry]);
+    }
+    return groups;
+  }, [ranked]);
 
   const dominantPigs = useMemo(
     () =>
@@ -138,21 +152,29 @@ const SocialOrderPage = () => {
             </p>
           ) : (
             <ol className="peckingList">
-              {ranked.map((entry) => (
+              {rankGroups.map((group) => (
                 <li
-                  className={`peckingRow${entry.rank === 1 ? ' peckingTop' : ''}`}
-                  key={entry.pig.id}
+                  className={`peckingRow${group[0].rank === 1 ? ' peckingTop' : ''}${group.length > 1 ? ' peckingTie' : ''}${group.length > 4 ? ' peckingCrowded' : ''}`}
+                  key={group[0].rank}
                 >
                   <span className="peckingRank">
-                    {entry.rank === 1 ? '👑' : entry.rank}
+                    {group[0].rank === 1 ? '👑' : group[0].rank}
                   </span>
-                  <div className="peckingPigCard">
-                    <PigCard pig={entry.pig} hideLastSeen />
+                  <div className="peckingMembers">
+                    {group.map((entry) => (
+                      <div className="peckingMember" key={entry.pig.id}>
+                        <div className="peckingPigCard">
+                          <PigCard pig={entry.pig} hideLastSeen />
+                        </div>
+                        <span className="peckingRecord">
+                          <span className="peckingWins">▲ {entry.dominates}</span>
+                          <span className="peckingLosses">
+                            ▼ {entry.yieldsTo}
+                          </span>
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <span className="peckingRecord">
-                    <span className="peckingWins">▲ {entry.dominates}</span>
-                    <span className="peckingLosses">▼ {entry.yieldsTo}</span>
-                  </span>
                 </li>
               ))}
             </ol>

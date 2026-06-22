@@ -82,14 +82,47 @@
   flex-shrink: 0;
 }
 
-.peckingRow .peckingPigCard {
+/* Tied pigs sit side by side; a single pig fills the row as before. */
+.peckingMembers {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.peckingMember {
+  /* Quarter-width basis caps a row at 4 pigs; grow lets 1–4 pigs fill the
+     row at full size. Crowded rows (5+) turn off grow below so the wrapped
+     cards stay an equal size across both lines. */
+  flex: 1 1 calc(25% - var(--spacing-sm));
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+.peckingCrowded .peckingMember {
+  flex-grow: 0;
+}
+
+.peckingMember .peckingPigCard {
+  width: 100%;
   min-width: 0;
   max-width: 96px;
 }
 
+/* Shrink the name when 4+ pigs share a row so it fits the tighter cards.
+   Cards are already at --font-size-sm via PigCard's container query, so go
+   smaller; the higher specificity here wins over that query. */
+.peckingCrowded .pigCardName {
+  font-size: 10px;
+}
+
 .peckingRecord {
-  margin-left: auto;
   display: flex;
   gap: var(--spacing-xs);
   font-weight: var(--font-weight-bold);
