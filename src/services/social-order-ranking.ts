@@ -15,10 +15,10 @@ export type PeckingOrder = {
 
 /**
  * Turns pairwise dominance observations into a ranked pecking order using a
- * Copeland score. Repeat/conflicting observations of the same pair are resolved
- * by majority: whichever direction was observed more often wins; an equal count
- * is a "standoff" that counts for neither pig. Non-transitive cycles (A▸B▸C▸A)
- * still produce sensible scores.
+ * Copeland score. Conflicting observations of the same pair are resolved by
+ * recency: the most recent observation wins outright, nullifying all earlier
+ * observations of that pair (a later reversal flips the result). Non-transitive
+ * cycles (A▸B▸C▸A) still produce sensible scores.
  */
 export function computePeckingOrder(
   pigs: Pig[],
@@ -26,32 +26,32 @@ export function computePeckingOrder(
 ): PeckingOrder {
   const pigById = new Map(pigs.map((p) => [p.id, p]));
 
-  // Count observations per ordered pair: `${dominant}#${submissive}`.
-  const counts = new Map<string, number>();
+  // Keep only the most recent observation per unordered pair, keyed
+  // `${loId}#${hiId}` so both directions collapse to one entry.
+  const latestByPair = new Map<string, SocialOrderItem>();
   const involved = new Set<number>();
   for (const item of items) {
-    const key = `${item.dominant_pig_id}#${item.submissive_pig_id}`;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
     involved.add(item.dominant_pig_id);
     involved.add(item.submissive_pig_id);
+    const lo = Math.min(item.dominant_pig_id, item.submissive_pig_id);
+    const hi = Math.max(item.dominant_pig_id, item.submissive_pig_id);
+    const key = `${lo}#${hi}`;
+    const current = latestByPair.get(key);
+    if (!current || isMoreRecent(item, current)) latestByPair.set(key, item);
   }
 
-  // Resolve each unordered pair and tally distinct wins/losses per pig.
+  // Tally distinct wins/losses from each pair's most recent observation.
   const dominates = new Map<number, number>();
   const yieldsTo = new Map<number, number>();
-  const ids = [...involved];
-  for (let i = 0; i < ids.length; i++) {
-    for (let j = i + 1; j < ids.length; j++) {
-      const a = ids[i];
-      const b = ids[j];
-      const ab = counts.get(`${a}#${b}`) ?? 0;
-      const ba = counts.get(`${b}#${a}`) ?? 0;
-      if (ab === ba) continue; // standoff — counts for neither
-      const winner = ab > ba ? a : b;
-      const loser = ab > ba ? b : a;
-      dominates.set(winner, (dominates.get(winner) ?? 0) + 1);
-      yieldsTo.set(loser, (yieldsTo.get(loser) ?? 0) + 1);
-    }
+  for (const item of latestByPair.values()) {
+    dominates.set(
+      item.dominant_pig_id,
+      (dominates.get(item.dominant_pig_id) ?? 0) + 1
+    );
+    yieldsTo.set(
+      item.submissive_pig_id,
+      (yieldsTo.get(item.submissive_pig_id) ?? 0) + 1
+    );
   }
 
   // Build entries for involved pigs that are part of the current herd.
@@ -82,4 +82,18 @@ export function computePeckingOrder(
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return { ranked, unranked };
+}
+
+// Recency for an observation: prefer when it was observed, else when the row
+// was created. ISO timestamps compare correctly as strings; a null sorts before
+// any real timestamp, and the higher id (later-inserted row) breaks ties.
+function recencyKey(item: SocialOrderItem): string {
+  return item.observed_at ?? item.created_at ?? '';
+}
+
+function isMoreRecent(a: SocialOrderItem, b: SocialOrderItem): boolean {
+  const ka = recencyKey(a);
+  const kb = recencyKey(b);
+  if (ka !== kb) return ka > kb;
+  return a.id > b.id;
 }
