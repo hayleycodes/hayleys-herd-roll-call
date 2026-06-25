@@ -69,6 +69,16 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
     loadPigs();
   }, [refreshKey]);
 
+  // Once every pig has been sighted, drop the unseen filter so the full list returns
+  useEffect(() => {
+    if (filter !== 'unseen') return;
+    const today = new Date().toDateString();
+    const hasUnseen = pigs.some(
+      (p) => !p.last_sighted || new Date(p.last_sighted).toDateString() !== today
+    );
+    if (!hasUnseen) setFilter(null);
+  }, [pigs, filter]);
+
   if (loading) {
     return <Loading />;
   }
