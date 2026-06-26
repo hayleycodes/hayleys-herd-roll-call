@@ -76,7 +76,7 @@ const PigPicker = ({
           title={selectedPig ? selectedPig.name : 'Link a pig'}
         >
           {selectedPig ? (
-            <PigThumb imagePath={selectedPig.image_path} />
+            <PigThumb imagePath={selectedPig.image_paths?.[0] ?? null} />
           ) : (
             <span className="pigPickerCompactIcon">🐖</span>
           )}
@@ -89,7 +89,7 @@ const PigPicker = ({
         >
           {selectedPig ? (
             <>
-              <PigThumb imagePath={selectedPig.image_path} />
+              <PigThumb imagePath={selectedPig.image_paths?.[0] ?? null} />
               <span>{selectedPig.name}</span>
             </>
           ) : (
@@ -124,7 +124,7 @@ const PigPicker = ({
                   setDropdownOpen(false);
                 }}
               >
-                <PigThumb imagePath={pig.image_path} />
+                <PigThumb imagePath={pig.image_paths?.[0] ?? null} />
                 <span>{pig.name}</span>
               </button>
             ))}

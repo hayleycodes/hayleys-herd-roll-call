@@ -3,7 +3,7 @@ import { markTaskDone } from './recurring-tasks.service';
 import type { HealthRecord } from './pigs.types';
 
 export type HealthLogEntry = HealthRecord & {
-  pigs: { name: string; image_path: string | null } | null;
+  pigs: { name: string; image_paths: string[] } | null;
 };
 
 export const getAllHealth = async (
@@ -12,7 +12,7 @@ export const getAllHealth = async (
 ): Promise<HealthLogEntry[]> => {
   const { data, error } = await supabase
     .from('health_data')
-    .select('*, pigs(name, image_path)')
+    .select('*, pigs(name, image_paths)')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 

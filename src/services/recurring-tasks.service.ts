@@ -18,7 +18,7 @@ export const getPigRecurringTasks = async (
 };
 
 type TaskWithPig = PigRecurringTask & {
-  pigs: { name: string; image_path: string | null };
+  pigs: { name: string; image_paths: string[] };
 };
 
 export type OverdueTask = TaskWithPig & {
@@ -38,7 +38,7 @@ export const getAllCareTasks = async (): Promise<{
 }> => {
   const { data, error } = await supabase
     .from('pig_recurring_tasks')
-    .select('*, pigs(name, image_path)');
+    .select('*, pigs(name, image_paths)');
 
   if (error) throw new Error(error.message);
   if (!data) return { overdue: [], upcoming: [], oneOffs: [] };

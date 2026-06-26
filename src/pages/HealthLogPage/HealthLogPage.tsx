@@ -324,7 +324,7 @@ const HealthLogPage = () => {
                       className="healthLogCardLink"
                     >
                       <PigThumbnail
-                        imagePath={record.pigs?.image_path ?? null}
+                        imagePath={record.pigs?.image_paths?.[0] ?? null}
                       />
 
                       <div className="healthLogCardBody">
@@ -403,7 +403,7 @@ const HealthLogPage = () => {
                 <div key={pig.id} className="weightsCardWrapper">
                   <div className="weightsCard">
                     <Link to={`/pigs/${pig.id}`} className="weightsCardLink">
-                      <PigThumbnail imagePath={pig.image_path} />
+                      <PigThumbnail imagePath={pig.image_paths?.[0] ?? null} />
                       <div className="weightsCardInfo">
                         <span className="weightsName">{pig.name}</span>
                         <span
@@ -481,7 +481,7 @@ const HealthLogPage = () => {
                       </span>
                     }
                     pigName={task.pigs?.name}
-                    pigImagePath={task.pigs?.image_path}
+                    pigImagePath={task.pigs?.image_paths?.[0] ?? null}
                     pigId={task.pig_id}
                     onSkip={() => setConfirmSkipTask(task)}
                     onDone={() => setConfirmTask(task)}
@@ -499,7 +499,7 @@ const HealthLogPage = () => {
                     label={getTaskLabel(task.task_type)}
                     variant="oneoff"
                     pigName={task.pigs?.name}
-                    pigImagePath={task.pigs?.image_path}
+                    pigImagePath={task.pigs?.image_paths?.[0] ?? null}
                     pigId={task.pig_id}
                     onDone={() => setConfirmTask(task)}
                   />
@@ -520,7 +520,7 @@ const HealthLogPage = () => {
                       </span>
                     }
                     pigName={task.pigs?.name}
-                    pigImagePath={task.pigs?.image_path}
+                    pigImagePath={task.pigs?.image_paths?.[0] ?? null}
                     pigId={task.pig_id}
                     onSkip={() => setConfirmSkipTask(task)}
                     onDone={() => setConfirmTask(task)}

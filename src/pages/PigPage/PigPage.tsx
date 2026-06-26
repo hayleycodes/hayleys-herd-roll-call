@@ -31,7 +31,7 @@ import { getPigColorClass } from '../../constants/colors';
 import { FEATURE_MOOD } from '../../config/features';
 
 import {
-  savePigImage,
+  savePigImages,
   getPig,
   getAllPigsIncludingPassed,
   updateDescription,
@@ -76,11 +76,37 @@ const getQuoteForPig = (pigId: number) => {
   return PIG_QUOTES[pigId % PIG_QUOTES.length];
 };
 
+// Resolves a single photo path to an <img>, used for the extra thumbnails and
+// the fullscreen viewer (the main circle has its own load/fade handling).
+const PigPhoto = ({
+  path,
+  className,
+  alt,
+}: {
+  path: string;
+  className?: string;
+  alt?: string;
+}) => {
+  const { imageUrl, imageReady } = usePigImage(path);
+  return imageUrl ? (
+    <img
+      src={imageUrl}
+      alt={alt ?? ''}
+      className={className}
+      style={{ opacity: imageReady ? 1 : 0, transition: 'opacity 0.3s ease' }}
+    />
+  ) : (
+    <span className={className}>🐹</span>
+  );
+};
+
 const PigPage = () => {
   const { id } = useParams();
 
   const [pig, setPig] = useState<Pig | null>(null);
-  const { imageUrl, imageLoading, imageReady } = usePigImage(pig?.image_path);
+  const { imageUrl, imageLoading, imageReady } = usePigImage(
+    pig?.image_paths?.[0] ?? null
+  );
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [descriptionDraft, setDescriptionDraft] = useState('');
@@ -111,6 +137,12 @@ const PigPage = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxMounted, setLightboxMounted] = useState(false);
   const [lightboxActive, setLightboxActive] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightboxAt = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,14 +202,22 @@ const PigPage = () => {
     setTimeout(() => setSightingStep('confirm'), 300);
   };
 
-  const handleUpload = async (file: File, pigId: number) => {
+  const MAX_PHOTOS = 3;
+
+  const handleAddPhoto = async (file: File, pigId: number) => {
+    if (!pig || pig.image_paths.length >= MAX_PHOTOS) return;
     const compressed = await compressImage(file);
-
     const filePath = await uploadPigImage(compressed, pigId);
+    const next = [...pig.image_paths, filePath];
+    await savePigImages(pigId, next);
+    setPig((prev) => (prev ? { ...prev, image_paths: next } : prev));
+  };
 
-    await savePigImage(pigId, filePath);
-
-    setPig((prev) => (prev ? { ...prev, image_path: filePath } : prev));
+  const handleRemovePhoto = async (index: number) => {
+    if (!pig) return;
+    const next = pig.image_paths.filter((_, i) => i !== index);
+    await savePigImages(pig.id, next);
+    setPig((prev) => (prev ? { ...prev, image_paths: next } : prev));
   };
 
   const handleAddTag = async (tag: string) => {
@@ -393,7 +433,8 @@ const PigPage = () => {
             </EmojiButton>
             <EmojiButton
               variant="pig"
-              aria-label="Upload photo"
+              aria-label="Add photo"
+              disabled={pig.image_paths.length >= 3}
               onClick={() =>
                 document.getElementById('pig-image-upload')?.click()
               }
@@ -416,7 +457,7 @@ const PigPage = () => {
                 src={imageUrl}
                 alt={pig.name}
                 className="detailImage"
-                onClick={() => setLightboxOpen(true)}
+                onClick={() => openLightboxAt(0)}
                 style={{
                   opacity: imageReady ? 1 : 0,
                   transition: 'opacity 0.3s ease',
@@ -427,6 +468,34 @@ const PigPage = () => {
               <span className="detailEmoji">🐖</span>
             )}
           </div>
+
+          {pig.image_paths.length >= 1 && (
+            <div className="detailExtraPhotos">
+              {pig.image_paths.slice(1).map((path, i) => (
+                <button
+                  key={path}
+                  type="button"
+                  className="detailExtraPhoto"
+                  onClick={() => openLightboxAt(i + 1)}
+                  aria-label="View photo"
+                >
+                  <PigPhoto path={path} />
+                </button>
+              ))}
+              {pig.image_paths.length < 3 && (
+                <button
+                  type="button"
+                  className="detailExtraPhoto detailExtraPhotoAdd"
+                  onClick={() =>
+                    document.getElementById('pig-image-upload')?.click()
+                  }
+                  aria-label="Add photo"
+                >
+                  +
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="detailLabel">
@@ -566,8 +635,11 @@ const PigPage = () => {
           onChange={async (e) => {
             const file = e.target.files?.[0];
             if (file && pig) {
-              await handleUpload(file, pig.id);
+              const newIndex = pig.image_paths.length;
+              await handleAddPhoto(file, pig.id);
+              setLightboxIndex(newIndex); // show the just-added photo
             }
+            e.target.value = '';
           }}
         />
       </div>
@@ -650,7 +722,7 @@ const PigPage = () => {
         </Modal>
       )}
 
-      {lightboxMounted && imageUrl && (
+      {lightboxMounted && pig.image_paths.length > 0 && (
         <div
           className={`imageLightboxOverlay ${lightboxActive ? 'open' : ''} ${pigColorClass}`}
           onClick={() => setLightboxOpen(false)}
@@ -665,8 +737,53 @@ const PigPage = () => {
           </EmojiButton>
           <div
             className={`imageLightboxCircle ${lightboxActive ? 'open' : ''}`}
+            onClick={(e) => e.stopPropagation()}
           >
-            <img src={imageUrl} alt={pig.name} className="imageLightboxImg" />
+            <PigPhoto
+              key={pig.image_paths[lightboxIndex]}
+              path={pig.image_paths[lightboxIndex]}
+              alt={pig.name}
+              className="imageLightboxImg"
+            />
+            <EmojiButton
+              className="lightboxDelete"
+              shape="circle"
+              onClick={async (e) => {
+                e.stopPropagation();
+                const wasLast = pig.image_paths.length === 1;
+                await handleRemovePhoto(lightboxIndex);
+                if (wasLast) setLightboxOpen(false);
+                else setLightboxIndex((i) => Math.max(0, i - 1));
+              }}
+              aria-label="Remove this photo"
+            >
+              🗑️
+            </EmojiButton>
+          </div>
+          <div className="lightboxThumbs" onClick={(e) => e.stopPropagation()}>
+            {pig.image_paths.map((path, i) => (
+              <button
+                key={path}
+                type="button"
+                className={`lightboxThumb${i === lightboxIndex ? ' lightboxThumbActive' : ''}`}
+                onClick={() => setLightboxIndex(i)}
+                aria-label={`Photo ${i + 1}`}
+              >
+                <PigPhoto path={path} />
+              </button>
+            ))}
+            {pig.image_paths.length < 3 && (
+              <button
+                type="button"
+                className="lightboxThumb lightboxThumbAdd"
+                onClick={() =>
+                  document.getElementById('pig-image-upload')?.click()
+                }
+                aria-label="Add photo"
+              >
+                +
+              </button>
+            )}
           </div>
         </div>
       )}

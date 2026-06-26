@@ -62,7 +62,7 @@ const PigDot = ({
   large?: boolean;
   stats?: GraphMetrics;
 }) => {
-  const { imageUrl, imageReady } = usePigImage(pig.image_path);
+  const { imageUrl, imageReady } = usePigImage(pig.image_paths?.[0] ?? null);
   const className = `graphNode${large ? ' graphNodeLarge' : ''}${repeated ? ' graphNodeRepeat' : ''} ${getPigColorClass(pig.id)}`;
 
   const inner = (

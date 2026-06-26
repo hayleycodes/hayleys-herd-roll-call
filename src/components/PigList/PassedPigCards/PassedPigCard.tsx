@@ -11,17 +11,18 @@ type Props = {
 const PassedPigCard = ({ pig }: Props) => {
   const [url, setUrl] = useState<string | null>(null);
 
+  const photo = pig.image_paths?.[0] ?? null;
+
   useEffect(() => {
     const load = async () => {
-      if (!pig.image_path) return;
+      if (!photo) return;
 
-      const { signedUrl } = await getPigImageUrl(pig.image_path);
+      const { signedUrl } = await getPigImageUrl(photo);
       setUrl(signedUrl);
     };
 
     load();
-  }, [pig.image_path]);
-  console.log(pig);
+  }, [photo]);
   return (
     <div className="passedAwayCard">
       <div

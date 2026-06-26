@@ -197,6 +197,112 @@
   color: var(--text);
 }
 
+/* ---- Extra photos, stacked vertically at the bottom-left of the circle ---- */
+
+.detailExtraPhotos {
+  position: absolute;
+  bottom: 15%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailExtraPhoto {
+  width: clamp(48px, 16cqw, 84px);
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border-radius: 50%;
+  border: 3px solid var(--pig-color, var(--border-color));
+  background: var(--surface-alt);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.detailExtraPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Placeholder slot for the next photo (up to 3). */
+.detailExtraPhotoAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(24px, 7cqw, 40px);
+  font-weight: bold;
+  color: var(--text-muted);
+  border-style: dashed;
+  border-color: var(--pig-color, var(--border-color));
+  background: color-mix(in srgb, var(--surface-alt) 70%, white);
+}
+
+/* ---- Fullscreen viewer thumbnails ---- */
+
+/* Sits at the lower-right of the photo, kept inside the round area so the
+   circle's overflow:hidden doesn't clip it. */
+.lightboxDelete {
+  position: absolute;
+  bottom: 15%;
+  right: 10%;
+  width: 40px;
+  height: 40px;
+  z-index: 2001;
+  border: 3px solid var(--primary-dark);
+}
+
+/* Pinned to the bottom of the overlay so the oversized circle can't push
+   them off-screen. */
+.lightboxThumbs {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2001;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.lightboxThumb {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: var(--surface-alt);
+  cursor: pointer;
+  opacity: 0.6;
+  transition:
+    opacity 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.lightboxThumbActive {
+  opacity: 1;
+  border-color: white;
+}
+
+.lightboxThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lightboxThumbAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  border-style: dashed;
+  opacity: 0.85;
+}
+
 .memorialMode .pigName::after {
   content: ' 🌈';
   font-size: 0.8em;
@@ -439,13 +545,15 @@
 }
 
 .imageLightboxCircle {
+  position: relative;
   width: 120%;
   flex-shrink: 0;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  overflow: hidden;
   transform: scale(0.8);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .imageLightboxCircle.open {

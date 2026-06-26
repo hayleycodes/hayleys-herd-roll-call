@@ -5,7 +5,7 @@ export interface Pig {
   description: string | null;
   dob: string | null;
   last_sighted: string | null;
-  image_path: string | null;
+  image_paths: string[];
   passed_away?: string | null;
 }
 

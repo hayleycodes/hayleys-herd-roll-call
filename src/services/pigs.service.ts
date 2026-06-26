@@ -83,10 +83,10 @@ export const setPigLastSighted = async (
   return data;
 };
 
-export const savePigImage = async (pigId: number, imagePath: string) => {
+export const savePigImages = async (pigId: number, imagePaths: string[]) => {
   const { data, error } = await supabase
     .from('pigs')
-    .update({ image_path: imagePath })
+    .update({ image_paths: imagePaths })
     .eq('id', pigId)
     .select()
     .single();

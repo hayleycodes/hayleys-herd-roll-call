@@ -198,7 +198,7 @@ export type Database = {
           dob: string | null;
           gender: Database['public']['Enums']['gender'] | null;
           id: number;
-          image_path: string | null;
+          image_paths: string[];
           last_sighted: string | null;
           name: string;
           passed_away: string | null;
@@ -210,7 +210,7 @@ export type Database = {
           dob?: string | null;
           gender?: Database['public']['Enums']['gender'] | null;
           id?: number;
-          image_path?: string | null;
+          image_paths?: string[];
           last_sighted?: string | null;
           name: string;
           passed_away?: string | null;
@@ -222,7 +222,7 @@ export type Database = {
           dob?: string | null;
           gender?: Database['public']['Enums']['gender'] | null;
           id?: number;
-          image_path?: string | null;
+          image_paths?: string[];
           last_sighted?: string | null;
           name?: string;
           passed_away?: string | null;

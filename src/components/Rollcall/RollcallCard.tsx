@@ -15,7 +15,9 @@ type Props = {
 };
 
 const RollcallCard = ({ pig, onSighted, onSkipped, disabled }: Props) => {
-  const { imageUrl, imageLoading, imageReady } = usePigImage(pig.image_path);
+  const { imageUrl, imageLoading, imageReady } = usePigImage(
+    pig.image_paths?.[0] ?? null
+  );
   const pigColorClass = getPigColorClass(pig.id);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
 

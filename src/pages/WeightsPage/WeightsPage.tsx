@@ -101,7 +101,7 @@ const WeightsPage = () => {
               <div key={pig.id} className="weightsCardWrapper">
                 <div className="weightsCard">
                   <Link to={`/pigs/${pig.id}`} className="weightsCardLink">
-                    <PigThumbnail imagePath={pig.image_path} />
+                    <PigThumbnail imagePath={pig.image_paths?.[0] ?? null} />
                     <div className="weightsCardInfo">
                       <span className="weightsName">{pig.name}</span>
                       <span

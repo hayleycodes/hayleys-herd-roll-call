@@ -22,7 +22,9 @@ const PigMoodRow = ({
   done: boolean;
   onMoodSelect: (pigId: number, mood: string) => void;
 }) => {
-  const { imageUrl, imageLoading, imageReady } = usePigImage(pig.image_path);
+  const { imageUrl, imageLoading, imageReady } = usePigImage(
+    pig.image_paths?.[0] ?? null
+  );
   const latestMood = moods[0];
 
   return (

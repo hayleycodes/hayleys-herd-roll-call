@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './PigCard.css';
 import type { Pig } from '../../../services/pigs.types';
-import { usePigImage } from '../../../hooks/usePigImage';
+import { useRandomPigImage } from '../../../hooks/usePigImage';
 import { getPigColorClass } from '../../../constants/colors';
 import EmojiButton from '../../ui/EmojiButton/EmojiButton';
 
@@ -36,7 +36,9 @@ const PigCard = ({
   onEyeClick,
   onUndoClick,
 }: Props) => {
-  const { imageUrl, imageLoading, imageReady } = usePigImage(pig.image_path);
+  const { imageUrl, imageLoading, imageReady } = useRandomPigImage(
+    pig.image_paths
+  );
   const [wiggling, setWiggling] = useState(false);
   const circleRef = useRef<HTMLDivElement>(null);
 
