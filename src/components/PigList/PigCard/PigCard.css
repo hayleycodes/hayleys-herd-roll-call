@@ -219,7 +219,7 @@
   position: absolute;
   top: -12%;
   left: 50%;
-  transform: translateX(-50%) rotate(-8deg);
+  transform: translateX(-50%) rotate(var(--crown-rotate, -8deg));
   font-size: clamp(30px, 30%, 44px);
   z-index: 2;
   pointer-events: none;

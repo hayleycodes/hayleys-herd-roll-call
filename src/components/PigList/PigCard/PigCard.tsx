@@ -67,7 +67,19 @@ const PigCard = ({
     >
       <Link to={`/pigs/${pig.id}`} className="pigCardLink">
         <div className="pigCardCircleWrapper">
-          {crowned && <span className="pigCardCrown">👑</span>}
+          {crowned && (
+            <span
+              className="pigCardCrown"
+              style={
+                {
+                  // Stable pseudo-random tilt per pig: -18° … +18°.
+                  '--crown-rotate': `${((pig.id * 53) % 37) - 18}deg`,
+                } as React.CSSProperties
+              }
+            >
+              👑
+            </span>
+          )}
           {onEyeClick &&
             (sighted ? (
               <EmojiButton

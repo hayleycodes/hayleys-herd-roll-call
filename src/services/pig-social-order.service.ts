@@ -1,7 +1,7 @@
 import { supabase } from '../../utils/supabase-client';
 import type { SocialOrderItem } from './pigs.types';
 import { getAllPigs } from './pigs.service';
-import { computePeckingOrder } from './social-order-ranking';
+import { computeGraphRanking } from './social-order-graph';
 
 export const getSocialOrder = async (): Promise<SocialOrderItem[]> => {
   const { data, error } = await supabase
@@ -51,11 +51,15 @@ export const deleteSocialOrderItem = async (id: number) => {
   if (error) throw new Error(error.message);
 };
 
-/** Ids of the herd's top-ranked pig(s) — rank 1 with a positive Copeland score. */
+/** Ids of the herd's top-ranked pig(s) — the graph ranking's rank-1 group(s). */
 export const getTopPigIds = async (): Promise<Set<number>> => {
   const [items, pigs] = await Promise.all([getSocialOrder(), getAllPigs()]);
-  const { ranked } = computePeckingOrder(pigs, items);
-  return new Set(
-    ranked.filter((e) => e.rank === 1 && e.score > 0).map((e) => e.pig.id)
-  );
+  const groups = computeGraphRanking(pigs, items);
+  const ids = new Set<number>();
+  for (const group of groups) {
+    if (group.rank === 1 && group.metrics.descendants > 0) {
+      group.pigs.forEach((pig) => ids.add(pig.id));
+    }
+  }
+  return ids;
 };
