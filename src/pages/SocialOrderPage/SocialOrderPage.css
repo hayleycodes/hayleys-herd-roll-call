@@ -290,6 +290,7 @@
 /* ---- Self-contained pig node (photo + name), used in the modal ---- */
 
 .graphNode {
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -306,6 +307,36 @@
 
 .graphNodeLarge {
   width: 88px;
+}
+
+/* A back-reference (this pig is drawn in full elsewhere). */
+.graphNodeRepeat {
+  opacity: 0.55;
+}
+
+.graphNodeRepeat .graphNodePhoto {
+  border-style: dashed;
+}
+
+.graphNodeRepeatBadge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 1.5px solid var(--pig-color, var(--border-color));
+  font-size: 11px;
+}
+
+.graphNodeRepeatNote {
+  font-weight: normal;
+  font-style: italic;
 }
 
 .graphNodePhoto {
@@ -344,6 +375,26 @@
   white-space: nowrap;
 }
 
+/* ---- Whole-herd overview ---- */
+
+.graphOverview {
+  margin-bottom: var(--spacing-md);
+}
+
+.graphOverviewHeading {
+  text-align: center;
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--spacing-xs);
+}
+
+/* The overview can be big; let it scroll both ways within a capped height. */
+.graphOverview .graphTreeScroll {
+  max-height: 60vh;
+  overflow: auto;
+  border-radius: var(--border-radius-md);
+  background: color-mix(in srgb, var(--primary) 8%, white);
+}
+
 /* ---- Dominance tree (computed tidy layout) ---- */
 
 .graphTreeScroll {
@@ -371,7 +422,26 @@
 
 .tidyTreeNode {
   position: absolute;
-  width: 56px;
+  width: 76px;
+}
+
+/* Bigger photo + name with almost no gap, plus a stats line beneath. */
+.tidyTreeNode .graphNode {
+  width: 100%;
+  gap: 0;
+}
+
+.tidyTreeNode .graphNodeName {
+  margin-top: -2px;
+  font-size: var(--font-size-md);
+}
+
+.graphNodeStats {
+  margin-top: 1px;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .graphRankMetrics {

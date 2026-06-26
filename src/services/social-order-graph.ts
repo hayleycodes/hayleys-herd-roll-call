@@ -287,6 +287,49 @@ export function computeDominanceTree(
   return build(pigId);
 }
 
+/**
+ * A forest covering every pig with at least one observation. Roots are the pigs
+ * nobody dominates; remaining pigs (e.g. those only inside a loop) seed extra
+ * trees. A single shared "expanded" set spans the whole forest, so each pig is
+ * drawn once and anything reached again becomes a `repeated` leaf.
+ */
+export function computeDominanceForest(
+  pigs: Pig[],
+  items: SocialOrderItem[]
+): DominanceTreeNode[] {
+  const { pigById, involved, out, inMap } = buildDominanceGraph(pigs, items);
+  if (!involved.size) return [];
+
+  const expanded = new Set<number>();
+  const build = (id: number): DominanceTreeNode => {
+    const pig = pigById.get(id)!;
+    if (expanded.has(id)) return { pig, children: [], repeated: true };
+    expanded.add(id);
+    const children = [...(out.get(id) ?? [])]
+      .map((cid) => pigById.get(cid)!)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((child) => build(child.id));
+    return { pig, children, repeated: false };
+  };
+
+  const byName = (a: number, b: number) =>
+    pigById.get(a)!.name.localeCompare(pigById.get(b)!.name);
+
+  const roots: DominanceTreeNode[] = [];
+  // Top of the hierarchy first: pigs nobody dominates.
+  [...involved]
+    .filter((id) => !inMap.get(id)?.size)
+    .sort(byName)
+    .forEach((id) => roots.push(build(id)));
+  // Then anything still unplaced (loop-only components with no clear top).
+  [...involved]
+    .filter((id) => !expanded.has(id))
+    .sort(byName)
+    .forEach((id) => roots.push(build(id)));
+
+  return roots;
+}
+
 type DominanceGraph = {
   pigById: Map<number, Pig>;
   involved: Set<number>;

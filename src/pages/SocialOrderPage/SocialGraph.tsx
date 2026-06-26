@@ -7,10 +7,12 @@ import { getPigColorClass } from '../../constants/colors';
 import { usePigImage } from '../../hooks/usePigImage';
 import type { Pig, SocialOrderItem } from '../../services/pigs.types';
 import {
+  computeDominanceForest,
   computeDominanceTree,
   computeGraphRanking,
   computePigGraphDetail,
   type DominanceTreeNode,
+  type GraphMetrics,
 } from '../../services/social-order-graph';
 
 type Props = {
@@ -51,33 +53,49 @@ const PigDot = ({
   asLink,
   repeated,
   large,
+  stats,
 }: {
   pig: Pig;
   onSelect?: (pig: Pig) => void;
   asLink?: boolean;
   repeated?: boolean;
   large?: boolean;
+  stats?: GraphMetrics;
 }) => {
   const { imageUrl, imageReady } = usePigImage(pig.image_path);
-  const className = `graphNode${large ? ' graphNodeLarge' : ''} ${getPigColorClass(pig.id)}`;
+  const className = `graphNode${large ? ' graphNodeLarge' : ''}${repeated ? ' graphNodeRepeat' : ''} ${getPigColorClass(pig.id)}`;
 
   const inner = (
     <>
+      {repeated && (
+        <span className="graphNodeRepeatBadge" aria-label="shown above">
+          ↩
+        </span>
+      )}
       <span className="graphNodePhoto">
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={pig.name}
-            style={{ opacity: imageReady ? 1 : 0, transition: 'opacity 0.3s ease' }}
+            style={{
+              opacity: imageReady ? 1 : 0,
+              transition: 'opacity 0.3s ease',
+            }}
           />
         ) : (
           <span className="graphNodeEmoji">🐹</span>
         )}
       </span>
-      <span className="graphNodeName">
-        {pig.name}
-        {repeated && ' ↩'}
-      </span>
+      <span className="graphNodeName">{pig.name}</span>
+      {repeated ? (
+        <span className="graphNodeStats graphNodeRepeatNote">shown above</span>
+      ) : (
+        stats && (
+          <span className="graphNodeStats">
+            👥{stats.descendants} 🪜{stats.chain} 💪{stats.power}
+          </span>
+        )
+      )}
     </>
   );
 
@@ -108,10 +126,10 @@ const PigRow = ({
 
 // ---- Tidy tree layout (contour packing, Reingold–Tilford style) ----
 
-const NODE_W = 56;
-const NODE_H = 78;
+const NODE_W = 76;
+const NODE_H = 124;
 const H_GAP = 22;
-const LEVEL_H = 112;
+const LEVEL_H = 176;
 
 type Placed = {
   node: DominanceTreeNode;
@@ -173,7 +191,13 @@ const contour = (n: Placed): { left: number[]; right: number[] } => {
   return { left, right };
 };
 
-type LaidNode = { pig: Pig; repeated: boolean; x: number; y: number; key: string };
+type LaidNode = {
+  pig: Pig;
+  repeated: boolean;
+  x: number;
+  y: number;
+  key: string;
+};
 type LaidLine = { x1: number; y1: number; x2: number; y2: number };
 
 const layoutTree = (root: DominanceTreeNode) => {
@@ -234,37 +258,87 @@ const layoutTree = (root: DominanceTreeNode) => {
   };
 };
 
+const FOREST_GAP = 56;
+
+type Laid = {
+  nodes: LaidNode[];
+  lines: LaidLine[];
+  width: number;
+  height: number;
+};
+
+// Lay out a forest of trees side by side, shifting each past the previous ones.
+const layoutForest = (roots: DominanceTreeNode[]): Laid => {
+  const nodes: LaidNode[] = [];
+  const lines: LaidLine[] = [];
+  let offsetX = 0;
+  let height = 0;
+  roots.forEach((root, t) => {
+    const laid = layoutTree(root);
+    laid.nodes.forEach((n) =>
+      nodes.push({ ...n, x: n.x + offsetX, key: `${t}-${n.key}` })
+    );
+    laid.lines.forEach((l) =>
+      lines.push({ x1: l.x1 + offsetX, y1: l.y1, x2: l.x2 + offsetX, y2: l.y2 })
+    );
+    height = Math.max(height, laid.height);
+    offsetX += laid.width + FOREST_GAP;
+  });
+  return { nodes, lines, width: Math.max(0, offsetX - FOREST_GAP), height };
+};
+
+type TreeProps = {
+  onSelect: (pig: Pig) => void;
+  metricsById: Map<number, GraphMetrics>;
+};
+
+const TreeCanvas = ({
+  nodes,
+  lines,
+  width,
+  height,
+  onSelect,
+  metricsById,
+}: Laid & TreeProps) => (
+  <div className="graphTreeScroll">
+    <div className="tidyTree" style={{ width, height }}>
+      <svg className="tidyTreeLines" width={width} height={height}>
+        {lines.map((l, i) => (
+          <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} />
+        ))}
+      </svg>
+      {nodes.map((n) => (
+        <div
+          className="tidyTreeNode"
+          key={n.key}
+          style={{ left: n.x - NODE_W / 2, top: n.y }}
+        >
+          <PigDot
+            pig={n.pig}
+            onSelect={onSelect}
+            repeated={n.repeated}
+            stats={n.repeated ? undefined : metricsById.get(n.pig.id)}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const TidyTree = ({
   root,
-  onSelect,
-}: {
-  root: DominanceTreeNode;
-  onSelect: (pig: Pig) => void;
-}) => {
-  const { nodes, lines, width, height } = useMemo(
-    () => layoutTree(root),
-    [root]
-  );
-  return (
-    <div className="graphTreeScroll">
-      <div className="tidyTree" style={{ width, height }}>
-        <svg className="tidyTreeLines" width={width} height={height}>
-          {lines.map((l, i) => (
-            <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} />
-          ))}
-        </svg>
-        {nodes.map((n) => (
-          <div
-            className="tidyTreeNode"
-            key={n.key}
-            style={{ left: n.x - NODE_W / 2, top: n.y }}
-          >
-            <PigDot pig={n.pig} onSelect={onSelect} repeated={n.repeated} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  ...rest
+}: { root: DominanceTreeNode } & TreeProps) => {
+  const laid = useMemo(() => layoutTree(root), [root]);
+  return <TreeCanvas {...laid} {...rest} />;
+};
+
+const TidyForest = ({
+  roots,
+  ...rest
+}: { roots: DominanceTreeNode[] } & TreeProps) => {
+  const laid = useMemo(() => layoutForest(roots), [roots]);
+  return <TreeCanvas {...laid} {...rest} />;
 };
 
 // A graph-derived ranking, separate from the pecking order. Pigs are scored
@@ -278,11 +352,18 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
     [pigs, socialOrder]
   );
 
-  // Look up a pig's rank/metrics for the detail header.
+  // Look up a pig's rank/metrics for the detail header and tree nodes.
   const groupByPigId = useMemo(() => {
     const map = new Map<number, (typeof groups)[number]>();
     for (const group of groups)
       for (const pig of group.pigs) map.set(pig.id, group);
+    return map;
+  }, [groups]);
+
+  const metricsById = useMemo(() => {
+    const map = new Map<number, GraphMetrics>();
+    for (const group of groups)
+      for (const pig of group.pigs) map.set(pig.id, group.metrics);
     return map;
   }, [groups]);
 
@@ -302,6 +383,11 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
     [selectedId, pigs, socialOrder]
   );
 
+  const forest = useMemo(
+    () => computeDominanceForest(pigs, socialOrder),
+    [pigs, socialOrder]
+  );
+
   if (!groups.length) {
     return (
       <p className="muted socialGraphEmpty">
@@ -314,10 +400,20 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
 
   return (
     <div className="graphRank">
-      <p className="graphRankLegend muted">
-        Ranked by 👥 pigs dominated, then 🪜 chain depth, then 💪 strength. Tap a
-        row for their graph.
-      </p>
+      {forest.length > 0 && (
+        <section className="graphOverview">
+          <p className="graphOverviewHeading">🌳 The whole herd</p>
+          <p className="graphRankLegend muted">
+            Ranked by pig's boss of 🐖 , then 🪜 chain depth, then 💪 strength.
+          </p>
+          <TidyForest
+            roots={forest}
+            onSelect={selectPig}
+            metricsById={metricsById}
+          />
+        </section>
+      )}
+
       <ol className="graphRankList">
         {groups.map((group) => (
           <li
@@ -338,7 +434,9 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
             </span>
 
             <div className="graphRankPigs">
-              {group.isLoop && <span className="graphRankLoopTag">🔁 loop</span>}
+              {group.isLoop && (
+                <span className="graphRankLoopTag">🔁 loop</span>
+              )}
               {group.pigs.map((pig) => (
                 <GraphPig
                   key={pig.id}
@@ -350,13 +448,16 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
             </div>
 
             <div className="graphRankMetrics">
-              <span className="graphMetric" title="Pigs dominated (directly or indirectly)">
-                👥 Descendants: {group.metrics.descendants}
+              <span className="graphMetric" title="Boss Pig of">
+                🐖 Boss Pig of: {group.metrics.descendants}
               </span>
-              <span className="graphMetric" title="Longest dominance chain beneath">
+              <span className="graphMetric" title="Longest chain beneath">
                 🪜 Chain: {group.metrics.chain}
               </span>
-              <span className="graphMetric" title="Clout: total strength of the pigs you dominate">
+              <span
+                className="graphMetric"
+                title="Clout: total strength of the pigs you are the boss of"
+              >
                 💪 Power: {group.metrics.power}
               </span>
             </div>
@@ -404,9 +505,15 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
                 ▼ Everyone below {detail.pig.name}
               </p>
               {tree && tree.children.length > 0 ? (
-                <TidyTree root={tree} onSelect={selectPig} />
+                <TidyTree
+                  root={tree}
+                  onSelect={selectPig}
+                  metricsById={metricsById}
+                />
               ) : (
-                <p className="muted">{detail.pig.name} dominates no one yet.</p>
+                <p className="muted">
+                  {detail.pig.name} is not the Boss Pig of anyone.
+                </p>
               )}
             </section>
           </div>
