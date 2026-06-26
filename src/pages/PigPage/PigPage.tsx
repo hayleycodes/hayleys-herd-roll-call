@@ -104,8 +104,15 @@ const PigPage = () => {
   const { id } = useParams();
 
   const [pig, setPig] = useState<Pig | null>(null);
+
+  // Which photo the big circle shows — picked at random once the pig loads,
+  // clamped so it stays valid if photos are removed.
+  const [heroIndex, setHeroIndex] = useState(0);
+  const photoCount = pig?.image_paths.length ?? 0;
+  const photoIndex = photoCount ? Math.min(heroIndex, photoCount - 1) : 0;
+
   const { imageUrl, imageLoading, imageReady } = usePigImage(
-    pig?.image_paths?.[0] ?? null
+    pig?.image_paths?.[photoIndex] ?? null
   );
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -278,6 +285,13 @@ const PigPage = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
+
+  // Pick a random photo for the big circle each time a pig loads.
+  useEffect(() => {
+    const count = pig?.image_paths.length ?? 0;
+    setHeroIndex(count ? Math.floor(Math.random() * count) : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pig?.id]);
 
   useEffect(() => {
     const load = async () => {
@@ -457,7 +471,7 @@ const PigPage = () => {
                 src={imageUrl}
                 alt={pig.name}
                 className="detailImage"
-                onClick={() => openLightboxAt(0)}
+                onClick={() => openLightboxAt(photoIndex)}
                 style={{
                   opacity: imageReady ? 1 : 0,
                   transition: 'opacity 0.3s ease',
@@ -471,17 +485,19 @@ const PigPage = () => {
 
           {pig.image_paths.length >= 1 && (
             <div className="detailExtraPhotos">
-              {pig.image_paths.slice(1).map((path, i) => (
-                <button
-                  key={path}
-                  type="button"
-                  className="detailExtraPhoto"
-                  onClick={() => openLightboxAt(i + 1)}
-                  aria-label="View photo"
-                >
-                  <PigPhoto path={path} />
-                </button>
-              ))}
+              {pig.image_paths.map((path, i) =>
+                i === photoIndex ? null : (
+                  <button
+                    key={path}
+                    type="button"
+                    className="detailExtraPhoto"
+                    onClick={() => openLightboxAt(i)}
+                    aria-label="View photo"
+                  >
+                    <PigPhoto path={path} />
+                  </button>
+                )
+              )}
               {pig.image_paths.length < 3 && (
                 <button
                   type="button"
