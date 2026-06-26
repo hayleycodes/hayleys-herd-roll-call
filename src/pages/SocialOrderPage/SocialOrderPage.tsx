@@ -17,6 +17,7 @@ import PigPicker from '../../components/PigPicker/PigPicker';
 import Button from '../../components/ui/Button/Button';
 import Modal from '../../components/ui/Modal/Modal';
 import Panel from '../../components/ui/Panel/Panel';
+import SocialGraph from './SocialGraph';
 
 const SocialOrderPage = () => {
   const [socialOrder, setSocialOrder] = useState<SocialOrderItem[]>([]);
@@ -31,9 +32,9 @@ const SocialOrderPage = () => {
     null
   );
   const [deleting, setDeleting] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ranking' | 'observations'>(
-    'ranking'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'ranking' | 'graph' | 'observations'
+  >('ranking');
 
   const { ranked, unranked } = useMemo(
     () => computePeckingOrder(allPigs, socialOrder),
@@ -137,6 +138,12 @@ const SocialOrderPage = () => {
           Pecking Order 👑
         </button>
         <button
+          className={activeTab === 'graph' ? 'active' : ''}
+          onClick={() => setActiveTab('graph')}
+        >
+          Graph 🕸️
+        </button>
+        <button
           className={activeTab === 'observations' ? 'active' : ''}
           onClick={() => setActiveTab('observations')}
         >
@@ -193,6 +200,10 @@ const SocialOrderPage = () => {
             </div>
           )}
         </div>
+      )}
+
+      {activeTab === 'graph' && (
+        <SocialGraph pigs={allPigs} socialOrder={socialOrder} />
       )}
 
       {activeTab === 'observations' && (

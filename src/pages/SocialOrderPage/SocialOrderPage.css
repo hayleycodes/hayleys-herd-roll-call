@@ -6,12 +6,13 @@
 /* ---- Tabs ---- */
 
 .socialOrderPage .tabs {
+  display: flex;
   margin: calc(0px - var(--spacing-xs)) calc(0px - var(--spacing-xs))
     var(--spacing-xxs);
 }
 
 .socialOrderPage .tabs button {
-  width: 50%;
+  flex: 1;
   padding: var(--spacing-xs) 0;
   background: none;
   border: none;
@@ -162,6 +163,170 @@
   justify-content: center;
   gap: var(--spacing-sm);
   opacity: 0.5;
+}
+
+/* ---- Graph ranking ---- */
+
+.socialGraphEmpty {
+  text-align: center;
+}
+
+.graphRankLegend {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--spacing-sm);
+}
+
+.graphRankList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.graphRankRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: color-mix(in srgb, var(--primary) 12%, white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.graphRankRow:hover {
+  filter: brightness(0.97);
+}
+
+.graphRankRow.graphRankTop {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.graphRankRow.graphRankLoop {
+  border: 2px dashed var(--primary-dark);
+}
+
+.graphRankNum {
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-muted);
+}
+
+.graphRankTop .graphRankNum {
+  font-size: var(--font-size-xl);
+}
+
+.graphRankPigs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.graphRankLoopTag {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-dark);
+  width: 100%;
+}
+
+.graphRankPigCard {
+  width: 72px;
+  cursor: pointer;
+}
+
+/* ---- Graph detail modal ---- */
+
+.graphDetailFocus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.graphDetailFocusCard {
+  display: block;
+  width: 100px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.graphDetailMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-xxs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.graphDetailFocusHint {
+  font-size: var(--font-size-sm);
+}
+
+.graphDetailSection {
+  margin-bottom: var(--spacing-md);
+}
+
+.graphDetailHeading {
+  margin: 0 0 var(--spacing-xs);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.graphDetailRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.graphDetailPigCard {
+  width: 64px;
+  cursor: pointer;
+}
+
+.graphDetailChain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.graphDetailChainStep {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.graphDetailArrow {
+  font-size: var(--font-size-lg);
+  color: var(--text-muted);
+}
+
+.graphRankMetrics {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.graphMetric {
+  white-space: nowrap;
 }
 
 /* ---- Form ---- */
