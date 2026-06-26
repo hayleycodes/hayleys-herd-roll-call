@@ -255,13 +255,6 @@
   margin-bottom: var(--spacing-md);
 }
 
-.graphDetailFocusCard {
-  display: block;
-  width: 100px;
-  text-decoration: none;
-  color: inherit;
-}
-
 .graphDetailMetrics {
   display: flex;
   flex-wrap: wrap;
@@ -279,10 +272,12 @@
   margin-bottom: var(--spacing-md);
 }
 
-.graphDetailHeading {
+/* Beat the generic `.modalOverlay p { font-size: 24px }` rule. */
+.graphDetail .graphDetailHeading {
   margin: 0 0 var(--spacing-xs);
   font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
+  text-align: left;
   color: var(--text-muted);
 }
 
@@ -292,27 +287,91 @@
   gap: var(--spacing-sm);
 }
 
-.graphDetailPigCard {
-  width: 64px;
+/* ---- Self-contained pig node (photo + name), used in the modal ---- */
+
+.graphNode {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 56px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: inherit;
+  text-decoration: none;
   cursor: pointer;
 }
 
-.graphDetailChain {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-xs);
+.graphNodeLarge {
+  width: 88px;
 }
 
-.graphDetailChainStep {
+.graphNodePhoto {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--surface-alt);
+  border: 3px solid var(--pig-color, var(--border-color));
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  justify-content: center;
 }
 
-.graphDetailArrow {
-  font-size: var(--font-size-lg);
-  color: var(--text-muted);
+.graphNodePhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.graphNodeEmoji {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.graphNodeName {
+  max-width: 100%;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+  background: var(--pig-color, var(--accent-yellow));
+  border-radius: var(--border-radius-sm);
+  padding: 1px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Dominance tree (computed tidy layout) ---- */
+
+.graphTreeScroll {
+  overflow-x: auto;
+  padding-bottom: var(--spacing-xs);
+}
+
+.tidyTree {
+  position: relative;
+  margin: 0 auto;
+}
+
+.tidyTreeLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.tidyTreeLines line {
+  stroke: color-mix(in srgb, var(--primary) 50%, white);
+  stroke-width: 2;
+}
+
+.tidyTreeNode {
+  position: absolute;
+  width: 56px;
 }
 
 .graphRankMetrics {

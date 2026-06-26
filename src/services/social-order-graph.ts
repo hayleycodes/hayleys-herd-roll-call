@@ -253,6 +253,40 @@ export function computePigGraphDetail(
   };
 }
 
+export type DominanceTreeNode = {
+  pig: Pig;
+  children: DominanceTreeNode[];
+  repeated: boolean; // already expanded elsewhere (loop/diamond) — not re-expanded
+};
+
+/**
+ * A spanning tree of everyone the given pig dominates, directly or indirectly.
+ * Each pig is expanded once; if it's reached again (a diamond or a loop) it
+ * appears as a `repeated` leaf so the tree stays finite.
+ */
+export function computeDominanceTree(
+  pigs: Pig[],
+  items: SocialOrderItem[],
+  pigId: number
+): DominanceTreeNode | null {
+  const { pigById, out } = buildDominanceGraph(pigs, items);
+  if (!pigById.has(pigId)) return null;
+
+  const expanded = new Set<number>();
+  const build = (id: number): DominanceTreeNode => {
+    const pig = pigById.get(id)!;
+    if (expanded.has(id)) return { pig, children: [], repeated: true };
+    expanded.add(id);
+    const children = [...(out.get(id) ?? [])]
+      .map((cid) => pigById.get(cid)!)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((child) => build(child.id));
+    return { pig, children, repeated: false };
+  };
+
+  return build(pigId);
+}
+
 type DominanceGraph = {
   pigById: Map<number, Pig>;
   involved: Set<number>;
