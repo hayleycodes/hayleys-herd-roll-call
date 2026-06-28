@@ -92,6 +92,16 @@ const MapPage = () => {
   } | null>(null);
   const [selectedPigs, setSelectedPigs] = useState<Set<number>>(new Set());
   const [sightings, setSightings] = useState<PigSighting[]>([]);
+  // First tap "arms" a cell (highlights it); a second tap on the same cell
+  // opens the picker. Keeps stray taps while scrolling from marking sightings.
+  const [armed, setArmed] = useState<{
+    x: number;
+    y: number;
+    level: number;
+    col: number;
+    row: number;
+    houseId?: string;
+  } | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   // Only pigs that live in the main pen can be sighted on this map.
@@ -133,6 +143,7 @@ const MapPage = () => {
     load();
   }, []);
 
+
   const handleDragEnd = (id: string, col: number, row: number) => {
     setHouses((prev) => {
       const next = prev.map((h) => (h.id === id ? { ...h, col, row } : h));
@@ -152,56 +163,69 @@ const MapPage = () => {
   };
 
   // Decide which way the dropdown should open so it stays inside the visible
-  // (scrolled) canvas viewport rather than clipping at an edge.
+  // (scrolled) viewport rather than clipping at an edge. Takes the cell centre
+  // in grid coords.
   const placementFor = (
-    px: number,
-    py: number
+    x: number,
+    y: number
   ): { dropUp: boolean; align: 'left' | 'right' } => {
     const wrap = wrapRef.current;
     if (!wrap) return { dropUp: false, align: 'right' };
-    const viewX = px - wrap.scrollLeft;
-    const viewY = py - wrap.scrollTop;
+    const viewX = x * CELL_SIZE - wrap.scrollLeft;
+    const viewY = y * CELL_SIZE - wrap.scrollTop;
     return {
       dropUp: viewY > wrap.clientHeight * 0.55,
       align: viewX < wrap.clientWidth * 0.5 ? 'left' : 'right',
     };
   };
 
-  // Click anywhere on the grid → open the pig picker at the clicked cell.
-  // Pass a houseId to highlight the house instead of the bare cell. Ignored in
-  // edit mode (clicks there are for arranging objects).
-  const handleCellClick = (stage: any, houseId?: string) => {
-    if (editMode) return;
-    const pos = stage.getPointerPosition();
-    if (!pos) return;
-    const col = Math.floor(pos.x / CELL_SIZE);
-    const row = Math.floor(pos.y / CELL_SIZE);
-    setSelectedPigs(new Set());
-    setMarking({
-      x: col + 0.5,
-      y: row + 0.5,
-      level: 0,
-      col,
-      row,
-      houseId,
-      ...placementFor((col + 0.5) * CELL_SIZE, (row + 0.5) * CELL_SIZE),
-    });
+  type TapTarget = {
+    x: number;
+    y: number;
+    level: number;
+    col: number;
+    row: number;
+    houseId?: string;
   };
 
-  // Open the picker for a specific floor of a house.
-  const openFloor = (house: PenObject, level: number) => {
+  // First tap arms (highlights) a target; tapping the same target again opens
+  // the picker. Ignored in edit mode (taps there are for arranging objects).
+  const tapTarget = (t: TapTarget) => {
     if (editMode) return;
+    const sameAsArmed =
+      armed &&
+      armed.col === t.col &&
+      armed.row === t.row &&
+      armed.level === t.level &&
+      armed.houseId === t.houseId;
+    if (sameAsArmed) {
+      setSelectedPigs(new Set());
+      setMarking({ ...t, ...placementFor(t.x, t.y) });
+    } else {
+      setMarking(null);
+      setArmed(t);
+    }
+  };
+
+  const handleCellClick = (stage: any, houseId?: string) => {
+    const p = stage.getPointerPosition();
+    if (!p) return;
+    const col = Math.floor(p.x / CELL_SIZE);
+    const row = Math.floor(p.y / CELL_SIZE);
+    tapTarget({ x: col + 0.5, y: row + 0.5, level: 0, col, row, houseId });
+  };
+
+  // First tap arms a specific floor of a house; second opens the picker.
+  const openFloor = (house: PenObject, level: number) => {
     const x = house.col + house.width / 2;
     const y = house.row + house.length / 2;
-    setSelectedPigs(new Set());
-    setMarking({
+    tapTarget({
       x,
       y,
       level,
       col: Math.floor(x),
       row: Math.floor(y),
       houseId: house.id,
-      ...placementFor(x * CELL_SIZE, y * CELL_SIZE),
     });
   };
 
@@ -219,6 +243,7 @@ const MapPage = () => {
     const { x, y, level } = marking;
     const ids = [...selectedPigs];
     setMarking(null);
+    setArmed(null);
     setSelectedPigs(new Set());
     try {
       await Promise.all(ids.map((id) => createSighting(id, x, y, level)));
@@ -316,10 +341,10 @@ const MapPage = () => {
 
             {/* Houses layer */}
             <Layer>
-              {marking && !marking.houseId && (
+              {armed && !armed.houseId && (
                 <Rect
-                  x={marking.col * CELL_SIZE}
-                  y={marking.row * CELL_SIZE}
+                  x={armed.col * CELL_SIZE}
+                  y={armed.row * CELL_SIZE}
                   width={CELL_SIZE}
                   height={CELL_SIZE}
                   fill="rgba(124, 92, 255, 0.25)"
@@ -329,7 +354,7 @@ const MapPage = () => {
                 />
               )}
               {houses.map((house) => {
-                const selected = marking?.houseId === house.id;
+                const selected = armed?.houseId === house.id;
                 const shapeStyle = selected
                   ? { ...SHAPE_STYLE, stroke: '#ff5fa2', strokeWidth: 6 }
                   : SHAPE_STYLE;
@@ -551,7 +576,10 @@ const MapPage = () => {
                 selectedPigIds={[...selectedPigs]}
                 onToggle={togglePig}
                 onSave={handleSave}
-                onClose={() => setMarking(null)}
+                onClose={() => {
+                  setMarking(null);
+                  setArmed(null);
+                }}
                 defaultOpen
                 theme="purple"
                 dropUp={marking.dropUp}
