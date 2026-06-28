@@ -51,7 +51,44 @@ const DISABLED_CORNER: number[] = [
 // sightings on this map.
 const NON_MAIN_PEN_PIGS = ['spud', 'pie', 'tornado pig'];
 
+// Objects that are scenery, not spaces — greyed out and not markable.
+const DISABLED_OBJECT_IDS = new Set(['tree', 'r2d2']);
+
 const snap = (value: number) => Math.round(value / CELL_SIZE);
+
+// Whether a cell falls inside one of the greyed-out, non-markable zones.
+const isDisabledCell = (col: number, row: number): boolean => {
+  const inArea =
+    col >= DISABLED_AREA.col &&
+    col < DISABLED_AREA.col + DISABLED_AREA.width &&
+    row >= DISABLED_AREA.row &&
+    row < DISABLED_AREA.row + DISABLED_AREA.height;
+  if (inArea) return true;
+
+  // Point-in-triangle for the cut corner (vertices in cell coords).
+  const ax = DISABLED_CORNER[0] / CELL_SIZE;
+  const ay = DISABLED_CORNER[1] / CELL_SIZE;
+  const bx = DISABLED_CORNER[2] / CELL_SIZE;
+  const by = DISABLED_CORNER[3] / CELL_SIZE;
+  const cx = DISABLED_CORNER[4] / CELL_SIZE;
+  const cy = DISABLED_CORNER[5] / CELL_SIZE;
+  const px = col + 0.5;
+  const py = row + 0.5;
+  const sign = (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number
+  ) => (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+  const d1 = sign(px, py, ax, ay, bx, by);
+  const d2 = sign(px, py, bx, by, cx, cy);
+  const d3 = sign(px, py, cx, cy, ax, ay);
+  const hasNeg = d1 < 0 || d2 < 0 || d3 < 0;
+  const hasPos = d1 > 0 || d2 > 0 || d3 > 0;
+  return !(hasNeg && hasPos);
+};
 
 const ROTATE_STEP = 45; // degrees per click of the rotate handle
 
@@ -211,6 +248,8 @@ const MapPage = () => {
     if (!p) return;
     const col = Math.floor(p.x / CELL_SIZE);
     const row = Math.floor(p.y / CELL_SIZE);
+    // Bare cells inside a greyed-out zone aren't markable.
+    if (!houseId && isDisabledCell(col, row)) return;
     tapTarget({ x: col + 0.5, y: row + 0.5, level: 0, col, row, houseId });
   };
 
@@ -366,8 +405,13 @@ const MapPage = () => {
                 />
               )}
               {houses.map((house) => {
+                const disabled = DISABLED_OBJECT_IDS.has(house.id);
                 const selected = armed?.houseId === house.id;
-                const shapeFill = selected ? SHAPE_STYLE.stroke : '#beadff';
+                const shapeFill = disabled
+                  ? '#b8b8c0'
+                  : selected
+                    ? SHAPE_STYLE.stroke
+                    : '#beadff';
                 const labelFill = selected ? '#ffffff' : LABEL_STYLE.fill;
                 return (
                   <Group
@@ -376,14 +420,16 @@ const MapPage = () => {
                     y={house.row * CELL_SIZE}
                     rotation={house.rotation}
                     draggable={editMode}
-                    onClick={(e) =>
-                      handleCellClick(e.target.getStage(), house.id)
-                    }
-                    onTap={(e) =>
-                      handleCellClick(e.target.getStage(), house.id)
-                    }
+                    onClick={(e) => {
+                      if (!disabled || editMode)
+                        handleCellClick(e.target.getStage(), house.id);
+                    }}
+                    onTap={(e) => {
+                      if (!disabled || editMode)
+                        handleCellClick(e.target.getStage(), house.id);
+                    }}
                     onMouseEnter={(e) => {
-                      if (editMode) return;
+                      if (editMode || disabled) return;
                       const stage = e.target.getStage();
                       if (stage) stage.container().style.cursor = 'pointer';
                     }}
@@ -445,90 +491,6 @@ const MapPage = () => {
                 );
               })}
 
-              {/* Upper-floor buttons for multi-storey houses. Rendered outside
-                  the rotating Group, anchored to the top-left of the house's
-                  on-screen (rotated) bounding box so they stay upright and in
-                  place. The house body itself records the ground floor. */}
-              {!editMode &&
-                houses
-                  .filter((house) => (house.levels ?? 1) >= 2)
-                  .map((house) => {
-                    const w = house.width * CELL_SIZE;
-                    const l = house.length * CELL_SIZE;
-                    const rad = (house.rotation * Math.PI) / 180;
-                    const cos = Math.cos(rad);
-                    const sin = Math.sin(rad);
-                    const px = house.col * CELL_SIZE;
-                    const py = house.row * CELL_SIZE;
-                    const corners = [
-                      [0, 0],
-                      [w, 0],
-                      [0, l],
-                      [w, l],
-                    ].map(([x, y]) => ({
-                      x: px + x * cos - y * sin,
-                      y: py + x * sin + y * cos,
-                    }));
-                    const minX = Math.min(...corners.map((c) => c.x));
-                    const minY = Math.min(...corners.map((c) => c.y));
-                    const upper = Array.from(
-                      { length: (house.levels ?? 1) - 1 },
-                      (_, i) => i + 1
-                    );
-                    const btnW = 44;
-                    const btnH = 29;
-                    const gap = 5;
-                    const pad = 5;
-                    return (
-                      <Group
-                        key={`floors-${house.id}`}
-                        x={minX + pad}
-                        y={minY + pad}
-                      >
-                        {upper.map((level, i) => {
-                          const floorArmed =
-                            armed?.houseId === house.id &&
-                            armed.level === level;
-                          return (
-                            <Group
-                              key={level}
-                              y={i * (btnH + gap)}
-                              onClick={(e) => {
-                                e.cancelBubble = true;
-                                openFloor(house, level);
-                              }}
-                              onTap={(e) => {
-                                e.cancelBubble = true;
-                                openFloor(house, level);
-                              }}
-                            >
-                              <Rect
-                                width={btnW}
-                                height={btnH}
-                                fill={floorArmed ? '#7c5cff' : '#ffffff'}
-                                stroke={floorArmed ? '#ffffff' : '#7c5cff'}
-                                strokeWidth={2}
-                                cornerRadius={8}
-                              />
-                              <Text
-                                text={`🪜${level}`}
-                                y={2}
-                                width={btnW}
-                                height={btnH}
-                                align="center"
-                                verticalAlign="middle"
-                                lineHeight={1}
-                                fontSize={17}
-                                fontFamily="Fuzzy Bubbles, system-ui"
-                                fill={floorArmed ? '#ffffff' : '#2b2d42'}
-                              />
-                            </Group>
-                          );
-                        })}
-                      </Group>
-                    );
-                  })}
-
               {/* Rotate handles — only in edit mode. Placed at each object's
                 rotation pivot (top-left), which stays put as it spins, and
                 kept outside the rotating Group so the icon stays upright. */}
@@ -585,6 +547,59 @@ const MapPage = () => {
               ))}
             </div>
           ))}
+
+          {/* Upper-floor buttons for multi-storey houses — rendered above the
+              pig photos and anchored to the top-left of the house's (rotated)
+              bounding box. The house body itself records the ground floor. */}
+          {!editMode &&
+            houses
+              .filter((house) => (house.levels ?? 1) >= 2)
+              .map((house) => {
+                const w = house.width * CELL_SIZE;
+                const l = house.length * CELL_SIZE;
+                const rad = (house.rotation * Math.PI) / 180;
+                const cos = Math.cos(rad);
+                const sin = Math.sin(rad);
+                const px = house.col * CELL_SIZE;
+                const py = house.row * CELL_SIZE;
+                const corners = [
+                  [0, 0],
+                  [w, 0],
+                  [0, l],
+                  [w, l],
+                ].map(([x, y]) => ({
+                  x: px + x * cos - y * sin,
+                  y: py + x * sin + y * cos,
+                }));
+                const minX = Math.min(...corners.map((c) => c.x));
+                const minY = Math.min(...corners.map((c) => c.y));
+                const upper = Array.from(
+                  { length: (house.levels ?? 1) - 1 },
+                  (_, i) => i + 1
+                );
+                return (
+                  <div
+                    key={`floors-${house.id}`}
+                    className="floorButtons"
+                    style={{ left: minX + 5, top: minY + 5 }}
+                  >
+                    {upper.map((level) => {
+                      const floorArmed =
+                        armed?.houseId === house.id && armed.level === level;
+                      return (
+                        <button
+                          key={level}
+                          type="button"
+                          className={`floorButton${floorArmed ? ' armed' : ''}`}
+                          onClick={() => openFloor(house, level)}
+                        >
+                          🪜{level}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
 
           {marking && (
             <div
