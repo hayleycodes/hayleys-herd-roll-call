@@ -37,6 +37,7 @@ type Props = {
   selectedPigIds?: number[];
   onToggle?: (pigId: number) => void;
   onSave?: () => void;
+  title?: string;
 };
 
 const PigPicker = ({
@@ -53,6 +54,7 @@ const PigPicker = ({
   selectedPigIds = [],
   onToggle,
   onSave,
+  title,
 }: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(defaultOpen);
   const [alignRight, setAlignRight] = useState(true);
@@ -118,6 +120,7 @@ const PigPicker = ({
         <div
           className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}${(align ? align === 'left' : !alignRight) ? ' pigPickerMenu--left' : ''}`}
         >
+          {title && <div className="pigPickerTitle">{title}</div>}
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
               <button

@@ -74,7 +74,7 @@ const LABEL_STYLE = {
 const MapPage = () => {
   const [houses, setHouses] = useState<PenObject[]>([]);
   const [allPigs, setAllPigs] = useState<Pig[]>([]);
-  const [fill, setFill] = useState('#dcb5ff');
+  const [fill, setFill] = useState('#beadff');
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   // The cell a sighting is being recorded for. x/y are grid coords (cell
@@ -228,6 +228,19 @@ const MapPage = () => {
     });
   };
 
+  // Heading for the picker: house + floor, or bare cell coordinates.
+  const markingTitle = (m: NonNullable<typeof marking>): string => {
+    if (m.houseId) {
+      const house = houses.find((h) => h.id === m.houseId);
+      const label = house?.label ?? 'House';
+      if ((house?.levels ?? 1) >= 2) {
+        return `${label} · ${m.level === 0 ? 'Ground' : `Floor ${m.level}`}`;
+      }
+      return label;
+    }
+    return `(${m.col}, ${m.row})`;
+  };
+
   const togglePig = (pigId: number) => {
     setSelectedPigs((prev) => {
       const next = new Set(prev);
@@ -354,9 +367,8 @@ const MapPage = () => {
               )}
               {houses.map((house) => {
                 const selected = armed?.houseId === house.id;
-                const shapeStyle = selected
-                  ? { ...SHAPE_STYLE, stroke: '#ff5fa2', strokeWidth: 6 }
-                  : SHAPE_STYLE;
+                const shapeFill = selected ? SHAPE_STYLE.stroke : '#beadff';
+                const labelFill = selected ? '#ffffff' : LABEL_STYLE.fill;
                 return (
                   <Group
                     key={house.id}
@@ -398,9 +410,9 @@ const MapPage = () => {
                           house.length * CELL_SIZE,
                         ]}
                         closed
-                        fill={fill}
+                        fill={shapeFill}
                         lineJoin="round"
-                        {...shapeStyle}
+                        {...SHAPE_STYLE}
                       />
                     ) : house.shape === 'circle' ? (
                       <Ellipse
@@ -408,16 +420,16 @@ const MapPage = () => {
                         y={(house.length * CELL_SIZE) / 2}
                         radiusX={(house.width * CELL_SIZE) / 2}
                         radiusY={(house.length * CELL_SIZE) / 2}
-                        fill={fill}
-                        {...shapeStyle}
+                        fill={shapeFill}
+                        {...SHAPE_STYLE}
                       />
                     ) : (
                       <Rect
                         width={house.width * CELL_SIZE}
                         height={house.length * CELL_SIZE}
-                        fill={fill}
+                        fill={shapeFill}
                         cornerRadius={10}
-                        {...shapeStyle}
+                        {...SHAPE_STYLE}
                       />
                     )}
                     <Text
@@ -427,6 +439,7 @@ const MapPage = () => {
                       align="center"
                       verticalAlign="middle"
                       {...LABEL_STYLE}
+                      fill={labelFill}
                     />
                   </Group>
                 );
@@ -472,40 +485,46 @@ const MapPage = () => {
                         x={minX + pad}
                         y={minY + pad}
                       >
-                        {upper.map((level, i) => (
-                          <Group
-                            key={level}
-                            y={i * (btnH + gap)}
-                            onClick={(e) => {
-                              e.cancelBubble = true;
-                              openFloor(house, level);
-                            }}
-                            onTap={(e) => {
-                              e.cancelBubble = true;
-                              openFloor(house, level);
-                            }}
-                          >
-                            <Rect
-                              width={btnW}
-                              height={btnH}
-                              fill="#ffffff"
-                              stroke="#7c5cff"
-                              strokeWidth={2}
-                              cornerRadius={8}
-                            />
-                            <Text
-                              text={`🪜${level}`}
-                              y={2}
-                              width={btnW}
-                              height={btnH}
-                              align="center"
-                              verticalAlign="middle"
-                              lineHeight={1}
-                              fontSize={17}
-                              fontFamily="Fuzzy Bubbles, system-ui"
-                            />
-                          </Group>
-                        ))}
+                        {upper.map((level, i) => {
+                          const floorArmed =
+                            armed?.houseId === house.id &&
+                            armed.level === level;
+                          return (
+                            <Group
+                              key={level}
+                              y={i * (btnH + gap)}
+                              onClick={(e) => {
+                                e.cancelBubble = true;
+                                openFloor(house, level);
+                              }}
+                              onTap={(e) => {
+                                e.cancelBubble = true;
+                                openFloor(house, level);
+                              }}
+                            >
+                              <Rect
+                                width={btnW}
+                                height={btnH}
+                                fill={floorArmed ? '#7c5cff' : '#ffffff'}
+                                stroke={floorArmed ? '#ffffff' : '#7c5cff'}
+                                strokeWidth={2}
+                                cornerRadius={8}
+                              />
+                              <Text
+                                text={`🪜${level}`}
+                                y={2}
+                                width={btnW}
+                                height={btnH}
+                                align="center"
+                                verticalAlign="middle"
+                                lineHeight={1}
+                                fontSize={17}
+                                fontFamily="Fuzzy Bubbles, system-ui"
+                                fill={floorArmed ? '#ffffff' : '#2b2d42'}
+                              />
+                            </Group>
+                          );
+                        })}
                       </Group>
                     );
                   })}
@@ -589,6 +608,7 @@ const MapPage = () => {
                 }}
                 defaultOpen
                 theme="purple"
+                title={markingTitle(marking)}
                 dropUp={marking.dropUp}
                 align={marking.align}
               />
