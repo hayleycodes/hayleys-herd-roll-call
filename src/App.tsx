@@ -21,6 +21,7 @@ import HealthLogPage from './pages/HealthLogPage/HealthLogPage.tsx';
 import WeightsPage from './pages/WeightsPage/WeightsPage.tsx';
 import TagsPage from './pages/TagsPage/TagsPage.tsx';
 import MoodPage from './pages/MoodPage/MoodPage.tsx';
+import MapPage from './pages/MapPage/MapPage.tsx';
 import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
@@ -65,6 +66,9 @@ function App() {
             </Link>
             <Link to="/health-log">
               <EmojiButton>🏥</EmojiButton>
+            </Link>
+            <Link to="/map">
+              <EmojiButton>🗺️</EmojiButton>
             </Link>
             <EmojiButton onClick={() => setIsRollcallOpen(true)}>
               🍎
@@ -134,6 +138,14 @@ function App() {
             element={
               <PageTransition>
                 <TagsPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/map"
+            element={
+              <PageTransition>
+                <MapPage />
               </PageTransition>
             }
           />
