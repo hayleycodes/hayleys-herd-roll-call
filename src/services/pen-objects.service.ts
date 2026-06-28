@@ -1,22 +1,10 @@
 import { supabase } from '../../utils/supabase-client';
+import type { Tables, TablesInsert } from '../types/database.types';
 import type { PenObject } from '../pages/MapPage/objects';
-
-// Cast to any since this table isn't in the generated types yet
-const penObjectsTable = () => (supabase as any).from('pen_objects');
 
 // DB row shape. `row` is a reserved word in Postgres, so the grid coords are
 // stored as grid_col / grid_row.
-type PenObjectRow = {
-  id: string;
-  label: string;
-  grid_col: number;
-  grid_row: number;
-  width: number;
-  length: number;
-  rotation: number;
-  shape: string | null;
-  levels: number | null;
-};
+type PenObjectRow = Tables<'pen_objects'>;
 
 const toPenObject = (r: PenObjectRow): PenObject => ({
   id: r.id,
@@ -30,7 +18,7 @@ const toPenObject = (r: PenObjectRow): PenObject => ({
   levels: r.levels ?? 1,
 });
 
-const toRow = (o: PenObject): PenObjectRow => ({
+const toRow = (o: PenObject): TablesInsert<'pen_objects'> => ({
   id: o.id,
   label: o.label,
   grid_col: o.col,
@@ -43,13 +31,15 @@ const toRow = (o: PenObject): PenObjectRow => ({
 });
 
 export const getPenObjects = async (): Promise<PenObject[]> => {
-  const { data, error } = await penObjectsTable().select('*');
+  const { data, error } = await supabase.from('pen_objects').select('*');
 
   if (error) throw new Error(error.message);
-  return ((data ?? []) as PenObjectRow[]).map(toPenObject);
+  return (data ?? []).map(toPenObject);
 };
 
 export const savePenObjects = async (objects: PenObject[]): Promise<void> => {
-  const { error } = await penObjectsTable().upsert(objects.map(toRow));
+  const { error } = await supabase
+    .from('pen_objects')
+    .upsert(objects.map(toRow));
   if (error) throw new Error(error.message);
 };

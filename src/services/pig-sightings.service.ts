@@ -1,28 +1,27 @@
 import { supabase } from '../../utils/supabase-client';
 import type { PigSighting } from './pigs.types';
 
-// Cast to any since this table isn't in the generated types yet
-const sightingsTable = () => (supabase as any).from('pig_sightings');
-
 export const getSightings = async (): Promise<PigSighting[]> => {
-  const { data, error } = await sightingsTable()
+  const { data, error } = await supabase
+    .from('pig_sightings')
     .select('*')
     .order('observed_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data ?? []) as PigSighting[];
+  return data ?? [];
 };
 
 export const getSightingsForPig = async (
   pigId: number
 ): Promise<PigSighting[]> => {
-  const { data, error } = await sightingsTable()
+  const { data, error } = await supabase
+    .from('pig_sightings')
     .select('*')
     .eq('pig_id', pigId)
     .order('observed_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data ?? []) as PigSighting[];
+  return data ?? [];
 };
 
 export const createSighting = async (
@@ -32,7 +31,7 @@ export const createSighting = async (
   level = 0,
   observedAt?: string | null
 ): Promise<void> => {
-  const { error } = await sightingsTable().insert({
+  const { error } = await supabase.from('pig_sightings').insert({
     pig_id: pigId,
     x,
     y,
@@ -43,6 +42,9 @@ export const createSighting = async (
 };
 
 export const deleteSighting = async (id: number): Promise<void> => {
-  const { error } = await sightingsTable().delete().eq('id', id);
+  const { error } = await supabase
+    .from('pig_sightings')
+    .delete()
+    .eq('id', id);
   if (error) throw new Error(error.message);
 };
