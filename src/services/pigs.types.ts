@@ -68,6 +68,16 @@ export interface SocialOrderItem {
   submissive_pig: SocialOrderPig;
 }
 
+export interface PigSighting {
+  id: number;
+  pig_id: number;
+  x: number; // grid coordinates (may be fractional)
+  y: number;
+  level: number; // floor index: 0 = ground, 1 = upstairs, ...
+  observed_at: string | null;
+  created_at: string | null;
+}
+
 export type FriendCategory =
   | 'snacking'
   | 'grooming'

@@ -9,6 +9,7 @@ export type PenObject = {
   length: number; // size down, in cells
   rotation: number; // degrees, clockwise, pivoting on the top-left corner
   shape?: 'rect' | 'triangle' | 'circle'; // defaults to 'rect'
+  levels?: number; // number of floors; defaults to 1. e.g. 2 = ground + upstairs
 };
 
 export const penObjects: PenObject[] = [
@@ -20,6 +21,7 @@ export const penObjects: PenObject[] = [
     width: 3,
     length: 3,
     rotation: 90,
+    levels: 3,
   },
   {
     label: 'Right Townhouse',
@@ -29,6 +31,7 @@ export const penObjects: PenObject[] = [
     width: 3,
     length: 3,
     rotation: 0,
+    levels: 3,
   },
   {
     label: 'Townhouse Extension Left',
@@ -38,6 +41,7 @@ export const penObjects: PenObject[] = [
     width: 3,
     length: 3,
     rotation: 90,
+    levels: 2,
   },
   {
     label: 'House with Porch',
@@ -47,6 +51,7 @@ export const penObjects: PenObject[] = [
     width: 3,
     length: 3,
     rotation: 0,
+    levels: 2,
   },
   {
     label: 'Tiny House 2',
@@ -110,6 +115,7 @@ export const penObjects: PenObject[] = [
     width: 4,
     length: 1,
     rotation: 40,
+    levels: 2,
   },
   {
     label: 'Tree',

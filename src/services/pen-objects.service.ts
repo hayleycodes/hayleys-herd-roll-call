@@ -15,6 +15,7 @@ type PenObjectRow = {
   length: number;
   rotation: number;
   shape: string | null;
+  levels: number | null;
 };
 
 const toPenObject = (r: PenObjectRow): PenObject => ({
@@ -26,6 +27,7 @@ const toPenObject = (r: PenObjectRow): PenObject => ({
   length: r.length,
   rotation: r.rotation,
   shape: (r.shape ?? undefined) as PenObject['shape'],
+  levels: r.levels ?? 1,
 });
 
 const toRow = (o: PenObject): PenObjectRow => ({
@@ -37,6 +39,7 @@ const toRow = (o: PenObject): PenObjectRow => ({
   length: o.length,
   rotation: o.rotation,
   shape: o.shape ?? null,
+  levels: o.levels ?? 1,
 });
 
 export const getPenObjects = async (): Promise<PenObject[]> => {

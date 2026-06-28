@@ -14,8 +14,13 @@ import {
   getPenObjects,
   savePenObjects,
 } from '../../services/pen-objects.service';
+import { createSighting } from '../../services/pig-sightings.service';
+import { getAllPigs } from '../../services/pigs.service';
+import type { Pig } from '../../services/pigs.types';
 import Button from '../../components/ui/Button/Button';
 import Loading from '../../components/ui/Loading/Loading';
+import Modal from '../../components/ui/Modal/Modal';
+import PigPicker from '../../components/PigPicker/PigPicker';
 import './MapPage.css';
 
 const CELL_SIZE = 40; // px per grid cell
@@ -62,9 +67,16 @@ const LABEL_STYLE = {
 
 const MapPage = () => {
   const [houses, setHouses] = useState<PenObject[]>([]);
+  const [allPigs, setAllPigs] = useState<Pig[]>([]);
   const [fill, setFill] = useState('#dcb5ff');
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  // The space a sighting is being recorded for. level 0 = ground floor,
+  // 1 = first floor up, etc.
+  const [markingSpace, setMarkingSpace] = useState<{
+    house: PenObject;
+    level: number;
+  } | null>(null);
 
   useEffect(() => {
     const resolved = getComputedStyle(document.documentElement)
@@ -78,13 +90,14 @@ const MapPage = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const saved = await getPenObjects();
+      const [saved, pigs] = await Promise.all([getPenObjects(), getAllPigs()]);
       if (saved.length) {
         setHouses(saved);
       } else {
         await savePenObjects(penObjects);
         setHouses(penObjects);
       }
+      setAllPigs(pigs);
       setLoading(false);
     };
     load();
@@ -106,6 +119,27 @@ const MapPage = () => {
       savePenObjects(next).catch((e) => console.error('Failed to save map', e));
       return next;
     });
+  };
+
+  // Clicking a house (or one of its floor buttons) records a sighting on that
+  // floor. Ignored in edit mode (clicks there are for arranging objects).
+  const handleSpaceClick = (house: PenObject, level: number) => {
+    if (editMode) return;
+    setMarkingSpace({ house, level });
+  };
+
+  const handleMarkPig = async (pigId: number | '') => {
+    if (!pigId || !markingSpace) return;
+    const { house, level } = markingSpace;
+    // Record the sighting at the footprint centre, in grid coords.
+    const x = house.col + house.width / 2;
+    const y = house.row + house.length / 2;
+    setMarkingSpace(null);
+    try {
+      await createSighting(pigId, x, y, level);
+    } catch (e) {
+      console.error('Failed to record sighting', e);
+    }
   };
 
   // Build the grid lines once.
@@ -135,7 +169,17 @@ const MapPage = () => {
           </Button>
         </div>
         <div className="mapCanvasWrap">
-          <Stage width={GRID_WIDTH} height={GRID_HEIGHT} className="mapStage">
+          <Stage
+            width={GRID_WIDTH}
+            height={GRID_HEIGHT}
+            className="mapStage"
+            onClick={(e) => {
+              if (e.target === e.target.getStage()) setMarkingSpace(null);
+            }}
+            onTap={(e) => {
+              if (e.target === e.target.getStage()) setMarkingSpace(null);
+            }}
+          >
             {/* Grid layer */}
             <Layer listening={false}>
               <Rect
@@ -167,6 +211,17 @@ const MapPage = () => {
                   y={house.row * CELL_SIZE}
                   rotation={house.rotation}
                   draggable={editMode}
+                  onClick={() => handleSpaceClick(house, 0)}
+                  onTap={() => handleSpaceClick(house, 0)}
+                  onMouseEnter={(e) => {
+                    if (editMode) return;
+                    const stage = e.target.getStage();
+                    if (stage) stage.container().style.cursor = 'pointer';
+                  }}
+                  onMouseLeave={(e) => {
+                    const stage = e.target.getStage();
+                    if (stage) stage.container().style.cursor = 'default';
+                  }}
                   onDragEnd={(e) => {
                     const node = e.target;
                     const col = snap(node.x());
@@ -219,6 +274,80 @@ const MapPage = () => {
                 </Group>
               ))}
 
+              {/* Upper-floor buttons for multi-storey houses. Rendered outside
+                  the rotating Group, anchored to the top-left of the house's
+                  on-screen (rotated) bounding box so they stay upright and in
+                  place. The house body itself records the ground floor. */}
+              {!editMode &&
+                houses
+                  .filter((house) => (house.levels ?? 1) >= 2)
+                  .map((house) => {
+                    const w = house.width * CELL_SIZE;
+                    const l = house.length * CELL_SIZE;
+                    const rad = (house.rotation * Math.PI) / 180;
+                    const cos = Math.cos(rad);
+                    const sin = Math.sin(rad);
+                    const px = house.col * CELL_SIZE;
+                    const py = house.row * CELL_SIZE;
+                    const corners = [
+                      [0, 0],
+                      [w, 0],
+                      [0, l],
+                      [w, l],
+                    ].map(([x, y]) => ({
+                      x: px + x * cos - y * sin,
+                      y: py + x * sin + y * cos,
+                    }));
+                    const minX = Math.min(...corners.map((c) => c.x));
+                    const minY = Math.min(...corners.map((c) => c.y));
+                    const upper = Array.from(
+                      { length: (house.levels ?? 1) - 1 },
+                      (_, i) => i + 1
+                    );
+                    const btnW = 44;
+                    const btnH = 29;
+                    const gap = 5;
+                    const pad = 5;
+                    return (
+                      <Group key={`floors-${house.id}`} x={minX + pad} y={minY + pad}>
+                        {upper.map((level, i) => (
+                          <Group
+                            key={level}
+                            y={i * (btnH + gap)}
+                            onClick={(e) => {
+                              e.cancelBubble = true;
+                              setMarkingSpace({ house, level });
+                            }}
+                            onTap={(e) => {
+                              e.cancelBubble = true;
+                              setMarkingSpace({ house, level });
+                            }}
+                          >
+                            <Rect
+                              width={btnW}
+                              height={btnH}
+                              fill="#ffffff"
+                              stroke="#7c5cff"
+                              strokeWidth={2}
+                              cornerRadius={8}
+                            />
+                            <Text
+                              text={`🪜${level + 1}`}
+                              y={2}
+                              width={btnW}
+                              height={btnH}
+                              align="center"
+                              verticalAlign="middle"
+                              lineHeight={1}
+                              fontSize={17}
+                              fontFamily="Fuzzy Bubbles, system-ui"
+                            />
+                          </Group>
+                        ))}
+                      </Group>
+                    );
+                  })}
+
               {/* Rotate handles — only in edit mode. Placed at each object's
                 rotation pivot (top-left), which stays put as it spins, and
                 kept outside the rotating Group so the icon stays upright. */}
@@ -261,6 +390,24 @@ const MapPage = () => {
           </Stage>
         </div>
       </div>
+
+      <Modal isOpen={!!markingSpace} onClose={() => setMarkingSpace(null)}>
+        {markingSpace && (
+          <>
+            <p>
+              {(markingSpace.house.levels ?? 1) >= 2
+                ? `Who's on floor ${markingSpace.level + 1} of ${markingSpace.house.label}?`
+                : `Who's at ${markingSpace.house.label}?`}
+            </p>
+            <PigPicker
+              pigs={allPigs}
+              selectedPigId=""
+              onSelect={handleMarkPig}
+              theme="purple"
+            />
+          </>
+        )}
+      </Modal>
     </div>
   );
 };
