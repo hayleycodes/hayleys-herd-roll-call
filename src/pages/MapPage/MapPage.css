@@ -19,6 +19,20 @@
   font-size: var(--font-size-md);
 }
 
+.mapCanvasContainer {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.mapEditButton {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: 2;
+}
+
 .mapCanvasWrap {
   flex: 1;
   overflow: auto;
