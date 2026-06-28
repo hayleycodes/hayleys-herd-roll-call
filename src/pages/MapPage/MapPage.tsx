@@ -149,13 +149,6 @@ const MapPage = () => {
     [allPigs]
   );
 
-  useEffect(() => {
-    const resolved = getComputedStyle(document.documentElement)
-      .getPropertyValue('--bg')
-      .trim();
-    if (resolved) setFill(resolved);
-  }, []);
-
   // Load the saved map. On first run (empty table) seed it from the static
   // layout so there's always something to show.
   useEffect(() => {
