@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Stage,
   Layer,
@@ -14,12 +14,15 @@ import {
   getPenObjects,
   savePenObjects,
 } from '../../services/pen-objects.service';
-import { createSighting } from '../../services/pig-sightings.service';
+import {
+  createSighting,
+  getSightings,
+} from '../../services/pig-sightings.service';
 import { getAllPigs } from '../../services/pigs.service';
-import type { Pig } from '../../services/pigs.types';
+import type { Pig, PigSighting } from '../../services/pigs.types';
 import Button from '../../components/ui/Button/Button';
 import Loading from '../../components/ui/Loading/Loading';
-import PigPicker from '../../components/PigPicker/PigPicker';
+import PigPicker, { PigThumb } from '../../components/PigPicker/PigPicker';
 import './MapPage.css';
 
 const CELL_SIZE = 40; // px per grid cell
@@ -43,6 +46,10 @@ const DISABLED_CORNER: number[] = [
   21 * CELL_SIZE,
   23 * CELL_SIZE,
 ];
+
+// Pigs that don't live in the main pen, so they shouldn't show up when marking
+// sightings on this map.
+const NON_MAIN_PEN_PIGS = ['spud', 'pie', 'tornado pig'];
 
 const snap = (value: number) => Math.round(value / CELL_SIZE);
 
@@ -84,7 +91,17 @@ const MapPage = () => {
     align: 'left' | 'right';
   } | null>(null);
   const [selectedPigs, setSelectedPigs] = useState<Set<number>>(new Set());
+  const [sightings, setSightings] = useState<PigSighting[]>([]);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Only pigs that live in the main pen can be sighted on this map.
+  const mainPenPigs = useMemo(
+    () =>
+      allPigs.filter(
+        (pig) => !NON_MAIN_PEN_PIGS.includes(pig.name.trim().toLowerCase())
+      ),
+    [allPigs]
+  );
 
   useEffect(() => {
     const resolved = getComputedStyle(document.documentElement)
@@ -98,7 +115,11 @@ const MapPage = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const [saved, pigs] = await Promise.all([getPenObjects(), getAllPigs()]);
+      const [saved, pigs, sightingData] = await Promise.all([
+        getPenObjects(),
+        getAllPigs(),
+        getSightings(),
+      ]);
       if (saved.length) {
         setHouses(saved);
       } else {
@@ -106,6 +127,7 @@ const MapPage = () => {
         setHouses(penObjects);
       }
       setAllPigs(pigs);
+      setSightings(sightingData);
       setLoading(false);
     };
     load();
@@ -200,6 +222,7 @@ const MapPage = () => {
     setSelectedPigs(new Set());
     try {
       await Promise.all(ids.map((id) => createSighting(id, x, y, level)));
+      setSightings(await getSightings());
     } catch (e) {
       console.error('Failed to record sightings', e);
     }
@@ -213,6 +236,30 @@ const MapPage = () => {
   for (let j = 0; j <= GRID_ROWS; j++) {
     gridLines.push([0, j * CELL_SIZE, GRID_WIDTH, j * CELL_SIZE]);
   }
+
+  // Each pig's most recent sighting, grouped by cell, so we can show their
+  // photo where they were last seen.
+  const sightingCells = useMemo(() => {
+    const pigById = new Map(allPigs.map((p) => [p.id, p]));
+    const tsOf = (s: PigSighting) => s.observed_at ?? s.created_at ?? '';
+
+    const latest = new Map<number, PigSighting>();
+    for (const s of sightings) {
+      const current = latest.get(s.pig_id);
+      if (!current || tsOf(s) > tsOf(current)) latest.set(s.pig_id, s);
+    }
+
+    const cells = new Map<string, { x: number; y: number; pigs: Pig[] }>();
+    for (const s of latest.values()) {
+      const pig = pigById.get(s.pig_id);
+      if (!pig) continue;
+      const key = `${s.x},${s.y}`;
+      const cell = cells.get(key) ?? { x: s.x, y: s.y, pigs: [] };
+      cell.pigs.push(pig);
+      cells.set(key, cell);
+    }
+    return [...cells.values()];
+  }, [sightings, allPigs]);
 
   if (loading) return <Loading />;
 
@@ -472,6 +519,22 @@ const MapPage = () => {
             </Layer>
           </Stage>
 
+          {/* Pig photos shown where each pig was last sighted. */}
+          {sightingCells.map((cell) => (
+            <div
+              key={`${cell.x},${cell.y}`}
+              className="sightingCell"
+              style={{ left: cell.x * CELL_SIZE, top: cell.y * CELL_SIZE }}
+            >
+              {cell.pigs.map((pig) => (
+                <PigThumb
+                  key={pig.id}
+                  imagePath={pig.image_paths?.[0] ?? null}
+                />
+              ))}
+            </div>
+          ))}
+
           {marking && (
             <div
               className="cellPicker"
@@ -481,7 +544,7 @@ const MapPage = () => {
               }}
             >
               <PigPicker
-                pigs={allPigs}
+                pigs={mainPenPigs}
                 selectedPigId=""
                 onSelect={() => {}}
                 multiSelect

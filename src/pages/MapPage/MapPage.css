@@ -45,6 +45,28 @@
   display: block;
 }
 
+/* Pig photos at their last-sighted cell. Non-interactive so clicks reach the
+   canvas for marking. */
+.sightingCell {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  width: 60px;
+  pointer-events: none;
+}
+
+.sightingCell .pigPickerThumb {
+  width: 26px;
+  height: 26px;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 .cellPicker {
   position: absolute;
   z-index: 5;
