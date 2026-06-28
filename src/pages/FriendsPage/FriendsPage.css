@@ -1,0 +1,200 @@
+.friendsPage {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ---- Tabs ---- */
+
+.friendsPage .tabs {
+  display: flex;
+  margin: calc(0px - var(--spacing-xs)) calc(0px - var(--spacing-xs))
+    var(--spacing-xxs);
+}
+
+.friendsPage .tabs button {
+  flex: 1;
+  padding: var(--spacing-xs) 0;
+  background: none;
+  border: none;
+  border-right: 2px solid var(--accent-pink);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  opacity: 0.6;
+}
+
+.friendsPage .tabs button:last-child {
+  border-right: none;
+}
+
+.friendsPage .tabs button.active {
+  border-bottom-color: var(--primary-dark);
+  opacity: 1;
+  font-weight: var(--font-weight-bold);
+}
+
+/* ---- Best friends ranking ---- */
+
+.friendsEmpty {
+  text-align: center;
+}
+
+.friendsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.friendsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: color-mix(in srgb, var(--accent-pink) 30%, white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.friendsRow.friendsTop {
+  background: var(--accent-pink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.friendsRank {
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-muted);
+}
+
+.friendsTop .friendsRank {
+  font-size: var(--font-size-xl);
+}
+
+.friendsPigCard {
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.friendsHeart {
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+}
+
+.friendsStrength {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.friendsStrengthPoints {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  color: var(--primary-dark);
+  white-space: nowrap;
+}
+
+.friendsStrengthLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ---- Form ---- */
+
+#newFriendForm {
+  background: color-mix(in srgb, var(--accent-pink) 30%, white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+#newFriendForm p {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-md);
+}
+
+#newFriendForm .formError {
+  color: var(--color-error, #d32f2f);
+  font-weight: normal;
+  font-size: var(--font-size-sm);
+}
+
+.friendCategories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.friendCategory {
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  background: var(--bg-translucent);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.friendCategory.active {
+  border-color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ---- Observations list ---- */
+
+.friendObsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.friendObsItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: color-mix(in srgb, var(--accent-pink) 30%, white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+}
+
+.friendObsDelete {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+}
+
+.friendObsPig {
+  flex: 1;
+  min-width: 0;
+}
+
+.friendObsCategory {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-muted);
+}

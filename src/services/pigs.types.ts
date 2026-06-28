@@ -67,3 +67,23 @@ export interface SocialOrderItem {
   dominant_pig: SocialOrderPig;
   submissive_pig: SocialOrderPig;
 }
+
+export type FriendCategory =
+  | 'snacking'
+  | 'grooming'
+  | 'following'
+  | 'sharing_house'
+  | 'booping_noses'
+  | 'resting_together';
+
+export interface FriendObservation {
+  id: number;
+  pig_id_a: number;
+  pig_id_b: number;
+  category: FriendCategory;
+  notes: string | null;
+  observed_at: string | null;
+  created_at: string | null;
+  pig_a: Pig;
+  pig_b: Pig;
+}

@@ -22,6 +22,7 @@ import WeightsPage from './pages/WeightsPage/WeightsPage.tsx';
 import TagsPage from './pages/TagsPage/TagsPage.tsx';
 import MoodPage from './pages/MoodPage/MoodPage.tsx';
 import MapPage from './pages/MapPage/MapPage.tsx';
+import FriendsPage from './pages/FriendsPage/FriendsPage.tsx';
 import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
@@ -63,6 +64,9 @@ function App() {
             </Link>
             <Link to="/social-order">
               <EmojiButton>👑</EmojiButton>
+            </Link>
+            <Link to="/friends">
+              <EmojiButton>💕</EmojiButton>
             </Link>
             <Link to="/health-log">
               <EmojiButton>🏥</EmojiButton>
@@ -146,6 +150,14 @@ function App() {
             element={
               <PageTransition>
                 <MapPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/friends"
+            element={
+              <PageTransition>
+                <FriendsPage />
               </PageTransition>
             }
           />
