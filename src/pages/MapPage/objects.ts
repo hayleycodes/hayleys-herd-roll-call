@@ -13,7 +13,7 @@ export type PenObject = {
 
 export const penObjects: PenObject[] = [
   {
-    label: '🏠 Left Townhouse',
+    label: 'Left Townhouse',
     id: 'house-1',
     col: 19,
     row: 8,
@@ -22,7 +22,7 @@ export const penObjects: PenObject[] = [
     rotation: 90,
   },
   {
-    label: '🏠 Right Townhouse',
+    label: 'Right Townhouse',
     id: 'house-2',
     col: 3,
     row: 5,
@@ -31,7 +31,7 @@ export const penObjects: PenObject[] = [
     rotation: 0,
   },
   {
-    label: '🏠 Townhouse Extension Left',
+    label: 'Townhouse Extension Left',
     id: 'townhouse-extension-left',
     col: 19,
     row: 12,
@@ -40,7 +40,7 @@ export const penObjects: PenObject[] = [
     rotation: 90,
   },
   {
-    label: '🏠 House with Porch',
+    label: 'House with Porch',
     id: 'house-with-porch',
     col: 10,
     row: 5,
@@ -49,7 +49,7 @@ export const penObjects: PenObject[] = [
     rotation: 0,
   },
   {
-    label: '🏚️ Tiny House 2',
+    label: 'Tiny House 2',
     id: 'tiny-house-2',
     col: 7,
     row: 4,
@@ -58,7 +58,7 @@ export const penObjects: PenObject[] = [
     rotation: 0,
   },
   {
-    label: '💧 Water Station',
+    label: 'Water Station',
     id: 'water-station',
     col: 0,
     row: 10,
@@ -67,7 +67,7 @@ export const penObjects: PenObject[] = [
     rotation: 0,
   },
   {
-    label: '🍽️ Table',
+    label: 'Table',
     id: 'table',
     col: 4,
     row: 11,
@@ -76,7 +76,7 @@ export const penObjects: PenObject[] = [
     rotation: 0,
   },
   {
-    label: '⛺ A-Frame',
+    label: 'A-Frame',
     id: 'aframe',
     col: 0,
     row: 4,
@@ -85,7 +85,7 @@ export const penObjects: PenObject[] = [
     rotation: -90,
   },
   {
-    label: '🛖 Barn',
+    label: 'Barn',
     id: 'barn',
     col: 19,
     row: 15,
@@ -94,7 +94,7 @@ export const penObjects: PenObject[] = [
     rotation: 90,
   },
   {
-    label: '🏚️ Tiny House',
+    label: 'Tiny House',
     id: 'tiny-house',
     col: 19,
     row: 18,
@@ -103,7 +103,7 @@ export const penObjects: PenObject[] = [
     rotation: 90,
   },
   {
-    label: '🌉 Bridge',
+    label: 'Bridge',
     id: 'bridge',
     col: 4,
     row: 18,
@@ -112,7 +112,7 @@ export const penObjects: PenObject[] = [
     rotation: 40,
   },
   {
-    label: '🌳 Tree',
+    label: 'Tree',
     id: 'tree',
     col: 1,
     row: 19,
@@ -122,7 +122,7 @@ export const penObjects: PenObject[] = [
     shape: 'circle',
   },
   {
-    label: '🥣 Kibble Station',
+    label: 'Kibble Station',
     id: 'kibble-station',
     col: 8,
     row: 19,
@@ -132,7 +132,7 @@ export const penObjects: PenObject[] = [
     shape: 'circle',
   },
   {
-    label: '🏖️ Cabana',
+    label: 'Cabana',
     id: 'cabana',
     col: 15,
     row: 4,
@@ -141,7 +141,7 @@ export const penObjects: PenObject[] = [
     rotation: 0,
   },
   {
-    label: '🏖️ Barbie Dream House',
+    label: 'Barbie Dream House',
     id: 'barbie-dream-house',
     col: 13,
     row: 6,
@@ -150,7 +150,7 @@ export const penObjects: PenObject[] = [
     rotation: 0,
   },
   {
-    label: '🤖 R2D2',
+    label: 'R2D2',
     id: 'r2d2',
     col: 12,
     row: 16,
@@ -159,7 +159,7 @@ export const penObjects: PenObject[] = [
     rotation: 0,
   },
   {
-    label: '🏟️ Long House',
+    label: 'Long House',
     id: 'long-house',
     col: 7,
     row: 15,
@@ -168,7 +168,7 @@ export const penObjects: PenObject[] = [
     rotation: -45,
   },
   {
-    label: '⛺ Tiny House 3',
+    label: 'Tiny House 3',
     id: 'tiny-house-3',
     col: 0,
     row: 21,

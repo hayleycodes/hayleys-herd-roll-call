@@ -27,13 +27,29 @@ const DISABLED_CORNER: number[] = [
 
 const snap = (value: number) => Math.round(value / CELL_SIZE);
 
+// Shared canvas styling (Konva draws to <canvas>, so these can't live in CSS).
+const SHAPE_STYLE = {
+  stroke: '#7c5cff',
+  strokeWidth: 3,
+  shadowColor: '#4a2d8a',
+  shadowBlur: 8,
+  shadowOpacity: 0.25,
+  shadowOffsetY: 3,
+};
+
+const LABEL_STYLE = {
+  fontSize: 14,
+  fontFamily: 'Fuzzy Bubbles, system-ui',
+  fill: '#2b2d42',
+};
+
 const MapPage = () => {
   const [houses, setHouses] = useState<PenObject[]>(penObjects);
   const [fill, setFill] = useState('#dcb5ff');
 
   useEffect(() => {
     const resolved = getComputedStyle(document.documentElement)
-      .getPropertyValue('--accent-pink')
+      .getPropertyValue('--bg')
       .trim();
     if (resolved) setFill(resolved);
   }, []);
@@ -112,13 +128,8 @@ const MapPage = () => {
                     ]}
                     closed
                     fill={fill}
-                    stroke="#7c5cff"
-                    strokeWidth={3}
                     lineJoin="round"
-                    shadowColor="#4a2d8a"
-                    shadowBlur={8}
-                    shadowOpacity={0.25}
-                    shadowOffsetY={3}
+                    {...SHAPE_STYLE}
                   />
                 ) : house.shape === 'circle' ? (
                   <Ellipse
@@ -127,25 +138,15 @@ const MapPage = () => {
                     radiusX={(house.width * CELL_SIZE) / 2}
                     radiusY={(house.length * CELL_SIZE) / 2}
                     fill={fill}
-                    stroke="#7c5cff"
-                    strokeWidth={3}
-                    shadowColor="#4a2d8a"
-                    shadowBlur={8}
-                    shadowOpacity={0.25}
-                    shadowOffsetY={3}
+                    {...SHAPE_STYLE}
                   />
                 ) : (
                   <Rect
                     width={house.width * CELL_SIZE}
                     height={house.length * CELL_SIZE}
                     fill={fill}
-                    stroke="#7c5cff"
-                    strokeWidth={3}
                     cornerRadius={10}
-                    shadowColor="#4a2d8a"
-                    shadowBlur={8}
-                    shadowOpacity={0.25}
-                    shadowOffsetY={3}
+                    {...SHAPE_STYLE}
                   />
                 )}
                 <Text
@@ -154,17 +155,7 @@ const MapPage = () => {
                   height={house.length * CELL_SIZE}
                   align="center"
                   verticalAlign="middle"
-                  fontSize={16}
-                  fontFamily="Fuzzy Bubbles, system-ui"
-                  fill="#2b2d42"
-                />
-                <Text
-                  text={`(${house.col}, ${house.row})`}
-                  x={4}
-                  y={4}
-                  fontSize={11}
-                  fontFamily="Fuzzy Bubbles, system-ui"
-                  fill="#4a2d8a"
+                  {...LABEL_STYLE}
                 />
               </Group>
             ))}
