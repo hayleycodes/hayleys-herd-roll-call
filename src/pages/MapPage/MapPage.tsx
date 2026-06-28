@@ -27,7 +27,7 @@ const GRID_HEIGHT = CELL_SIZE * GRID_ROWS;
 
 // Disabled / out-of-bounds region of the pen, in grid cells: top-left (4,0)
 // to bottom-right (18,4).
-const DISABLED_AREA = { col: 5, row: 0, width: 16, height: 4 };
+const DISABLED_AREA = { col: 4, row: 0, width: 17, height: 4 };
 
 // Disabled bottom-right corner, cut at 45°. The hypotenuse runs from (13,26)
 // to (18,21); the right-angle corner sits at (18,26).
