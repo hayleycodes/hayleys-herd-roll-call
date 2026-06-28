@@ -246,9 +246,14 @@ const MapPage = () => {
   };
 
   // First tap arms a specific floor of a house; second opens the picker.
+  // Use the house's rotation-aware visual centre so the sighting (and the pig
+  // photo) lands on the house even when it's rotated.
   const openFloor = (house: PenObject, level: number) => {
-    const x = house.col + house.width / 2;
-    const y = house.row + house.length / 2;
+    const rad = (house.rotation * Math.PI) / 180;
+    const cx = house.width / 2;
+    const cy = house.length / 2;
+    const x = house.col + (cx * Math.cos(rad) - cy * Math.sin(rad));
+    const y = house.row + (cx * Math.sin(rad) + cy * Math.cos(rad));
     tapTarget({
       x,
       y,
