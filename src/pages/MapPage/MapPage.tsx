@@ -111,7 +111,6 @@ const LABEL_STYLE = {
 const MapPage = () => {
   const [houses, setHouses] = useState<PenObject[]>([]);
   const [allPigs, setAllPigs] = useState<Pig[]>([]);
-  const [fill, setFill] = useState('#beadff');
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   // The cell a sighting is being recorded for. x/y are grid coords (cell
