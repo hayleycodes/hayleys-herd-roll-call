@@ -15,6 +15,31 @@
   transform: scale(0.9);
 }
 
+/* Cards pop into their new positions after a re-sort. Two identical
+   animations let the keyframe replay each sighting without remounting. */
+@keyframes pigCardPop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pigCardPopA {
+  animation: pigCardPop 0.4s ease-out both;
+}
+
+.pigCardPopB {
+  animation: pigCardPop 0.4s ease-out both;
+}
+
 .pigCardLink {
   display: flex;
   flex-direction: column;

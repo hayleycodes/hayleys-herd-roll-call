@@ -18,6 +18,8 @@ type Props = {
   sighted?: boolean;
   highlightUnseen?: boolean;
   crowned?: boolean;
+  popPhase?: 'a' | 'b' | null;
+  popIndex?: number;
   onEyeClick?: (origin: { x: number; y: number }) => void;
   onUndoClick?: () => void;
 };
@@ -33,6 +35,8 @@ const PigCard = ({
   sighted,
   highlightUnseen,
   crowned,
+  popPhase,
+  popIndex,
   onEyeClick,
   onUndoClick,
 }: Props) => {
@@ -50,6 +54,11 @@ const PigCard = ({
 
   const pigColorClass = getPigColorClass(pig.id, sick);
   const eyeUnseen = notSightedToday && !sick;
+  const popClass = popPhase
+    ? popPhase === 'a'
+      ? ' pigCardPopA'
+      : ' pigCardPopB'
+    : '';
 
   const handleTap = () => {
     setWiggling(true);
@@ -57,13 +66,17 @@ const PigCard = ({
 
   return (
     <div
-      className={`pigCard ${pigColorClass}${fading ? ' pigCardFading' : ''}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}`}
+      className={`pigCard ${pigColorClass}${fading ? ' pigCardFading' : ''}${popClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}`}
       style={
-        passed
+        popPhase
           ? ({
-              '--float-delay': `${(pig.id * 1.37) % 7}s`,
+              animationDelay: `${(popIndex ?? 0) * 0.04}s`,
             } as React.CSSProperties)
-          : undefined
+          : passed
+            ? ({
+                '--float-delay': `${(pig.id * 1.37) % 7}s`,
+              } as React.CSSProperties)
+            : undefined
       }
       onClick={handleTap}
     >

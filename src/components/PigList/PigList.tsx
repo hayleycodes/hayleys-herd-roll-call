@@ -42,6 +42,12 @@ const PigList = ({
     { x: number; y: number } | undefined
   >();
   const [fadingPigId, setFadingPigId] = useState<number | null>(null);
+  // Toggles 'a'/'b' on each re-sort so the pop keyframe replays (alternating
+  // between two identical animations restarts them without remounting cards).
+  const [popPhase, setPopPhase] = useState<'a' | 'b' | null>(null);
+  // Only cards at or below this index pop — i.e. from the sighted pig's old
+  // position down, the region that actually shifts when it moves to the bottom.
+  const [popFromIndex, setPopFromIndex] = useState(0);
   // Pigs sighted this session, mapped to their previous last_sighted value so
   // the sighting can be undone.
   const [sightedPigs, setSightedPigs] = useState<Map<number, string | null>>(
@@ -94,6 +100,12 @@ const PigList = ({
   ) => {
     const now = new Date().toISOString();
     const prevLastSighted = pig.last_sighted ?? null;
+    // Position the pig occupies now; everything from here down shifts when it
+    // moves to the bottom, so only these cards should pop.
+    const oldIndex = Math.max(
+      0,
+      pigs.findIndex((p) => p.id === pig.id)
+    );
 
     setConfettiOrigin(origin);
     setShowConfetti(true);
@@ -131,6 +143,8 @@ const PigList = ({
     setTimeout(() => {
       setFadingPigId(null);
       resortPigs();
+      setPopFromIndex(oldIndex);
+      setPopPhase((p) => (p === 'a' ? 'b' : 'a'));
     }, 1200);
 
     if (FEATURE_MOOD) {
@@ -180,11 +194,9 @@ const PigList = ({
         {pigs.map((pig, i) => (
           <motion.div
             key={pig.id}
-            layout
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{
-              layout: { duration: 0.4, ease: 'easeInOut' },
               delay: i * 0.05,
               duration: 0.3,
               ease: 'easeOut',
@@ -193,6 +205,8 @@ const PigList = ({
             <PigCard
               pig={pig}
               fading={pig.id === fadingPigId}
+              popPhase={i >= popFromIndex ? popPhase : null}
+              popIndex={i - popFromIndex}
               sick={sickPigIds?.has(pig.id)}
               notSightedToday={
                 !pig.last_sighted ||
