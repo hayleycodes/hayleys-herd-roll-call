@@ -143,7 +143,6 @@ const MapPage = () => {
     load();
   }, []);
 
-
   const handleDragEnd = (id: string, col: number, row: number) => {
     setHouses((prev) => {
       const next = prev.map((h) => (h.id === id ? { ...h, col, row } : h));
@@ -359,73 +358,77 @@ const MapPage = () => {
                   ? { ...SHAPE_STYLE, stroke: '#ff5fa2', strokeWidth: 6 }
                   : SHAPE_STYLE;
                 return (
-                <Group
-                  key={house.id}
-                  x={house.col * CELL_SIZE}
-                  y={house.row * CELL_SIZE}
-                  rotation={house.rotation}
-                  draggable={editMode}
-                  onClick={(e) => handleCellClick(e.target.getStage(), house.id)}
-                  onTap={(e) => handleCellClick(e.target.getStage(), house.id)}
-                  onMouseEnter={(e) => {
-                    if (editMode) return;
-                    const stage = e.target.getStage();
-                    if (stage) stage.container().style.cursor = 'pointer';
-                  }}
-                  onMouseLeave={(e) => {
-                    const stage = e.target.getStage();
-                    if (stage) stage.container().style.cursor = 'default';
-                  }}
-                  onDragEnd={(e) => {
-                    const node = e.target;
-                    const col = snap(node.x());
-                    const row = snap(node.y());
-                    node.position({ x: col * CELL_SIZE, y: row * CELL_SIZE });
-                    handleDragEnd(house.id, col, row);
-                  }}
-                >
-                  {house.shape === 'triangle' ? (
-                    <Line
-                      points={[
-                        0,
-                        0,
-                        0,
-                        house.length * CELL_SIZE,
-                        house.width * CELL_SIZE,
-                        house.length * CELL_SIZE,
-                      ]}
-                      closed
-                      fill={fill}
-                      lineJoin="round"
-                      {...shapeStyle}
-                    />
-                  ) : house.shape === 'circle' ? (
-                    <Ellipse
-                      x={(house.width * CELL_SIZE) / 2}
-                      y={(house.length * CELL_SIZE) / 2}
-                      radiusX={(house.width * CELL_SIZE) / 2}
-                      radiusY={(house.length * CELL_SIZE) / 2}
-                      fill={fill}
-                      {...shapeStyle}
-                    />
-                  ) : (
-                    <Rect
+                  <Group
+                    key={house.id}
+                    x={house.col * CELL_SIZE}
+                    y={house.row * CELL_SIZE}
+                    rotation={house.rotation}
+                    draggable={editMode}
+                    onClick={(e) =>
+                      handleCellClick(e.target.getStage(), house.id)
+                    }
+                    onTap={(e) =>
+                      handleCellClick(e.target.getStage(), house.id)
+                    }
+                    onMouseEnter={(e) => {
+                      if (editMode) return;
+                      const stage = e.target.getStage();
+                      if (stage) stage.container().style.cursor = 'pointer';
+                    }}
+                    onMouseLeave={(e) => {
+                      const stage = e.target.getStage();
+                      if (stage) stage.container().style.cursor = 'default';
+                    }}
+                    onDragEnd={(e) => {
+                      const node = e.target;
+                      const col = snap(node.x());
+                      const row = snap(node.y());
+                      node.position({ x: col * CELL_SIZE, y: row * CELL_SIZE });
+                      handleDragEnd(house.id, col, row);
+                    }}
+                  >
+                    {house.shape === 'triangle' ? (
+                      <Line
+                        points={[
+                          0,
+                          0,
+                          0,
+                          house.length * CELL_SIZE,
+                          house.width * CELL_SIZE,
+                          house.length * CELL_SIZE,
+                        ]}
+                        closed
+                        fill={fill}
+                        lineJoin="round"
+                        {...shapeStyle}
+                      />
+                    ) : house.shape === 'circle' ? (
+                      <Ellipse
+                        x={(house.width * CELL_SIZE) / 2}
+                        y={(house.length * CELL_SIZE) / 2}
+                        radiusX={(house.width * CELL_SIZE) / 2}
+                        radiusY={(house.length * CELL_SIZE) / 2}
+                        fill={fill}
+                        {...shapeStyle}
+                      />
+                    ) : (
+                      <Rect
+                        width={house.width * CELL_SIZE}
+                        height={house.length * CELL_SIZE}
+                        fill={fill}
+                        cornerRadius={10}
+                        {...shapeStyle}
+                      />
+                    )}
+                    <Text
+                      text={house.label}
                       width={house.width * CELL_SIZE}
                       height={house.length * CELL_SIZE}
-                      fill={fill}
-                      cornerRadius={10}
-                      {...shapeStyle}
+                      align="center"
+                      verticalAlign="middle"
+                      {...LABEL_STYLE}
                     />
-                  )}
-                  <Text
-                    text={house.label}
-                    width={house.width * CELL_SIZE}
-                    height={house.length * CELL_SIZE}
-                    align="center"
-                    verticalAlign="middle"
-                    {...LABEL_STYLE}
-                  />
-                </Group>
+                  </Group>
                 );
               })}
 
@@ -464,7 +467,11 @@ const MapPage = () => {
                     const gap = 5;
                     const pad = 5;
                     return (
-                      <Group key={`floors-${house.id}`} x={minX + pad} y={minY + pad}>
+                      <Group
+                        key={`floors-${house.id}`}
+                        x={minX + pad}
+                        y={minY + pad}
+                      >
                         {upper.map((level, i) => (
                           <Group
                             key={level}
@@ -487,7 +494,7 @@ const MapPage = () => {
                               cornerRadius={8}
                             />
                             <Text
-                              text={`🪜${level + 1}`}
+                              text={`🪜${level}`}
                               y={2}
                               width={btnW}
                               height={btnH}
