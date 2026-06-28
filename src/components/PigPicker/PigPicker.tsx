@@ -28,6 +28,15 @@ type Props = {
   view?: 'default' | 'compact';
   theme?: 'green' | 'purple' | 'blue';
   dropUp?: boolean;
+  defaultOpen?: boolean;
+  onClose?: () => void;
+  align?: 'left' | 'right';
+  // Multi-select mode: clicking a pig toggles it (the menu stays open) and a
+  // Save button is shown. onSave fires when the user confirms.
+  multiSelect?: boolean;
+  selectedPigIds?: number[];
+  onToggle?: (pigId: number) => void;
+  onSave?: () => void;
 };
 
 const PigPicker = ({
@@ -37,8 +46,15 @@ const PigPicker = ({
   view = 'default',
   theme = 'purple',
   dropUp = false,
+  defaultOpen = false,
+  onClose,
+  align,
+  multiSelect = false,
+  selectedPigIds = [],
+  onToggle,
+  onSave,
 }: Props) => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(defaultOpen);
   const [alignRight, setAlignRight] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +68,7 @@ const PigPicker = ({
         !dropdownRef.current.contains(e.target as Node)
       ) {
         setDropdownOpen(false);
+        onClose?.();
       }
     };
     document.addEventListener('mousedown', handleClick);
@@ -99,7 +116,7 @@ const PigPicker = ({
       )}
       {dropdownOpen && (
         <div
-          className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}${alignRight ? '' : ' pigPickerMenu--left'}`}
+          className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}${(align ? align === 'left' : !alignRight) ? ' pigPickerMenu--left' : ''}`}
         >
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
@@ -114,21 +131,40 @@ const PigPicker = ({
                 <span>No pig</span>
               </button>
             )}
-            {pigs.map((pig) => (
-              <button
-                key={pig.id}
-                type="button"
-                className={`pigPickerOption ${pig.id === selectedPigId ? 'pigPickerOptionActive' : ''}`}
-                onClick={() => {
-                  onSelect(pig.id);
-                  setDropdownOpen(false);
-                }}
-              >
-                <PigThumb imagePath={pig.image_paths?.[0] ?? null} />
-                <span>{pig.name}</span>
-              </button>
-            ))}
+            {pigs.map((pig) => {
+              const active = multiSelect
+                ? selectedPigIds.includes(pig.id)
+                : pig.id === selectedPigId;
+              return (
+                <button
+                  key={pig.id}
+                  type="button"
+                  className={`pigPickerOption ${active ? 'pigPickerOptionActive' : ''}`}
+                  onClick={() => {
+                    if (multiSelect) {
+                      onToggle?.(pig.id);
+                    } else {
+                      onSelect(pig.id);
+                      setDropdownOpen(false);
+                    }
+                  }}
+                >
+                  <PigThumb imagePath={pig.image_paths?.[0] ?? null} />
+                  <span>{pig.name}</span>
+                </button>
+              );
+            })}
           </div>
+          {multiSelect && (
+            <button
+              type="button"
+              className="pigPickerSave"
+              disabled={selectedPigIds.length === 0}
+              onClick={() => onSave?.()}
+            >
+              Save{selectedPigIds.length ? ` (${selectedPigIds.length})` : ''}
+            </button>
+          )}
         </div>
       )}
     </div>

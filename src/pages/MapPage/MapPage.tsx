@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Stage,
   Layer,
@@ -19,7 +19,6 @@ import { getAllPigs } from '../../services/pigs.service';
 import type { Pig } from '../../services/pigs.types';
 import Button from '../../components/ui/Button/Button';
 import Loading from '../../components/ui/Loading/Loading';
-import Modal from '../../components/ui/Modal/Modal';
 import PigPicker from '../../components/PigPicker/PigPicker';
 import './MapPage.css';
 
@@ -71,12 +70,21 @@ const MapPage = () => {
   const [fill, setFill] = useState('#dcb5ff');
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  // The space a sighting is being recorded for. level 0 = ground floor,
-  // 1 = first floor up, etc.
-  const [markingSpace, setMarkingSpace] = useState<{
-    house: PenObject;
+  // The cell a sighting is being recorded for. x/y are grid coords (cell
+  // centre); col/row drive the cell highlight; houseId highlights a house
+  // instead. level 0 = ground floor, 1 = first floor up, etc.
+  const [marking, setMarking] = useState<{
+    x: number;
+    y: number;
     level: number;
+    col: number;
+    row: number;
+    houseId?: string;
+    dropUp: boolean;
+    align: 'left' | 'right';
   } | null>(null);
+  const [selectedPigs, setSelectedPigs] = useState<Set<number>>(new Set());
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const resolved = getComputedStyle(document.documentElement)
@@ -121,24 +129,79 @@ const MapPage = () => {
     });
   };
 
-  // Clicking a house (or one of its floor buttons) records a sighting on that
-  // floor. Ignored in edit mode (clicks there are for arranging objects).
-  const handleSpaceClick = (house: PenObject, level: number) => {
-    if (editMode) return;
-    setMarkingSpace({ house, level });
+  // Decide which way the dropdown should open so it stays inside the visible
+  // (scrolled) canvas viewport rather than clipping at an edge.
+  const placementFor = (
+    px: number,
+    py: number
+  ): { dropUp: boolean; align: 'left' | 'right' } => {
+    const wrap = wrapRef.current;
+    if (!wrap) return { dropUp: false, align: 'right' };
+    const viewX = px - wrap.scrollLeft;
+    const viewY = py - wrap.scrollTop;
+    return {
+      dropUp: viewY > wrap.clientHeight * 0.55,
+      align: viewX < wrap.clientWidth * 0.5 ? 'left' : 'right',
+    };
   };
 
-  const handleMarkPig = async (pigId: number | '') => {
-    if (!pigId || !markingSpace) return;
-    const { house, level } = markingSpace;
-    // Record the sighting at the footprint centre, in grid coords.
+  // Click anywhere on the grid → open the pig picker at the clicked cell.
+  // Pass a houseId to highlight the house instead of the bare cell. Ignored in
+  // edit mode (clicks there are for arranging objects).
+  const handleCellClick = (stage: any, houseId?: string) => {
+    if (editMode) return;
+    const pos = stage.getPointerPosition();
+    if (!pos) return;
+    const col = Math.floor(pos.x / CELL_SIZE);
+    const row = Math.floor(pos.y / CELL_SIZE);
+    setSelectedPigs(new Set());
+    setMarking({
+      x: col + 0.5,
+      y: row + 0.5,
+      level: 0,
+      col,
+      row,
+      houseId,
+      ...placementFor((col + 0.5) * CELL_SIZE, (row + 0.5) * CELL_SIZE),
+    });
+  };
+
+  // Open the picker for a specific floor of a house.
+  const openFloor = (house: PenObject, level: number) => {
+    if (editMode) return;
     const x = house.col + house.width / 2;
     const y = house.row + house.length / 2;
-    setMarkingSpace(null);
+    setSelectedPigs(new Set());
+    setMarking({
+      x,
+      y,
+      level,
+      col: Math.floor(x),
+      row: Math.floor(y),
+      houseId: house.id,
+      ...placementFor(x * CELL_SIZE, y * CELL_SIZE),
+    });
+  };
+
+  const togglePig = (pigId: number) => {
+    setSelectedPigs((prev) => {
+      const next = new Set(prev);
+      if (next.has(pigId)) next.delete(pigId);
+      else next.add(pigId);
+      return next;
+    });
+  };
+
+  const handleSave = async () => {
+    if (!marking || selectedPigs.size === 0) return;
+    const { x, y, level } = marking;
+    const ids = [...selectedPigs];
+    setMarking(null);
+    setSelectedPigs(new Set());
     try {
-      await createSighting(pigId, x, y, level);
+      await Promise.all(ids.map((id) => createSighting(id, x, y, level)));
     } catch (e) {
-      console.error('Failed to record sighting', e);
+      console.error('Failed to record sightings', e);
     }
   };
 
@@ -168,16 +231,18 @@ const MapPage = () => {
             {editMode ? '✓ Done' : '✏️ Edit'}
           </Button>
         </div>
-        <div className="mapCanvasWrap">
+        <div className="mapCanvasWrap" ref={wrapRef}>
           <Stage
             width={GRID_WIDTH}
             height={GRID_HEIGHT}
             className="mapStage"
             onClick={(e) => {
-              if (e.target === e.target.getStage()) setMarkingSpace(null);
+              if (e.target === e.target.getStage())
+                handleCellClick(e.target.getStage());
             }}
             onTap={(e) => {
-              if (e.target === e.target.getStage()) setMarkingSpace(null);
+              if (e.target === e.target.getStage())
+                handleCellClick(e.target.getStage());
             }}
           >
             {/* Grid layer */}
@@ -204,15 +269,32 @@ const MapPage = () => {
 
             {/* Houses layer */}
             <Layer>
-              {houses.map((house) => (
+              {marking && !marking.houseId && (
+                <Rect
+                  x={marking.col * CELL_SIZE}
+                  y={marking.row * CELL_SIZE}
+                  width={CELL_SIZE}
+                  height={CELL_SIZE}
+                  fill="rgba(124, 92, 255, 0.25)"
+                  stroke="#7c5cff"
+                  strokeWidth={2}
+                  listening={false}
+                />
+              )}
+              {houses.map((house) => {
+                const selected = marking?.houseId === house.id;
+                const shapeStyle = selected
+                  ? { ...SHAPE_STYLE, stroke: '#ff5fa2', strokeWidth: 6 }
+                  : SHAPE_STYLE;
+                return (
                 <Group
                   key={house.id}
                   x={house.col * CELL_SIZE}
                   y={house.row * CELL_SIZE}
                   rotation={house.rotation}
                   draggable={editMode}
-                  onClick={() => handleSpaceClick(house, 0)}
-                  onTap={() => handleSpaceClick(house, 0)}
+                  onClick={(e) => handleCellClick(e.target.getStage(), house.id)}
+                  onTap={(e) => handleCellClick(e.target.getStage(), house.id)}
                   onMouseEnter={(e) => {
                     if (editMode) return;
                     const stage = e.target.getStage();
@@ -243,7 +325,7 @@ const MapPage = () => {
                       closed
                       fill={fill}
                       lineJoin="round"
-                      {...SHAPE_STYLE}
+                      {...shapeStyle}
                     />
                   ) : house.shape === 'circle' ? (
                     <Ellipse
@@ -252,7 +334,7 @@ const MapPage = () => {
                       radiusX={(house.width * CELL_SIZE) / 2}
                       radiusY={(house.length * CELL_SIZE) / 2}
                       fill={fill}
-                      {...SHAPE_STYLE}
+                      {...shapeStyle}
                     />
                   ) : (
                     <Rect
@@ -260,7 +342,7 @@ const MapPage = () => {
                       height={house.length * CELL_SIZE}
                       fill={fill}
                       cornerRadius={10}
-                      {...SHAPE_STYLE}
+                      {...shapeStyle}
                     />
                   )}
                   <Text
@@ -272,7 +354,8 @@ const MapPage = () => {
                     {...LABEL_STYLE}
                   />
                 </Group>
-              ))}
+                );
+              })}
 
               {/* Upper-floor buttons for multi-storey houses. Rendered outside
                   the rotating Group, anchored to the top-left of the house's
@@ -316,11 +399,11 @@ const MapPage = () => {
                             y={i * (btnH + gap)}
                             onClick={(e) => {
                               e.cancelBubble = true;
-                              setMarkingSpace({ house, level });
+                              openFloor(house, level);
                             }}
                             onTap={(e) => {
                               e.cancelBubble = true;
-                              setMarkingSpace({ house, level });
+                              openFloor(house, level);
                             }}
                           >
                             <Rect
@@ -388,26 +471,33 @@ const MapPage = () => {
                 ))}
             </Layer>
           </Stage>
+
+          {marking && (
+            <div
+              className="cellPicker"
+              style={{
+                left: marking.x * CELL_SIZE,
+                top: marking.y * CELL_SIZE,
+              }}
+            >
+              <PigPicker
+                pigs={allPigs}
+                selectedPigId=""
+                onSelect={() => {}}
+                multiSelect
+                selectedPigIds={[...selectedPigs]}
+                onToggle={togglePig}
+                onSave={handleSave}
+                onClose={() => setMarking(null)}
+                defaultOpen
+                theme="purple"
+                dropUp={marking.dropUp}
+                align={marking.align}
+              />
+            </div>
+          )}
         </div>
       </div>
-
-      <Modal isOpen={!!markingSpace} onClose={() => setMarkingSpace(null)}>
-        {markingSpace && (
-          <>
-            <p>
-              {(markingSpace.house.levels ?? 1) >= 2
-                ? `Who's on floor ${markingSpace.level + 1} of ${markingSpace.house.label}?`
-                : `Who's at ${markingSpace.house.label}?`}
-            </p>
-            <PigPicker
-              pigs={allPigs}
-              selectedPigId=""
-              onSelect={handleMarkPig}
-              theme="purple"
-            />
-          </>
-        )}
-      </Modal>
     </div>
   );
 };
