@@ -31,6 +31,7 @@ const GRID_ROWS = 23;
 
 const GRID_WIDTH = CELL_SIZE * GRID_COLS;
 const GRID_HEIGHT = CELL_SIZE * GRID_ROWS;
+const BORDER_WIDTH = 5; // matches --border-width on .mapCanvasWrap
 
 // Disabled / out-of-bounds region of the pen, in grid cells: top-left (4,0)
 // to bottom-right (18,4).
@@ -338,11 +339,17 @@ const MapPage = () => {
 
   return (
     <div className="mapPage">
-      <div className="mapHeader">
+      <div
+        className="mapHeader"
+        style={{ maxWidth: GRID_WIDTH + 2 * BORDER_WIDTH }}
+      >
         <h2>🗺️ Pig Pen Map</h2>
       </div>
 
-      <div className="mapCanvasContainer">
+      <div
+        className="mapCanvasContainer"
+        style={{ maxWidth: GRID_WIDTH + 2 * BORDER_WIDTH }}
+      >
         <div className="mapEditButton">
           <Button
             variant={editMode ? 'success' : 'default'}

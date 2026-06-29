@@ -6,10 +6,21 @@
   box-sizing: border-box;
 }
 
+.mapHeader {
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  background-color: color-mix(in srgb, var(--primary) 25%, white);
+  border: var(--border-width) var(--border-style) var(--primary);
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+}
+
 .mapHeader h2 {
   margin: 0;
+  padding: var(--spacing-sm) 0;
   font-size: var(--font-size-xl);
   color: var(--text);
+  text-align: center;
 }
 
 .mapHint {
@@ -23,6 +34,8 @@
   flex: 1;
   display: flex;
   min-height: 0;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .mapEditButton {
@@ -37,7 +50,8 @@
   flex: 1;
   overflow: auto;
   border: var(--border-width) var(--border-style) var(--primary);
-  border-radius: var(--border-radius-md);
+  border-top: none;
+  border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
   background: var(--surface-alt);
 }
 
