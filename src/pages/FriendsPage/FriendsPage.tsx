@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { subMonths } from 'date-fns';
 import PigCard from '../../components/PigList/PigCard/PigCard';
 import Loading from '../../components/ui/Loading/Loading';
 import Button from '../../components/ui/Button/Button';
@@ -35,6 +36,11 @@ const CATEGORIES: { value: FriendCategory; label: string }[] = [
 
 const categoryLabel = (value: FriendCategory) =>
   CATEGORIES.find((c) => c.value === value)?.label ?? value;
+
+// Friendship strength only reflects the last 2 months — relationships change.
+const FRIENDSHIP_MONTHS = 2;
+const parseTs = (ts: string | null) =>
+  Date.parse((ts ?? '').replace(' ', 'T'));
 
 // Relationship strength: 1 point per shared event. Tiers are just a friendly
 // label over the raw points total.
@@ -89,18 +95,31 @@ const FriendsPage = () => {
     [allPigs]
   );
 
-  // Logged friend events + map sightings of 2+ pigs, newest first.
+  // Only count events from the last 2 months.
+  const cutoff = useMemo(
+    () => subMonths(new Date(), FRIENDSHIP_MONTHS).getTime(),
+    []
+  );
+
+  // Logged friend events + map sightings of 2+ pigs (last 2 months), newest
+  // first.
   const bondEvents = useMemo<BondEvent[]>(() => {
-    const logged: BondEvent[] = friendEvents.map((e) => ({
-      uid: `f-${e.id}`,
-      rawId: e.id,
-      source: 'logged',
-      category: e.category,
-      pigIds: e.pig_ids,
-      ts: e.observed_at ?? e.created_at ?? '',
-    }));
+    const logged: BondEvent[] = friendEvents
+      .filter((e) => parseTs(e.observed_at ?? e.created_at) >= cutoff)
+      .map((e) => ({
+        uid: `f-${e.id}`,
+        rawId: e.id,
+        source: 'logged',
+        category: e.category,
+        pigIds: e.pig_ids,
+        ts: e.observed_at ?? e.created_at ?? '',
+      }));
     const fromMap: BondEvent[] = sightingEvents
-      .filter((s) => s.pig_ids.length >= 2)
+      .filter(
+        (s) =>
+          s.pig_ids.length >= 2 &&
+          parseTs(s.observed_at ?? s.created_at) >= cutoff
+      )
       .map((s) => ({
         uid: `s-${s.id}`,
         rawId: s.id,
@@ -110,12 +129,17 @@ const FriendsPage = () => {
         ts: s.observed_at ?? s.created_at ?? '',
       }));
     return [...logged, ...fromMap].sort((a, b) => b.ts.localeCompare(a.ts));
-  }, [friendEvents, sightingEvents]);
+  }, [friendEvents, sightingEvents, cutoff]);
 
-  // Proximity points (pigs sighted near each other), keyed by pair.
+  // Proximity points (pigs sighted near each other) from the last 2 months.
   const proximityPoints = useMemo(
-    () => computeProximityPoints(sightingEvents),
-    [sightingEvents]
+    () =>
+      computeProximityPoints(
+        sightingEvents.filter(
+          (s) => parseTs(s.observed_at ?? s.created_at) >= cutoff
+        )
+      ),
+    [sightingEvents, cutoff]
   );
 
   // Rank pairs by total points: +1 for each explicit event they shared, plus
