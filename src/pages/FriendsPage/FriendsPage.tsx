@@ -22,7 +22,10 @@ import {
   deleteSightingEvent,
   getSightingEvents,
 } from '../../services/pig-sightings.service';
-import { computeProximityPoints } from '../../services/friendship-proximity';
+import {
+  computeProximityEvents,
+  computeProximityPoints,
+} from '../../services/friendship-proximity';
 import { createPigSighting, getAllPigs } from '../../services/pigs.service';
 import {
   FRIEND_CATEGORIES,
@@ -55,12 +58,13 @@ type FriendPair = {
   points: number;
 };
 
-// A bonding event from either source: a logged friend event or a map sighting
-// of 2+ pigs together.
+// A bonding event from any source: a logged friend event, a map sighting of
+// 2+ pigs together, or a derived proximity moment (pigs sighted near each
+// other). Proximity events aren't stored, so they can't be deleted.
 type BondEvent = {
   uid: string;
   rawId: number;
-  source: 'logged' | 'map';
+  source: 'logged' | 'map' | 'proximity';
   category: FriendCategory | null;
   pigIds: number[];
   ts: string;
@@ -129,15 +133,42 @@ const FriendsPage = () => {
     return [...logged, ...fromMap].sort((a, b) => b.ts.localeCompare(a.ts));
   }, [friendEvents, sightingEvents, cutoff]);
 
-  // Proximity points (pigs sighted near each other) from the last 2 months.
-  const proximityPoints = useMemo(
+  // Sightings within the scoring window, shared by proximity calculations.
+  const recentSightings = useMemo(
     () =>
-      computeProximityPoints(
-        sightingEvents.filter(
-          (s) => parseTs(s.observed_at ?? s.created_at) >= cutoff
-        )
+      sightingEvents.filter(
+        (s) => parseTs(s.observed_at ?? s.created_at) >= cutoff
       ),
     [sightingEvents, cutoff]
+  );
+
+  // Proximity points (pigs sighted near each other) from the last 2 months.
+  const proximityPoints = useMemo(
+    () => computeProximityPoints(recentSightings),
+    [recentSightings]
+  );
+
+  // Proximity moments as displayable events for the history list.
+  const proximityEvents = useMemo<BondEvent[]>(
+    () =>
+      computeProximityEvents(recentSightings).map((ev) => ({
+        uid: `p-${ev.pigIds[0]}-${ev.pigIds[1]}-${ev.t}`,
+        rawId: 0,
+        source: 'proximity',
+        category: null,
+        pigIds: ev.pigIds,
+        ts: new Date(ev.t).toISOString(),
+      })),
+    [recentSightings]
+  );
+
+  // All events shown in the history, newest first.
+  const historyEvents = useMemo(
+    () =>
+      [...bondEvents, ...proximityEvents].sort(
+        (a, b) => parseTs(b.ts) - parseTs(a.ts)
+      ),
+    [bondEvents, proximityEvents]
   );
 
   // Rank pairs by total points: +1 for each explicit event they shared, plus
@@ -410,20 +441,28 @@ const FriendsPage = () => {
               </Button>
             </div>
             <div className="friendObsList">
-              {bondEvents.map((ev) => (
+              {historyEvents.map((ev) => (
                 <div className="friendEvent" key={ev.uid}>
-                  <button
-                    className="friendObsDelete"
-                    onClick={() => setDeletingItem(ev)}
-                    aria-label="Delete"
-                  >
-                    🗑️
-                  </button>
+                  {ev.source !== 'proximity' && (
+                    <button
+                      className="friendObsDelete"
+                      onClick={() => setDeletingItem(ev)}
+                      aria-label="Delete"
+                    >
+                      🗑️
+                    </button>
+                  )}
                   <div className="friendEventCategory">
-                    {ev.source === 'map' ? '📍 ' : ''}
-                    {ev.category
-                      ? friendCategoryLabel(ev.category)
-                      : 'Spotted together'}
+                    {ev.source === 'proximity' ? (
+                      '👀 Spotted nearby'
+                    ) : (
+                      <>
+                        {ev.source === 'map' ? '📍 ' : ''}
+                        {ev.category
+                          ? friendCategoryLabel(ev.category)
+                          : 'Spotted together'}
+                      </>
+                    )}
                   </div>
                   <div className="friendEventPigs">
                     {ev.pigIds

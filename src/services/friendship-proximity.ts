@@ -12,34 +12,40 @@ type Obs = {
   col: number;
   row: number;
   level: number;
+  sIdx: number; // index of the sighting it came from
+};
+
+// A single counted moment of two pigs being near each other.
+export type ProximityEvent = {
+  pigIds: [number, number];
+  t: number; // epoch ms of the moment
 };
 
 const pairKey = (a: number, b: number) =>
   a < b ? `${a}-${b}` : `${b}-${a}`;
 
 /**
- * Proximity friendship points per pig pair, derived from sightings:
- * two pigs sighted within 5 minutes of each other, within 1 cell (Chebyshev
- * <= 1) on the same level, count as being together. Repeats for a pair within
- * an hour collapse to one point. Each counted moment is worth PROXIMITY_WEIGHT.
- *
- * Returns a map of `${loId}-${hiId}` -> points.
+ * Individual proximity moments, derived from sightings: two pigs sighted within
+ * 5 minutes of each other, within 1 cell (Chebyshev <= 1) on the same level,
+ * count as being near each other. Pigs in the *same* sighting are excluded —
+ * those are already recorded as an explicit "together" event. Repeats for a
+ * pair within an hour collapse to a single moment.
  */
-export const computeProximityPoints = (
+export const computeProximityEvents = (
   sightings: SightingEvent[]
-): Map<string, number> => {
+): ProximityEvent[] => {
   // Flatten to one observation per pig per sighting.
   const obs: Obs[] = [];
-  for (const s of sightings) {
-    if (s.cleared) continue;
+  sightings.forEach((s, sIdx) => {
+    if (s.cleared) return;
     const t = Date.parse((s.observed_at ?? s.created_at ?? '').replace(' ', 'T'));
-    if (Number.isNaN(t)) continue;
+    if (Number.isNaN(t)) return;
     const col = Math.floor(s.x);
     const row = Math.floor(s.y);
     for (const pigId of s.pig_ids) {
-      obs.push({ pigId, t, col, row, level: s.level });
+      obs.push({ pigId, t, col, row, level: s.level, sIdx });
     }
-  }
+  });
 
   // Candidate proximity moments (times) per pair.
   const moments = new Map<string, number[]>();
@@ -48,6 +54,7 @@ export const computeProximityPoints = (
       const a = obs[i];
       const b = obs[j];
       if (a.pigId === b.pigId) continue;
+      if (a.sIdx === b.sIdx) continue; // same sighting = explicit togetherness
       if (a.level !== b.level) continue;
       if (Math.abs(a.t - b.t) > FIVE_MIN) continue;
       if (Math.abs(a.col - b.col) > 1 || Math.abs(a.row - b.row) > 1) continue;
@@ -58,19 +65,33 @@ export const computeProximityPoints = (
     }
   }
 
-  // Count moments with a 1-hour cooldown per pair, then weight them.
-  const points = new Map<string, number>();
+  // Emit one event per counted moment, with a 1-hour cooldown per pair.
+  const events: ProximityEvent[] = [];
   for (const [key, times] of moments) {
     times.sort((x, y) => x - y);
-    let counted = 0;
     let lastCounted = -Infinity;
     for (const t of times) {
       if (t - lastCounted >= ONE_HOUR) {
-        counted += 1;
+        const [lo, hi] = key.split('-').map(Number);
+        events.push({ pigIds: [lo, hi], t });
         lastCounted = t;
       }
     }
-    points.set(key, counted * PROXIMITY_WEIGHT);
+  }
+  return events;
+};
+
+/**
+ * Proximity friendship points per pig pair. Each counted moment is worth
+ * PROXIMITY_WEIGHT. Returns a map of `${loId}-${hiId}` -> points.
+ */
+export const computeProximityPoints = (
+  sightings: SightingEvent[]
+): Map<string, number> => {
+  const points = new Map<string, number>();
+  for (const ev of computeProximityEvents(sightings)) {
+    const key = pairKey(ev.pigIds[0], ev.pigIds[1]);
+    points.set(key, (points.get(key) ?? 0) + PROXIMITY_WEIGHT);
   }
   return points;
 };
