@@ -30,7 +30,11 @@
 }
 
 .friendsPage .tabs button.active {
-  border-bottom-color: var(--primary-dark);
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--accent-pink) 55%,
+    var(--text-red)
+  );
   opacity: 1;
   font-weight: var(--font-weight-bold);
 }
@@ -51,6 +55,12 @@
   background: color-mix(in srgb, var(--accent-pink) 30%, white);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.friendStatCard:focus-visible {
+  outline: 3px solid var(--accent-pink);
+  outline-offset: 2px;
 }
 
 .friendStatPig {
@@ -91,6 +101,85 @@
   text-align: center;
 }
 
+/* ---- Relationships modal ---- */
+
+.friendRelHeading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: 0 0 var(--spacing-sm);
+}
+
+.friendRelHeading .pigPickerThumb {
+  width: 40px;
+  height: 40px;
+}
+
+/* Horizontal relationship bar chart */
+
+.friendBars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.friendBarRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: inherit;
+  text-decoration: none;
+}
+
+.friendBarLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.friendBarLabel .pigPickerThumb {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.friendBarName {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friendBarTrack {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: color-mix(in srgb, var(--accent-pink) 18%, white);
+  border-radius: var(--border-radius-sm);
+  min-height: 28px;
+}
+
+.friendBarFill {
+  height: 28px;
+  border-radius: var(--border-radius-sm);
+  background: var(--accent-pink);
+  min-width: 4px;
+  transition: width 0.3s ease;
+}
+
+.friendBarValue {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--primary-dark);
+  white-space: nowrap;
+  padding-right: var(--spacing-xs);
+}
+
 /* ---- Form ---- */
 
 #newFriendForm {
@@ -122,7 +211,7 @@
 }
 
 .friendCategory {
-  padding: var(--spacing-xxs) var(--spacing-xs);
+  padding: var(--spacing-xs);
   background: var(--bg-translucent);
   border: 2px solid transparent;
   border-radius: var(--border-radius-sm);

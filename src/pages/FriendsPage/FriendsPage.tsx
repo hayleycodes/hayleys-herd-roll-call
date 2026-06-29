@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { subMonths } from 'date-fns';
 import PigCard from '../../components/PigList/PigCard/PigCard';
 import Loading from '../../components/ui/Loading/Loading';
@@ -23,24 +24,15 @@ import {
 } from '../../services/pig-sightings.service';
 import { computeProximityPoints } from '../../services/friendship-proximity';
 import { createPigSighting, getAllPigs } from '../../services/pigs.service';
+import {
+  FRIEND_CATEGORIES,
+  friendCategoryLabel,
+} from '../../constants/friend-categories';
 import './FriendsPage.css';
-
-const CATEGORIES: { value: FriendCategory; label: string }[] = [
-  { value: 'snacking', label: '🍴 Snacking' },
-  { value: 'grooming', label: '🧼 Grooming' },
-  { value: 'following', label: '🐾 Following' },
-  { value: 'sharing_house', label: '🏠 Sharing a house' },
-  { value: 'booping_noses', label: '👃 Booping noses' },
-  { value: 'resting_together', label: '😴 Resting together' },
-];
-
-const categoryLabel = (value: FriendCategory) =>
-  CATEGORIES.find((c) => c.value === value)?.label ?? value;
 
 // Friendship strength only reflects the last 2 months — relationships change.
 const FRIENDSHIP_MONTHS = 2;
-const parseTs = (ts: string | null) =>
-  Date.parse((ts ?? '').replace(' ', 'T'));
+const parseTs = (ts: string | null) => Date.parse((ts ?? '').replace(' ', 'T'));
 
 // Relationship strength: 1 point per shared event. Tiers are just a friendly
 // label over the raw points total. Ordered strongest first.
@@ -86,6 +78,7 @@ const FriendsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [deletingItem, setDeletingItem] = useState<BondEvent | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [selectedPig, setSelectedPig] = useState<Pig | null>(null);
   const [activeTab, setActiveTab] = useState<'friends' | 'observations'>(
     'friends'
   );
@@ -158,7 +151,10 @@ const FriendsPage = () => {
       const ids = ev.pigIds.filter((id) => pigById.has(id));
       for (let i = 0; i < ids.length; i++) {
         for (let j = i + 1; j < ids.length; j++) {
-          add(ids[i] < ids[j] ? `${ids[i]}-${ids[j]}` : `${ids[j]}-${ids[i]}`, 1);
+          add(
+            ids[i] < ids[j] ? `${ids[i]}-${ids[j]}` : `${ids[j]}-${ids[i]}`,
+            1
+          );
         }
       }
     }
@@ -192,6 +188,42 @@ const FriendsPage = () => {
     }
     return stats;
   }, [friendPairs]);
+
+  // Order pigs by relationship strength: most friends in the strongest tier
+  // first, falling back to the next tier down, then alphabetically.
+  const pigsByStrength = useMemo(() => {
+    const countsFor = (pig: Pig) =>
+      statsByPig.get(Number(pig.id)) ?? {
+        inseparable: 0,
+        close: 0,
+        friends: 0,
+        acquaintances: 0,
+      };
+    return [...sortedPigs].sort((a, b) => {
+      const ca = countsFor(a);
+      const cb = countsFor(b);
+      for (const t of TIERS) {
+        if (cb[t.key] !== ca[t.key]) return cb[t.key] - ca[t.key];
+      }
+      return a.name.localeCompare(b.name);
+    });
+  }, [sortedPigs, statsByPig]);
+
+  // Friends of the pig whose modal is open, strongest first, for the bar chart.
+  const selectedPigRels = useMemo(() => {
+    if (!selectedPig) return [];
+    return friendPairs
+      .filter(
+        (p) =>
+          Number(p.pigA.id) === Number(selectedPig.id) ||
+          Number(p.pigB.id) === Number(selectedPig.id)
+      )
+      .map((p) => {
+        const partner =
+          Number(p.pigA.id) === Number(selectedPig.id) ? p.pigB : p.pigA;
+        return { partner, points: p.points, tier: tierFor(p.points) };
+      });
+  }, [selectedPig, friendPairs]);
 
   const load = async () => {
     try {
@@ -236,9 +268,7 @@ const FriendsPage = () => {
       setSelectedPigs(new Set());
       setFriendEvents(await getFriendEvents());
     } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : 'Failed to add event'
-      );
+      setFormError(err instanceof Error ? err.message : 'Failed to add event');
     } finally {
       setSubmitting(false);
     }
@@ -288,13 +318,30 @@ const FriendsPage = () => {
 
         {activeTab === 'friends' && (
           <div className="friendsStatsGrid">
-            {sortedPigs.map((pig) => {
+            {pigsByStrength.map((pig) => {
               const stats = statsByPig.get(Number(pig.id));
               const total = stats
                 ? TIERS.reduce((sum, t) => sum + stats[t.key], 0)
                 : 0;
               return (
-                <div className="friendStatCard" key={pig.id}>
+                <div
+                  className="friendStatCard"
+                  key={pig.id}
+                  role="button"
+                  tabIndex={0}
+                  // Capture the click before PigCard's <Link> so we open the
+                  // relationships modal instead of navigating to the pig page.
+                  onClickCapture={(e) => {
+                    e.preventDefault();
+                    setSelectedPig(pig);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedPig(pig);
+                    }
+                  }}
+                >
                   <div className="friendStatPig">
                     <PigCard pig={pig} hideLastSeen />
                   </div>
@@ -327,7 +374,7 @@ const FriendsPage = () => {
             <div id="newFriendForm">
               <p>What were they doing?</p>
               <div className="friendCategories">
-                {CATEGORIES.map((c) => (
+                {FRIEND_CATEGORIES.map((c) => (
                   <button
                     key={c.value}
                     type="button"
@@ -374,7 +421,9 @@ const FriendsPage = () => {
                   </button>
                   <div className="friendEventCategory">
                     {ev.source === 'map' ? '📍 ' : ''}
-                    {ev.category ? categoryLabel(ev.category) : 'Spotted together'}
+                    {ev.category
+                      ? friendCategoryLabel(ev.category)
+                      : 'Spotted together'}
                   </div>
                   <div className="friendEventPigs">
                     {ev.pigIds
@@ -382,9 +431,7 @@ const FriendsPage = () => {
                       .filter((p): p is Pig => !!p)
                       .map((pig) => (
                         <div className="friendEventPig" key={pig.id}>
-                          <PigThumb
-                            imagePath={pig.image_paths?.[0] ?? null}
-                          />
+                          <PigThumb imagePath={pig.image_paths?.[0] ?? null} />
                           <span>{pig.name}</span>
                         </div>
                       ))}
@@ -396,13 +443,69 @@ const FriendsPage = () => {
         )}
       </Panel>
 
+      <Modal
+        isOpen={!!selectedPig}
+        onClose={() => setSelectedPig(null)}
+        variant="large"
+        showClose
+      >
+        {selectedPig &&
+          (() => {
+            // Bar widths are scaled against the strongest relationship.
+            const maxPoints = selectedPigRels.reduce(
+              (m, r) => Math.max(m, r.points),
+              0
+            );
+            return (
+              <>
+                <h3 className="friendRelHeading">
+                  <PigThumb imagePath={selectedPig.image_paths?.[0] ?? null} />
+                  {selectedPig.name}'s Friends
+                </h3>
+                {selectedPigRels.length === 0 ? (
+                  <p className="friendStatEmpty">No friends yet 🌱</p>
+                ) : (
+                  <div className="friendBars">
+                    {selectedPigRels.map((r) => (
+                      <Link
+                        key={r.partner.id}
+                        to={`/pigs/${r.partner.id}`}
+                        className="friendBarRow"
+                        title={r.tier.label}
+                      >
+                        <span className="friendBarLabel">
+                          <PigThumb
+                            imagePath={r.partner.image_paths?.[0] ?? null}
+                          />
+                          <span className="friendBarName">{r.partner.name}</span>
+                        </span>
+                        <span className="friendBarTrack">
+                          <span
+                            className="friendBarFill"
+                            style={{
+                              width: `${maxPoints ? (r.points / maxPoints) * 100 : 0}%`,
+                            }}
+                          />
+                          <span className="friendBarValue">
+                            {r.tier.icon} {r.points}
+                          </span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
+      </Modal>
+
       <Modal isOpen={!!deletingItem} onClose={() => setDeletingItem(null)}>
         {deletingItem && (
           <>
             <p>
               Remove this{' '}
               {deletingItem.category
-                ? categoryLabel(deletingItem.category)
+                ? friendCategoryLabel(deletingItem.category)
                 : 'sighting'}{' '}
               event ({deletingItem.pigIds.length} pigs)?
             </p>
