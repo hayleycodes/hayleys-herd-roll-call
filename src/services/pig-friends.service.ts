@@ -1,40 +1,34 @@
 import { supabase } from '../../utils/supabase-client';
-import type { FriendCategory, FriendObservation } from './pigs.types';
+import type { FriendCategory, FriendEvent } from './pigs.types';
 
-const SELECT =
-  '*, pig_a:pigs!friend_observations_pig_id_a_fkey(*), pig_b:pigs!friend_observations_pig_id_b_fkey(*)';
+// Cast to any since this table isn't in the generated types yet
+const friendEventsTable = () => (supabase as any).from('friend_events');
 
-export const getFriendObservations = async (): Promise<FriendObservation[]> => {
-  const { data, error } = await supabase
-    .from('friend_observations')
-    .select(SELECT)
+export const getFriendEvents = async (): Promise<FriendEvent[]> => {
+  const { data, error } = await friendEventsTable()
+    .select('*')
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data ?? []) as unknown as FriendObservation[];
+  return (data ?? []) as FriendEvent[];
 };
 
-export const createFriendObservation = async (
-  pigIdA: number,
-  pigIdB: number,
+export const createFriendEvent = async (
   category: FriendCategory,
+  pigIds: number[],
   notes?: string | null,
   observedAt?: string | null
 ) => {
-  const { error } = await supabase.from('friend_observations').insert({
-    pig_id_a: pigIdA,
-    pig_id_b: pigIdB,
+  const { error } = await friendEventsTable().insert({
     category,
+    pig_ids: pigIds,
     notes: notes ?? null,
     observed_at: observedAt ?? null,
   });
   if (error) throw new Error(error.message);
 };
 
-export const deleteFriendObservation = async (id: number) => {
-  const { error } = await supabase
-    .from('friend_observations')
-    .delete()
-    .eq('id', id);
+export const deleteFriendEvent = async (id: number) => {
+  const { error } = await friendEventsTable().delete().eq('id', id);
   if (error) throw new Error(error.message);
 };

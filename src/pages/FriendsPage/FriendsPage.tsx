@@ -4,16 +4,12 @@ import Loading from '../../components/ui/Loading/Loading';
 import Button from '../../components/ui/Button/Button';
 import Modal from '../../components/ui/Modal/Modal';
 import Panel from '../../components/ui/Panel/Panel';
-import PigPicker from '../../components/PigPicker/PigPicker';
-import type {
-  FriendCategory,
-  FriendObservation,
-  Pig,
-} from '../../services/pigs.types';
+import { PigThumb } from '../../components/PigPicker/PigPicker';
+import type { FriendCategory, FriendEvent, Pig } from '../../services/pigs.types';
 import {
-  createFriendObservation,
-  deleteFriendObservation,
-  getFriendObservations,
+  createFriendEvent,
+  deleteFriendEvent,
+  getFriendEvents,
 } from '../../services/pig-friends.service';
 import { getAllPigs } from '../../services/pigs.service';
 import './FriendsPage.css';
@@ -30,7 +26,7 @@ const CATEGORIES: { value: FriendCategory; label: string }[] = [
 const categoryLabel = (value: FriendCategory) =>
   CATEGORIES.find((c) => c.value === value)?.label ?? value;
 
-// Relationship strength: 1 point per bonding event. Tiers are just a friendly
+// Relationship strength: 1 point per shared event. Tiers are just a friendly
 // label over the raw points total.
 const strengthTier = (points: number) => {
   if (points >= 10) return { icon: '💞', label: 'Inseparable' };
@@ -47,64 +43,64 @@ type FriendPair = {
 };
 
 const FriendsPage = () => {
-  const [observations, setObservations] = useState<FriendObservation[]>([]);
+  const [events, setEvents] = useState<FriendEvent[]>([]);
   const [allPigs, setAllPigs] = useState<Pig[]>([]);
-  const [pigIdA, setPigIdA] = useState<number | ''>('');
-  const [pigIdB, setPigIdB] = useState<number | ''>('');
+  const [selectedPigs, setSelectedPigs] = useState<Set<number>>(new Set());
   const [category, setCategory] = useState<FriendCategory>('snacking');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [deletingItem, setDeletingItem] = useState<FriendObservation | null>(
-    null
-  );
+  const [deletingItem, setDeletingItem] = useState<FriendEvent | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<'friends' | 'observations'>(
     'friends'
   );
 
-  // Rank pig pairs by how many friendship observations they share.
+  const pigById = useMemo(
+    () => new Map(allPigs.map((p) => [p.id, p])),
+    [allPigs]
+  );
+
+  const sortedPigs = useMemo(
+    () => [...allPigs].sort((a, b) => a.name.localeCompare(b.name)),
+    [allPigs]
+  );
+
+  // Rank pig pairs by how many events they've shared. Each event adds a point
+  // to every pair of pigs that attended it.
   const friendPairs = useMemo(() => {
     const pairs = new Map<string, FriendPair>();
-    for (const obs of observations) {
-      if (!obs.pig_a || !obs.pig_b) continue;
-      const [lo, hi] =
-        obs.pig_id_a < obs.pig_id_b
-          ? [obs.pig_a, obs.pig_b]
-          : [obs.pig_b, obs.pig_a];
-      const key = `${lo.id}-${hi.id}`;
-      const existing = pairs.get(key);
-      if (existing) existing.points += 1;
-      else pairs.set(key, { key, pigA: lo, pigB: hi, points: 1 });
+    for (const ev of events) {
+      const ids = ev.pig_ids.filter((id) => pigById.has(id));
+      for (let i = 0; i < ids.length; i++) {
+        for (let j = i + 1; j < ids.length; j++) {
+          const [lo, hi] =
+            ids[i] < ids[j] ? [ids[i], ids[j]] : [ids[j], ids[i]];
+          const key = `${lo}-${hi}`;
+          const existing = pairs.get(key);
+          if (existing) existing.points += 1;
+          else
+            pairs.set(key, {
+              key,
+              pigA: pigById.get(lo)!,
+              pigB: pigById.get(hi)!,
+              points: 1,
+            });
+        }
+      }
     }
     return [...pairs.values()].sort((a, b) => b.points - a.points);
-  }, [observations]);
-
-  const pigsForA = useMemo(
-    () =>
-      allPigs
-        .filter((p) => p.id !== pigIdB)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [allPigs, pigIdB]
-  );
-
-  const pigsForB = useMemo(
-    () =>
-      allPigs
-        .filter((p) => p.id !== pigIdA)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [allPigs, pigIdA]
-  );
+  }, [events, pigById]);
 
   const load = async () => {
     try {
       setLoading(true);
-      const [obsData, pigsData] = await Promise.all([
-        getFriendObservations(),
+      const [eventData, pigsData] = await Promise.all([
+        getFriendEvents(),
         getAllPigs(),
       ]);
-      setObservations(obsData);
+      setEvents(eventData);
       setAllPigs(pigsData);
     } catch (err: any) {
       setError(err.message);
@@ -117,18 +113,26 @@ const FriendsPage = () => {
     load();
   }, []);
 
+  const togglePig = (id: number) => {
+    setSelectedPigs((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const handleAdd = async () => {
-    if (!pigIdA || !pigIdB) return;
+    if (selectedPigs.size < 2) return;
     try {
       setSubmitting(true);
       setFormError(null);
-      await createFriendObservation(pigIdA, pigIdB, category);
-      setPigIdA('');
-      setPigIdB('');
-      setObservations(await getFriendObservations());
+      await createFriendEvent(category, [...selectedPigs]);
+      setSelectedPigs(new Set());
+      setEvents(await getFriendEvents());
     } catch (err) {
       setFormError(
-        err instanceof Error ? err.message : 'Failed to add observation'
+        err instanceof Error ? err.message : 'Failed to add event'
       );
     } finally {
       setSubmitting(false);
@@ -139,13 +143,11 @@ const FriendsPage = () => {
     if (!deletingItem) return;
     try {
       setDeleting(true);
-      await deleteFriendObservation(deletingItem.id);
-      setObservations((prev) =>
-        prev.filter((item) => item.id !== deletingItem.id)
-      );
+      await deleteFriendEvent(deletingItem.id);
+      setEvents((prev) => prev.filter((item) => item.id !== deletingItem.id));
       setDeletingItem(null);
     } catch {
-      setObservations(await getFriendObservations());
+      setEvents(await getFriendEvents());
     } finally {
       setDeleting(false);
     }
@@ -168,7 +170,7 @@ const FriendsPage = () => {
             className={activeTab === 'observations' ? 'active' : ''}
             onClick={() => setActiveTab('observations')}
           >
-            Observations 👀
+            Events 👀
           </button>
         </div>
 
@@ -176,7 +178,7 @@ const FriendsPage = () => {
           <div className="friendsRanking">
             {friendPairs.length === 0 ? (
               <p className="muted friendsEmpty">
-                No friendship observations yet. Add some in the Observations tab.
+                No friendship events yet. Add some in the Events tab.
               </p>
             ) : (
               <ol className="friendsList">
@@ -214,20 +216,6 @@ const FriendsPage = () => {
         {activeTab === 'observations' && (
           <>
             <div id="newFriendForm">
-              <p>Pig</p>
-              <PigPicker
-                pigs={pigsForA}
-                selectedPigId={pigIdA}
-                onSelect={setPigIdA}
-                theme="purple"
-              />
-              <p>Friend</p>
-              <PigPicker
-                pigs={pigsForB}
-                selectedPigId={pigIdB}
-                onSelect={setPigIdB}
-                theme="purple"
-              />
               <p>What were they doing?</p>
               <div className="friendCategories">
                 {CATEGORIES.map((c) => (
@@ -241,32 +229,55 @@ const FriendsPage = () => {
                   </button>
                 ))}
               </div>
+              <p>Who was involved?</p>
+              <div className="pigChips">
+                {sortedPigs.map((pig) => (
+                  <button
+                    key={pig.id}
+                    type="button"
+                    className={`pigChip${selectedPigs.has(pig.id) ? ' selected' : ''}`}
+                    onClick={() => togglePig(pig.id)}
+                  >
+                    <PigThumb imagePath={pig.image_paths?.[0] ?? null} />
+                    <span>{pig.name}</span>
+                  </button>
+                ))}
+              </div>
               {formError && <p className="formError">{formError}</p>}
               <Button
                 onClick={handleAdd}
-                disabled={submitting || !pigIdA || !pigIdB}
+                disabled={submitting || selectedPigs.size < 2}
               >
-                {submitting ? 'Saving...' : 'Add'}
+                {submitting
+                  ? 'Saving...'
+                  : `Add${selectedPigs.size ? ` (${selectedPigs.size})` : ''}`}
               </Button>
             </div>
             <div className="friendObsList">
-              {observations.map((obs) => (
-                <div className="friendObsItem" key={obs.id}>
+              {events.map((ev) => (
+                <div className="friendEvent" key={ev.id}>
                   <button
                     className="friendObsDelete"
-                    onClick={() => setDeletingItem(obs)}
+                    onClick={() => setDeletingItem(ev)}
                     aria-label="Delete"
                   >
                     🗑️
                   </button>
-                  <div className="friendObsPig">
-                    <PigCard pig={obs.pig_a} hideLastSeen />
+                  <div className="friendEventCategory">
+                    {categoryLabel(ev.category)}
                   </div>
-                  <span className="friendObsCategory">
-                    {categoryLabel(obs.category)}
-                  </span>
-                  <div className="friendObsPig">
-                    <PigCard pig={obs.pig_b} hideLastSeen />
+                  <div className="friendEventPigs">
+                    {ev.pig_ids
+                      .map((id) => pigById.get(id))
+                      .filter((p): p is Pig => !!p)
+                      .map((pig) => (
+                        <div className="friendEventPig" key={pig.id}>
+                          <PigThumb
+                            imagePath={pig.image_paths?.[0] ?? null}
+                          />
+                          <span>{pig.name}</span>
+                        </div>
+                      ))}
                   </div>
                 </div>
               ))}
@@ -279,8 +290,8 @@ const FriendsPage = () => {
         {deletingItem && (
           <>
             <p>
-              Remove {deletingItem.pig_a.name} &amp; {deletingItem.pig_b.name} (
-              {categoryLabel(deletingItem.category)})?
+              Remove this {categoryLabel(deletingItem.category)} event (
+              {deletingItem.pig_ids.length} pigs)?
             </p>
             <div className="confirmActions">
               <Button onClick={() => setDeletingItem(null)}>Cancel</Button>

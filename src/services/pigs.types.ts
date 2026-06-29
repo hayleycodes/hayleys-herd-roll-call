@@ -86,14 +86,13 @@ export type FriendCategory =
   | 'booping_noses'
   | 'resting_together';
 
-export interface FriendObservation {
+// A bonding event involving any number of pigs (e.g. 4 pigs snacking).
+// Friendship strength is derived from co-attendance of these events.
+export interface FriendEvent {
   id: number;
-  pig_id_a: number;
-  pig_id_b: number;
   category: FriendCategory;
+  pig_ids: number[];
   notes: string | null;
   observed_at: string | null;
   created_at: string | null;
-  pig_a: Pig;
-  pig_b: Pig;
 }

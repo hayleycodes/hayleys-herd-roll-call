@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      friend_events: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: number
+          notes: string | null
+          observed_at: string | null
+          pig_ids: number[]
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: never
+          notes?: string | null
+          observed_at?: string | null
+          pig_ids: number[]
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: never
+          notes?: string | null
+          observed_at?: string | null
+          pig_ids?: number[]
+        }
+        Relationships: []
+      }
       friend_observations: {
         Row: {
           category: string

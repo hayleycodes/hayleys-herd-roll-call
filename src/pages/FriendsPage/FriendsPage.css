@@ -155,7 +155,41 @@
   font-weight: var(--font-weight-bold);
 }
 
-/* ---- Observations list ---- */
+/* ---- Pig multi-select chips ---- */
+
+.pigChips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--spacing-xs);
+}
+
+.pigChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xs);
+  background: var(--bg-translucent);
+  border: 3px solid transparent;
+  border-radius: var(--border-radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.pigChip.selected {
+  border-color: var(--accent-pink);
+  background: color-mix(in srgb, var(--accent-pink) 25%, white);
+  font-weight: var(--font-weight-bold);
+}
+
+.pigChip .pigPickerThumb {
+  width: 64px;
+  height: 64px;
+}
+
+/* ---- Events list ---- */
 
 .friendObsList {
   display: flex;
@@ -163,11 +197,8 @@
   gap: var(--spacing-sm);
 }
 
-.friendObsItem {
+.friendEvent {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
   background: color-mix(in srgb, var(--accent-pink) 30%, white);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-sm);
@@ -186,15 +217,22 @@
   border-radius: var(--border-radius-sm);
 }
 
-.friendObsPig {
-  flex: 1;
-  min-width: 0;
+.friendEventCategory {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-md);
+  margin-bottom: var(--spacing-xs);
 }
 
-.friendObsCategory {
-  flex-shrink: 0;
-  text-align: center;
+.friendEventPigs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.friendEventPig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-muted);
 }
