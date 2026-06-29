@@ -19,7 +19,7 @@ import {
   createSightingEvent,
   getSightingEvents,
 } from '../../services/pig-sightings.service';
-import { getAllPigs } from '../../services/pigs.service';
+import { createPigSighting, getAllPigs } from '../../services/pigs.service';
 import type {
   FriendCategory,
   Pig,
@@ -333,6 +333,8 @@ const MapPage = () => {
     setBehaviour(null);
     try {
       await createSightingEvent(ids, x, y, level, tag);
+      // Marking a pig also counts as sighting it for the home page sort.
+      await Promise.all(ids.map((id) => createPigSighting(Number(id))));
       setSightings(await getSightingEvents());
     } catch (e) {
       console.error('Failed to record sighting', e);
