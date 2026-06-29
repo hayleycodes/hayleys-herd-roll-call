@@ -68,12 +68,15 @@ export interface SocialOrderItem {
   submissive_pig: SocialOrderPig;
 }
 
-export interface PigSighting {
+// A map sighting: a group of pigs seen together at a spot, optionally tagged
+// with what they were doing (behaviour only matters for 2+ pigs).
+export interface SightingEvent {
   id: number;
-  pig_id: number;
+  pig_ids: number[];
   x: number; // grid coordinates (may be fractional)
   y: number;
   level: number; // floor index: 0 = ground, 1 = upstairs, ...
+  behaviour: string | null;
   observed_at: string | null;
   created_at: string | null;
 }

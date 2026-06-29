@@ -5,12 +5,21 @@ import Button from '../../components/ui/Button/Button';
 import Modal from '../../components/ui/Modal/Modal';
 import Panel from '../../components/ui/Panel/Panel';
 import { PigThumb } from '../../components/PigPicker/PigPicker';
-import type { FriendCategory, FriendEvent, Pig } from '../../services/pigs.types';
+import type {
+  FriendCategory,
+  FriendEvent,
+  Pig,
+  SightingEvent,
+} from '../../services/pigs.types';
 import {
   createFriendEvent,
   deleteFriendEvent,
   getFriendEvents,
 } from '../../services/pig-friends.service';
+import {
+  deleteSightingEvent,
+  getSightingEvents,
+} from '../../services/pig-sightings.service';
 import { getAllPigs } from '../../services/pigs.service';
 import './FriendsPage.css';
 
@@ -42,8 +51,20 @@ type FriendPair = {
   points: number;
 };
 
+// A bonding event from either source: a logged friend event or a map sighting
+// of 2+ pigs together.
+type BondEvent = {
+  uid: string;
+  rawId: number;
+  source: 'logged' | 'map';
+  category: FriendCategory | null;
+  pigIds: number[];
+  ts: string;
+};
+
 const FriendsPage = () => {
-  const [events, setEvents] = useState<FriendEvent[]>([]);
+  const [friendEvents, setFriendEvents] = useState<FriendEvent[]>([]);
+  const [sightingEvents, setSightingEvents] = useState<SightingEvent[]>([]);
   const [allPigs, setAllPigs] = useState<Pig[]>([]);
   const [selectedPigs, setSelectedPigs] = useState<Set<number>>(new Set());
   const [category, setCategory] = useState<FriendCategory>('snacking');
@@ -51,14 +72,14 @@ const FriendsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [deletingItem, setDeletingItem] = useState<FriendEvent | null>(null);
+  const [deletingItem, setDeletingItem] = useState<BondEvent | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<'friends' | 'observations'>(
     'friends'
   );
 
   const pigById = useMemo(
-    () => new Map(allPigs.map((p) => [p.id, p])),
+    () => new Map(allPigs.map((p) => [Number(p.id), p])),
     [allPigs]
   );
 
@@ -67,12 +88,35 @@ const FriendsPage = () => {
     [allPigs]
   );
 
+  // Logged friend events + map sightings of 2+ pigs, newest first.
+  const bondEvents = useMemo<BondEvent[]>(() => {
+    const logged: BondEvent[] = friendEvents.map((e) => ({
+      uid: `f-${e.id}`,
+      rawId: e.id,
+      source: 'logged',
+      category: e.category,
+      pigIds: e.pig_ids,
+      ts: e.observed_at ?? e.created_at ?? '',
+    }));
+    const fromMap: BondEvent[] = sightingEvents
+      .filter((s) => s.pig_ids.length >= 2)
+      .map((s) => ({
+        uid: `s-${s.id}`,
+        rawId: s.id,
+        source: 'map',
+        category: (s.behaviour as FriendCategory | null) ?? null,
+        pigIds: s.pig_ids,
+        ts: s.observed_at ?? s.created_at ?? '',
+      }));
+    return [...logged, ...fromMap].sort((a, b) => b.ts.localeCompare(a.ts));
+  }, [friendEvents, sightingEvents]);
+
   // Rank pig pairs by how many events they've shared. Each event adds a point
   // to every pair of pigs that attended it.
   const friendPairs = useMemo(() => {
     const pairs = new Map<string, FriendPair>();
-    for (const ev of events) {
-      const ids = ev.pig_ids.filter((id) => pigById.has(id));
+    for (const ev of bondEvents) {
+      const ids = ev.pigIds.filter((id) => pigById.has(id));
       for (let i = 0; i < ids.length; i++) {
         for (let j = i + 1; j < ids.length; j++) {
           const [lo, hi] =
@@ -91,16 +135,18 @@ const FriendsPage = () => {
       }
     }
     return [...pairs.values()].sort((a, b) => b.points - a.points);
-  }, [events, pigById]);
+  }, [bondEvents, pigById]);
 
   const load = async () => {
     try {
       setLoading(true);
-      const [eventData, pigsData] = await Promise.all([
+      const [friendData, sightingData, pigsData] = await Promise.all([
         getFriendEvents(),
+        getSightingEvents(),
         getAllPigs(),
       ]);
-      setEvents(eventData);
+      setFriendEvents(friendData);
+      setSightingEvents(sightingData);
       setAllPigs(pigsData);
     } catch (err: any) {
       setError(err.message);
@@ -129,7 +175,7 @@ const FriendsPage = () => {
       setFormError(null);
       await createFriendEvent(category, [...selectedPigs]);
       setSelectedPigs(new Set());
-      setEvents(await getFriendEvents());
+      setFriendEvents(await getFriendEvents());
     } catch (err) {
       setFormError(
         err instanceof Error ? err.message : 'Failed to add event'
@@ -143,11 +189,18 @@ const FriendsPage = () => {
     if (!deletingItem) return;
     try {
       setDeleting(true);
-      await deleteFriendEvent(deletingItem.id);
-      setEvents((prev) => prev.filter((item) => item.id !== deletingItem.id));
+      if (deletingItem.source === 'logged') {
+        await deleteFriendEvent(deletingItem.rawId);
+        setFriendEvents((prev) =>
+          prev.filter((e) => e.id !== deletingItem.rawId)
+        );
+      } else {
+        await deleteSightingEvent(deletingItem.rawId);
+        setSightingEvents((prev) =>
+          prev.filter((e) => e.id !== deletingItem.rawId)
+        );
+      }
       setDeletingItem(null);
-    } catch {
-      setEvents(await getFriendEvents());
     } finally {
       setDeleting(false);
     }
@@ -254,8 +307,8 @@ const FriendsPage = () => {
               </Button>
             </div>
             <div className="friendObsList">
-              {events.map((ev) => (
-                <div className="friendEvent" key={ev.id}>
+              {bondEvents.map((ev) => (
+                <div className="friendEvent" key={ev.uid}>
                   <button
                     className="friendObsDelete"
                     onClick={() => setDeletingItem(ev)}
@@ -264,10 +317,11 @@ const FriendsPage = () => {
                     🗑️
                   </button>
                   <div className="friendEventCategory">
-                    {categoryLabel(ev.category)}
+                    {ev.source === 'map' ? '📍 ' : ''}
+                    {ev.category ? categoryLabel(ev.category) : 'Spotted together'}
                   </div>
                   <div className="friendEventPigs">
-                    {ev.pig_ids
+                    {ev.pigIds
                       .map((id) => pigById.get(id))
                       .filter((p): p is Pig => !!p)
                       .map((pig) => (
@@ -290,8 +344,11 @@ const FriendsPage = () => {
         {deletingItem && (
           <>
             <p>
-              Remove this {categoryLabel(deletingItem.category)} event (
-              {deletingItem.pig_ids.length} pigs)?
+              Remove this{' '}
+              {deletingItem.category
+                ? categoryLabel(deletingItem.category)
+                : 'sighting'}{' '}
+              event ({deletingItem.pigIds.length} pigs)?
             </p>
             <div className="confirmActions">
               <Button onClick={() => setDeletingItem(null)}>Cancel</Button>

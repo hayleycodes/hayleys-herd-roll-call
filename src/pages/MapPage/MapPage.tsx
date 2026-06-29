@@ -15,11 +15,15 @@ import {
   savePenObjects,
 } from '../../services/pen-objects.service';
 import {
-  createSighting,
-  getSightings,
+  createSightingEvent,
+  getSightingEvents,
 } from '../../services/pig-sightings.service';
 import { getAllPigs } from '../../services/pigs.service';
-import type { Pig, PigSighting } from '../../services/pigs.types';
+import type {
+  FriendCategory,
+  Pig,
+  SightingEvent,
+} from '../../services/pigs.types';
 import Button from '../../components/ui/Button/Button';
 import Loading from '../../components/ui/Loading/Loading';
 import PigPicker, { PigThumb } from '../../components/PigPicker/PigPicker';
@@ -54,6 +58,21 @@ const NON_MAIN_PEN_PIGS = ['spud', 'pie', 'tornado pig'];
 
 // Objects that are scenery, not spaces — greyed out and not markable.
 const DISABLED_OBJECT_IDS = new Set(['tree', 'r2d2']);
+
+// Optional behaviour tags for a sighting of 2+ pigs together.
+const BEHAVIOURS: { value: FriendCategory; label: string }[] = [
+  { value: 'snacking', label: '🍴 Snacking' },
+  { value: 'grooming', label: '🧼 Grooming' },
+  { value: 'following', label: '🐾 Following' },
+  { value: 'sharing_house', label: '🏠 Sharing a house' },
+  { value: 'booping_noses', label: '👃 Booping noses' },
+  { value: 'resting_together', label: '😴 Resting together' },
+];
+
+// Objects that imply a behaviour, pre-selected when marking pigs there.
+const DEFAULT_BEHAVIOUR: Record<string, FriendCategory> = {
+  'kibble-station': 'snacking',
+};
 
 const snap = (value: number) => Math.round(value / CELL_SIZE);
 
@@ -128,7 +147,8 @@ const MapPage = () => {
     align: 'left' | 'right';
   } | null>(null);
   const [selectedPigs, setSelectedPigs] = useState<Set<number>>(new Set());
-  const [sightings, setSightings] = useState<PigSighting[]>([]);
+  const [behaviour, setBehaviour] = useState<FriendCategory | null>(null);
+  const [sightings, setSightings] = useState<SightingEvent[]>([]);
   // First tap "arms" a cell (highlights it); a second tap on the same cell
   // opens the picker. Keeps stray taps while scrolling from marking sightings.
   const [armed, setArmed] = useState<{
@@ -158,7 +178,7 @@ const MapPage = () => {
       const [saved, pigs, sightingData] = await Promise.all([
         getPenObjects(),
         getAllPigs(),
-        getSightings(),
+        getSightingEvents(),
       ]);
       if (saved.length) {
         setHouses(saved);
@@ -229,6 +249,7 @@ const MapPage = () => {
       armed.houseId === t.houseId;
     if (sameAsArmed) {
       setSelectedPigs(new Set());
+      setBehaviour(t.houseId ? (DEFAULT_BEHAVIOUR[t.houseId] ?? null) : null);
       setMarking({ ...t, ...placementFor(t.x, t.y) });
     } else {
       setMarking(null);
@@ -291,14 +312,17 @@ const MapPage = () => {
     if (!marking || selectedPigs.size === 0) return;
     const { x, y, level } = marking;
     const ids = [...selectedPigs];
+    // Behaviour only applies to a group; a lone pig is just a location.
+    const tag = ids.length >= 2 ? behaviour : null;
     setMarking(null);
     setArmed(null);
     setSelectedPigs(new Set());
+    setBehaviour(null);
     try {
-      await Promise.all(ids.map((id) => createSighting(id, x, y, level)));
-      setSightings(await getSightings());
+      await createSightingEvent(ids, x, y, level, tag);
+      setSightings(await getSightingEvents());
     } catch (e) {
-      console.error('Failed to record sightings', e);
+      console.error('Failed to record sighting', e);
     }
   };
 
@@ -314,18 +338,21 @@ const MapPage = () => {
   // Each pig's most recent sighting, grouped by cell, so we can show their
   // photo where they were last seen.
   const sightingCells = useMemo(() => {
-    const pigById = new Map(allPigs.map((p) => [p.id, p]));
-    const tsOf = (s: PigSighting) => s.observed_at ?? s.created_at ?? '';
+    const pigById = new Map(allPigs.map((p) => [Number(p.id), p]));
+    const tsOf = (s: SightingEvent) => s.observed_at ?? s.created_at ?? '';
 
-    const latest = new Map<number, PigSighting>();
+    // Latest event seen for each pig.
+    const latest = new Map<number, SightingEvent>();
     for (const s of sightings) {
-      const current = latest.get(s.pig_id);
-      if (!current || tsOf(s) > tsOf(current)) latest.set(s.pig_id, s);
+      for (const pigId of s.pig_ids) {
+        const current = latest.get(pigId);
+        if (!current || tsOf(s) > tsOf(current)) latest.set(pigId, s);
+      }
     }
 
     const cells = new Map<string, { x: number; y: number; pigs: Pig[] }>();
-    for (const s of latest.values()) {
-      const pig = pigById.get(s.pig_id);
+    for (const [pigId, s] of latest) {
+      const pig = pigById.get(pigId);
       if (!pig) continue;
       const key = `${s.x},${s.y}`;
       const cell = cells.get(key) ?? { x: s.x, y: s.y, pigs: [] };
@@ -630,6 +657,26 @@ const MapPage = () => {
                 title={markingTitle(marking)}
                 dropUp={marking.dropUp}
                 align={marking.align}
+                footer={
+                  selectedPigs.size >= 2 ? (
+                    <div className="behaviourChips">
+                      {BEHAVIOURS.map((b) => (
+                        <button
+                          key={b.value}
+                          type="button"
+                          className={`behaviourChip${behaviour === b.value ? ' active' : ''}`}
+                          onClick={() =>
+                            setBehaviour((cur) =>
+                              cur === b.value ? null : b.value
+                            )
+                          }
+                        >
+                          {b.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null
+                }
               />
             </div>
           )}

@@ -8,7 +8,11 @@ export const getFriendEvents = async (): Promise<FriendEvent[]> => {
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data ?? []) as FriendEvent[];
+  // bigint[] comes back as strings from PostgREST — coerce to numbers.
+  return ((data ?? []) as any[]).map((r) => ({
+    ...r,
+    pig_ids: (r.pig_ids ?? []).map(Number),
+  })) as FriendEvent[];
 };
 
 export const createFriendEvent = async (

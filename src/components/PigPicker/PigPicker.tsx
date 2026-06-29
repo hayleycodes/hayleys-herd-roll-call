@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { getPigImageUrl } from '../../services/pig-images.service';
 import type { Pig } from '../../services/pigs.types';
 import './PigPicker.css';
@@ -38,6 +38,8 @@ type Props = {
   onToggle?: (pigId: number) => void;
   onSave?: () => void;
   title?: string;
+  // Extra content rendered between the pig list and the Save button.
+  footer?: ReactNode;
 };
 
 const PigPicker = ({
@@ -55,6 +57,7 @@ const PigPicker = ({
   onToggle,
   onSave,
   title,
+  footer,
 }: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(defaultOpen);
   const [alignRight, setAlignRight] = useState(true);
@@ -158,6 +161,7 @@ const PigPicker = ({
               );
             })}
           </div>
+          {footer}
           {multiSelect && (
             <button
               type="button"

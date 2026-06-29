@@ -117,6 +117,31 @@
   z-index: 5;
 }
 
+/* Behaviour tags shown in the picker when 2+ pigs are selected. */
+.behaviourChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: var(--spacing-xs);
+  border-top: 2px solid var(--primary);
+}
+
+.behaviourChip {
+  padding: 2px 6px;
+  background: var(--bg-translucent);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.behaviourChip.active {
+  border-color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
 .cellPicker .pigPickerTrigger {
   display: none;
 }

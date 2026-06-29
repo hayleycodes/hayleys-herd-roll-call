@@ -333,6 +333,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sighting_events: {
+        Row: {
+          behaviour: string | null
+          created_at: string | null
+          id: number
+          level: number
+          observed_at: string | null
+          pig_ids: number[]
+          x: number
+          y: number
+        }
+        Insert: {
+          behaviour?: string | null
+          created_at?: string | null
+          id?: never
+          level?: number
+          observed_at?: string | null
+          pig_ids: number[]
+          x: number
+          y: number
+        }
+        Update: {
+          behaviour?: string | null
+          created_at?: string | null
+          id?: never
+          level?: number
+          observed_at?: string | null
+          pig_ids?: number[]
+          x?: number
+          y?: number
+        }
+        Relationships: []
+      }
       social_order: {
         Row: {
           created_at: string | null
