@@ -41,51 +41,6 @@ export type Database = {
         }
         Relationships: []
       }
-      friend_observations: {
-        Row: {
-          category: string
-          created_at: string | null
-          id: number
-          notes: string | null
-          observed_at: string | null
-          pig_id_a: number
-          pig_id_b: number
-        }
-        Insert: {
-          category: string
-          created_at?: string | null
-          id?: never
-          notes?: string | null
-          observed_at?: string | null
-          pig_id_a: number
-          pig_id_b: number
-        }
-        Update: {
-          category?: string
-          created_at?: string | null
-          id?: never
-          notes?: string | null
-          observed_at?: string | null
-          pig_id_a?: number
-          pig_id_b?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friend_observations_pig_id_a_fkey"
-            columns: ["pig_id_a"]
-            isOneToOne: false
-            referencedRelation: "pigs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "friend_observations_pig_id_b_fkey"
-            columns: ["pig_id_b"]
-            isOneToOne: false
-            referencedRelation: "pigs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       health_data: {
         Row: {
           created_at: string
