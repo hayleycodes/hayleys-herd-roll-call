@@ -43,13 +43,18 @@ const parseTs = (ts: string | null) =>
   Date.parse((ts ?? '').replace(' ', 'T'));
 
 // Relationship strength: 1 point per shared event. Tiers are just a friendly
-// label over the raw points total.
-const strengthTier = (points: number) => {
-  if (points >= 10) return { icon: '💞', label: 'Inseparable' };
-  if (points >= 6) return { icon: '💖', label: 'Close Friends' };
-  if (points >= 3) return { icon: '💕', label: 'Friends' };
-  return { icon: '🌱', label: 'Acquaintances' };
-};
+// label over the raw points total. Ordered strongest first.
+const TIERS = [
+  { key: 'inseparable', icon: '💞', label: 'Inseparable', min: 10 },
+  { key: 'close', icon: '💖', label: 'Close Friends', min: 6 },
+  { key: 'friends', icon: '💕', label: 'Friends', min: 3 },
+  { key: 'acquaintances', icon: '🌱', label: 'Acquaintances', min: 0 },
+] as const;
+
+type TierKey = (typeof TIERS)[number]['key'];
+
+const tierFor = (points: number) =>
+  TIERS.find((t) => points >= t.min) ?? TIERS[TIERS.length - 1];
 
 type FriendPair = {
   key: string;
@@ -169,6 +174,25 @@ const FriendsPage = () => {
     return pairs.sort((a, b) => b.points - a.points);
   }, [bondEvents, proximityPoints, pigById]);
 
+  // For each pig, how many friends fall into each strength tier.
+  const statsByPig = useMemo(() => {
+    const stats = new Map<number, Record<TierKey, number>>();
+    const ensure = (id: number) => {
+      let s = stats.get(id);
+      if (!s) {
+        s = { inseparable: 0, close: 0, friends: 0, acquaintances: 0 };
+        stats.set(id, s);
+      }
+      return s;
+    };
+    for (const pair of friendPairs) {
+      const tier = tierFor(pair.points);
+      ensure(Number(pair.pigA.id))[tier.key]++;
+      ensure(Number(pair.pigB.id))[tier.key]++;
+    }
+    return stats;
+  }, [friendPairs]);
+
   const load = async () => {
     try {
       setLoading(true);
@@ -263,41 +287,38 @@ const FriendsPage = () => {
         </div>
 
         {activeTab === 'friends' && (
-          <div className="friendsRanking">
-            {friendPairs.length === 0 ? (
-              <p className="muted friendsEmpty">
-                No friendship events yet. Add some in the Events tab.
-              </p>
-            ) : (
-              <ol className="friendsList">
-                {friendPairs.map((pair, i) => {
-                  const tier = strengthTier(pair.points);
-                  return (
-                    <li
-                      className={`friendsRow${i === 0 ? ' friendsTop' : ''}`}
-                      key={pair.key}
-                    >
-                      <span className="friendsRank">{i + 1}</span>
-                      <div className="friendsPigCard">
-                        <PigCard pig={pair.pigA} hideLastSeen />
-                      </div>
-                      <span className="friendsHeart">💕</span>
-                      <div className="friendsPigCard">
-                        <PigCard pig={pair.pigB} hideLastSeen />
-                      </div>
-                      <span className="friendsStrength">
-                        <span className="friendsStrengthPoints">
-                          {tier.icon} {pair.points}
-                        </span>
-                        <span className="friendsStrengthLabel">
-                          {tier.label}
-                        </span>
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            )}
+          <div className="friendsStatsGrid">
+            {sortedPigs.map((pig) => {
+              const stats = statsByPig.get(Number(pig.id));
+              const total = stats
+                ? TIERS.reduce((sum, t) => sum + stats[t.key], 0)
+                : 0;
+              return (
+                <div className="friendStatCard" key={pig.id}>
+                  <div className="friendStatPig">
+                    <PigCard pig={pig} hideLastSeen />
+                  </div>
+                  {total === 0 ? (
+                    <p className="friendStatEmpty">No friends yet 🌱</p>
+                  ) : (
+                    <ul className="friendStatList">
+                      {TIERS.filter((t) => stats && stats[t.key] > 0).map(
+                        (t) => (
+                          <li className="friendStatRow" key={t.key}>
+                            <span className="friendStatLabel">
+                              {t.icon} {t.label}
+                            </span>
+                            <span className="friendStatCount">
+                              {stats![t.key]}
+                            </span>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 

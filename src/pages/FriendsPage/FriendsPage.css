@@ -35,78 +35,60 @@
   font-weight: var(--font-weight-bold);
 }
 
-/* ---- Best friends ranking ---- */
+/* ---- Per-pig friend stats ---- */
 
-.friendsEmpty {
-  text-align: center;
+.friendsStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--spacing-sm);
 }
 
-.friendsList {
+.friendStatCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: color-mix(in srgb, var(--accent-pink) 30%, white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+}
+
+.friendStatPig {
+  width: 90px;
+}
+
+.friendStatList {
   list-style: none;
   margin: 0;
   padding: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.friendsRow {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  background: color-mix(in srgb, var(--accent-pink) 30%, white);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-xs) var(--spacing-sm);
-}
-
-.friendsRow.friendsTop {
-  background: var(--accent-pink);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.friendsRank {
-  flex-shrink: 0;
-  width: 32px;
-  text-align: center;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-muted);
-}
-
-.friendsTop .friendsRank {
-  font-size: var(--font-size-xl);
-}
-
-.friendsPigCard {
-  width: 72px;
-  flex-shrink: 0;
-}
-
-.friendsHeart {
-  font-size: var(--font-size-lg);
-  flex-shrink: 0;
-}
-
-.friendsStrength {
-  margin-left: auto;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
   gap: 2px;
 }
 
-.friendsStrengthPoints {
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-lg);
-  color: var(--primary-dark);
+.friendStatRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+}
+
+.friendStatLabel {
   white-space: nowrap;
 }
 
-.friendsStrengthLabel {
+.friendStatCount {
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-dark);
+}
+
+.friendStatEmpty {
+  margin: 0;
   font-size: var(--font-size-sm);
   color: var(--text-muted);
-  white-space: nowrap;
+  text-align: center;
 }
 
 /* ---- Form ---- */
