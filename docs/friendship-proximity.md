@@ -1,7 +1,24 @@
 # Proximity-based friendship (design notes)
 
-Ideas for deriving friendship strength from pigs being **near each other** on the
-map, not just explicitly recorded together. Not built yet — this is the plan.
+Deriving friendship strength from pigs being **near each other** on the map, not
+just explicitly recorded together.
+
+## Built
+
+Implemented in `src/services/friendship-proximity.ts` and folded into the Best
+Friends ranking on the Friends page:
+
+- **Window:** two pigs sighted within **5 minutes** of each other and within
+  **1 cell** (Chebyshev ≤ 1) on the **same level** = a proximity moment.
+- **Cooldown:** repeats for a pair within **1 hour** collapse to one point.
+- **Weight:** each counted moment is worth **0.5** (vs 1 for a deliberate event).
+- **Double counting:** not specially handled — the 5-min window + 1-hour
+  cooldown are considered sufficient. A group event of pigs at one spot does also
+  earn a small proximity bump on top of its +1; accepted for now.
+- Derived on the fly from `sighting_events` (no proximity table). Cleared events
+  are ignored.
+
+The rest of this doc is the original exploration that led to the above.
 
 ## The idea
 

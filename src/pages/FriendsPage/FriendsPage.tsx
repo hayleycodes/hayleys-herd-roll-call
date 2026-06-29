@@ -20,6 +20,7 @@ import {
   deleteSightingEvent,
   getSightingEvents,
 } from '../../services/pig-sightings.service';
+import { computeProximityPoints } from '../../services/friendship-proximity';
 import { getAllPigs } from '../../services/pigs.service';
 import './FriendsPage.css';
 
@@ -111,31 +112,38 @@ const FriendsPage = () => {
     return [...logged, ...fromMap].sort((a, b) => b.ts.localeCompare(a.ts));
   }, [friendEvents, sightingEvents]);
 
-  // Rank pig pairs by how many events they've shared. Each event adds a point
-  // to every pair of pigs that attended it.
+  // Proximity points (pigs sighted near each other), keyed by pair.
+  const proximityPoints = useMemo(
+    () => computeProximityPoints(sightingEvents),
+    [sightingEvents]
+  );
+
+  // Rank pairs by total points: +1 for each explicit event they shared, plus
+  // their proximity points (0.5 each).
   const friendPairs = useMemo(() => {
-    const pairs = new Map<string, FriendPair>();
+    const points = new Map<string, number>();
+    const add = (key: string, n: number) =>
+      points.set(key, (points.get(key) ?? 0) + n);
+
     for (const ev of bondEvents) {
       const ids = ev.pigIds.filter((id) => pigById.has(id));
       for (let i = 0; i < ids.length; i++) {
         for (let j = i + 1; j < ids.length; j++) {
-          const [lo, hi] =
-            ids[i] < ids[j] ? [ids[i], ids[j]] : [ids[j], ids[i]];
-          const key = `${lo}-${hi}`;
-          const existing = pairs.get(key);
-          if (existing) existing.points += 1;
-          else
-            pairs.set(key, {
-              key,
-              pigA: pigById.get(lo)!,
-              pigB: pigById.get(hi)!,
-              points: 1,
-            });
+          add(ids[i] < ids[j] ? `${ids[i]}-${ids[j]}` : `${ids[j]}-${ids[i]}`, 1);
         }
       }
     }
-    return [...pairs.values()].sort((a, b) => b.points - a.points);
-  }, [bondEvents, pigById]);
+    for (const [key, pts] of proximityPoints) add(key, pts);
+
+    const pairs: FriendPair[] = [];
+    for (const [key, pts] of points) {
+      const [lo, hi] = key.split('-').map(Number);
+      const pigA = pigById.get(lo);
+      const pigB = pigById.get(hi);
+      if (pigA && pigB) pairs.push({ key, pigA, pigB, points: pts });
+    }
+    return pairs.sort((a, b) => b.points - a.points);
+  }, [bondEvents, proximityPoints, pigById]);
 
   const load = async () => {
     try {
