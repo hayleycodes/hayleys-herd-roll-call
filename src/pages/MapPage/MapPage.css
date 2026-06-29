@@ -10,8 +10,8 @@
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  background-color: color-mix(in srgb, var(--primary) 25%, white);
-  border: var(--border-width) var(--border-style) var(--primary);
+  background-color: #ffe9f0;
+  border: var(--border-width) var(--border-style) var(--accent-pink);
   border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
 }
 
@@ -51,10 +51,10 @@
   position: relative;
   flex: 1;
   overflow: auto;
-  border: var(--border-width) var(--border-style) var(--primary);
+  border: var(--border-width) var(--border-style) var(--accent-pink);
   border-top: none;
   border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
-  background: var(--surface-alt);
+  background: #fff5f8;
 }
 
 .mapStage {
@@ -98,7 +98,7 @@
   justify-content: center;
   width: 44px;
   height: 29px;
-  border: 2px solid var(--primary);
+  border: 2px solid var(--accent-pink);
   border-radius: 8px;
   background: #ffffff;
   font-family: var(--primary-font);
@@ -109,7 +109,7 @@
 }
 
 .floorButton.armed {
-  background: var(--primary);
+  background: color-mix(in srgb, var(--accent-pink) 55%, #c2185b);
   border-color: #ffffff;
   color: #ffffff;
 }
@@ -125,7 +125,7 @@
   flex-wrap: wrap;
   gap: 4px;
   padding: var(--spacing-xs);
-  border-bottom: 2px solid var(--primary);
+  border-bottom: 2px solid var(--accent-pink);
 }
 
 .cellPigHere {
@@ -153,7 +153,7 @@
   flex-wrap: wrap;
   gap: 4px;
   padding: var(--spacing-xs);
-  border-top: 2px solid var(--primary);
+  border-top: 2px solid var(--accent-pink);
 }
 
 .behaviourChip {
@@ -168,7 +168,7 @@
 }
 
 .behaviourChip.active {
-  border-color: var(--primary);
+  border-color: color-mix(in srgb, var(--accent-pink) 55%, #c2185b);
   font-weight: var(--font-weight-bold);
 }
 

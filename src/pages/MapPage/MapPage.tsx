@@ -107,10 +107,13 @@ const isDisabledCell = (col: number, row: number): boolean => {
 const ROTATE_STEP = 45; // degrees per click of the rotate handle
 
 // Shared canvas styling (Konva draws to <canvas>, so these can't live in CSS).
+// Pink "friendship" palette: a rose accent over soft accent-pink fills.
+const PINK_ACCENT = '#e47597'; // rose — strong accent / selected
+const PINK_FILL = '#ffc1c8'; // accent-pink — object fill
 const SHAPE_STYLE = {
-  stroke: '#7c5cff',
+  stroke: PINK_ACCENT,
   strokeWidth: 3,
-  shadowColor: '#4a2d8a',
+  shadowColor: '#a23a6a',
   shadowBlur: 8,
   shadowOpacity: 0.25,
   shadowOffsetY: 3,
@@ -440,7 +443,7 @@ const MapPage = () => {
                 y={0}
                 width={GRID_WIDTH}
                 height={GRID_HEIGHT}
-                fill="#f3f8ff"
+                fill="#fff5f8"
               />
               <Rect
                 x={DISABLED_AREA.col * CELL_SIZE}
@@ -451,7 +454,7 @@ const MapPage = () => {
               />
               <Line points={DISABLED_CORNER} closed fill="#b8b8c0" />
               {gridLines.map((pts, i) => (
-                <Line key={i} points={pts} stroke="#d8d0ec" strokeWidth={1} />
+                <Line key={i} points={pts} stroke="#ffd6e0" strokeWidth={1} />
               ))}
             </Layer>
 
@@ -463,8 +466,8 @@ const MapPage = () => {
                   y={armed.row * CELL_SIZE}
                   width={CELL_SIZE}
                   height={CELL_SIZE}
-                  fill="rgba(124, 92, 255, 0.25)"
-                  stroke="#7c5cff"
+                  fill="rgba(228, 117, 151, 0.25)"
+                  stroke={PINK_ACCENT}
                   strokeWidth={2}
                   listening={false}
                 />
@@ -476,7 +479,10 @@ const MapPage = () => {
                   ? '#b8b8c0'
                   : selected
                     ? SHAPE_STYLE.stroke
-                    : '#beadff';
+                    : PINK_FILL;
+                // Disabled scenery is grey, so its border/shadow are grey too.
+                const strokeColor = disabled ? '#8a8a92' : SHAPE_STYLE.stroke;
+                const shadowColor = disabled ? '#5c5c64' : SHAPE_STYLE.shadowColor;
                 const labelFill = selected ? '#ffffff' : LABEL_STYLE.fill;
                 return (
                   <Group
@@ -524,6 +530,8 @@ const MapPage = () => {
                         fill={shapeFill}
                         lineJoin="round"
                         {...SHAPE_STYLE}
+                        stroke={strokeColor}
+                        shadowColor={shadowColor}
                       />
                     ) : house.shape === 'circle' ? (
                       <Ellipse
@@ -533,6 +541,8 @@ const MapPage = () => {
                         radiusY={(house.length * CELL_SIZE) / 2}
                         fill={shapeFill}
                         {...SHAPE_STYLE}
+                        stroke={strokeColor}
+                        shadowColor={shadowColor}
                       />
                     ) : (
                       <Rect
@@ -541,6 +551,8 @@ const MapPage = () => {
                         fill={shapeFill}
                         cornerRadius={10}
                         {...SHAPE_STYLE}
+                        stroke={strokeColor}
+                        shadowColor={shadowColor}
                       />
                     )}
                     <Text
@@ -579,7 +591,7 @@ const MapPage = () => {
                     <Circle
                       radius={12}
                       fill="#ffffff"
-                      stroke="#7c5cff"
+                      stroke={PINK_ACCENT}
                       strokeWidth={2}
                     />
                     <Text
