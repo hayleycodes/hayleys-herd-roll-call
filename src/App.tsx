@@ -68,11 +68,11 @@ function App() {
             <Link to="/friends">
               <EmojiButton>💕</EmojiButton>
             </Link>
-            <Link to="/health-log">
-              <EmojiButton>🏥</EmojiButton>
-            </Link>
             <Link to="/map">
               <EmojiButton>🗺️</EmojiButton>
+            </Link>
+            <Link to="/health-log">
+              <EmojiButton>🏥</EmojiButton>
             </Link>
             <EmojiButton onClick={() => setIsRollcallOpen(true)}>
               🍎
