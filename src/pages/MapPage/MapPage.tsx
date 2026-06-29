@@ -15,6 +15,7 @@ import {
   savePenObjects,
 } from '../../services/pen-objects.service';
 import {
+  clearPigSighting,
   createSightingEvent,
   getSightingEvents,
 } from '../../services/pig-sightings.service';
@@ -308,6 +309,16 @@ const MapPage = () => {
     });
   };
 
+  // Pig moved / whereabouts unknown — clear it from the map.
+  const handleRemovePig = async (pigId: number) => {
+    try {
+      await clearPigSighting(pigId);
+      setSightings(await getSightingEvents());
+    } catch (e) {
+      console.error('Failed to remove pig', e);
+    }
+  };
+
   const handleSave = async () => {
     if (!marking || selectedPigs.size === 0) return;
     const { x, y, level } = marking;
@@ -352,6 +363,7 @@ const MapPage = () => {
 
     const cells = new Map<string, { x: number; y: number; pigs: Pig[] }>();
     for (const [pigId, s] of latest) {
+      if (s.cleared) continue; // whereabouts unknown — don't place it
       const pig = pigById.get(pigId);
       if (!pig) continue;
       const key = `${s.x},${s.y}`;
@@ -361,6 +373,12 @@ const MapPage = () => {
     }
     return [...cells.values()];
   }, [sightings, allPigs]);
+
+  // Pigs currently shown in the cell being marked (so they can be removed).
+  const pigsHere = marking
+    ? (sightingCells.find((c) => c.x === marking.x && c.y === marking.y)
+        ?.pigs ?? [])
+    : [];
 
   if (loading) return <Loading />;
 
@@ -657,6 +675,27 @@ const MapPage = () => {
                 title={markingTitle(marking)}
                 dropUp={marking.dropUp}
                 align={marking.align}
+                header={
+                  pigsHere.length ? (
+                    <div className="cellPigsHere">
+                      {pigsHere.map((pig) => (
+                        <button
+                          key={pig.id}
+                          type="button"
+                          className="cellPigHere"
+                          onClick={() => handleRemovePig(Number(pig.id))}
+                          title={`Remove ${pig.name}`}
+                        >
+                          <PigThumb
+                            imagePath={pig.image_paths?.[0] ?? null}
+                          />
+                          <span>{pig.name}</span>
+                          <span className="cellPigRemove">×</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null
+                }
                 footer={
                   selectedPigs.size >= 2 ? (
                     <div className="behaviourChips">

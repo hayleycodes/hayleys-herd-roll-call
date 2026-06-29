@@ -336,6 +336,7 @@ export type Database = {
       sighting_events: {
         Row: {
           behaviour: string | null
+          cleared: boolean
           created_at: string | null
           id: number
           level: number
@@ -346,6 +347,7 @@ export type Database = {
         }
         Insert: {
           behaviour?: string | null
+          cleared?: boolean
           created_at?: string | null
           id?: never
           level?: number
@@ -356,6 +358,7 @@ export type Database = {
         }
         Update: {
           behaviour?: string | null
+          cleared?: boolean
           created_at?: string | null
           id?: never
           level?: number

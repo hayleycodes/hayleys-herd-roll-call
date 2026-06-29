@@ -38,6 +38,8 @@ type Props = {
   onToggle?: (pigId: number) => void;
   onSave?: () => void;
   title?: string;
+  // Content rendered between the title and the pig list.
+  header?: ReactNode;
   // Extra content rendered between the pig list and the Save button.
   footer?: ReactNode;
 };
@@ -57,6 +59,7 @@ const PigPicker = ({
   onToggle,
   onSave,
   title,
+  header,
   footer,
 }: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(defaultOpen);
@@ -124,6 +127,7 @@ const PigPicker = ({
           className={`pigPickerMenu${dropUp ? ' pigPickerMenu--up' : ''}${(align ? align === 'left' : !alignRight) ? ' pigPickerMenu--left' : ''}`}
         >
           {title && <div className="pigPickerTitle">{title}</div>}
+          {header}
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
               <button

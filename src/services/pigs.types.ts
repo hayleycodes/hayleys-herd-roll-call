@@ -77,6 +77,9 @@ export interface SightingEvent {
   y: number;
   level: number; // floor index: 0 = ground, 1 = upstairs, ...
   behaviour: string | null;
+  // A clearing event (single pig, no location): the pig's whereabouts are now
+  // unknown, so it stops showing on the map. Past sightings are kept.
+  cleared: boolean;
   observed_at: string | null;
   created_at: string | null;
 }

@@ -117,6 +117,34 @@
   z-index: 5;
 }
 
+/* Pigs already in the tapped cell, shown in the picker with a remove (×). */
+.cellPigsHere {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: var(--spacing-xs);
+  border-bottom: 2px solid var(--primary);
+}
+
+.cellPigHere {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 2px;
+  background: color-mix(in srgb, var(--accent-red) 60%, white);
+  border: 2px solid var(--accent-pink);
+  border-radius: var(--border-radius-md);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.cellPigRemove {
+  font-weight: var(--font-weight-bold);
+  color: var(--text-red);
+}
+
 /* Behaviour tags shown in the picker when 2+ pigs are selected. */
 .behaviourChips {
   display: flex;

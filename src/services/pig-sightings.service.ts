@@ -41,3 +41,15 @@ export const deleteSightingEvent = async (id: number): Promise<void> => {
   const { error } = await sightingEventsTable().delete().eq('id', id);
   if (error) throw new Error(error.message);
 };
+
+// Record that a pig's whereabouts are now unknown (hides it from the map).
+export const clearPigSighting = async (pigId: number): Promise<void> => {
+  const { error } = await sightingEventsTable().insert({
+    pig_ids: [pigId],
+    x: 0,
+    y: 0,
+    level: 0,
+    cleared: true,
+  });
+  if (error) throw new Error(error.message);
+};
