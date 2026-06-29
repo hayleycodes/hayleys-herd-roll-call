@@ -26,7 +26,7 @@ type Props = {
   selectedPigId: number | '';
   onSelect: (pigId: number | '') => void;
   view?: 'default' | 'compact';
-  theme?: 'green' | 'purple' | 'blue';
+  theme?: 'green' | 'purple' | 'blue' | 'pink';
   dropUp?: boolean;
   defaultOpen?: boolean;
   onClose?: () => void;

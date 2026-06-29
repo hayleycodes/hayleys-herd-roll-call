@@ -699,7 +699,7 @@ const MapPage = () => {
                   setArmed(null);
                 }}
                 defaultOpen
-                theme="purple"
+                theme="pink"
                 title={markingTitle(marking)}
                 dropUp={marking.dropUp}
                 align={marking.align}

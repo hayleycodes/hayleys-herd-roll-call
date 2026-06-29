@@ -38,6 +38,11 @@
   --picker-hover: #daedf8;
 }
 
+.pigPicker--pink {
+  --picker-color: #e47597;
+  --picker-hover: #ffe9f0;
+}
+
 /* Default trigger (full-width button) */
 .pigPickerTrigger {
   width: 100%;
