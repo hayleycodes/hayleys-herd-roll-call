@@ -165,9 +165,11 @@ const MapPage = () => {
   // Only pigs that live in the main pen can be sighted on this map.
   const mainPenPigs = useMemo(
     () =>
-      allPigs.filter(
-        (pig) => !NON_MAIN_PEN_PIGS.includes(pig.name.trim().toLowerCase())
-      ),
+      allPigs
+        .filter(
+          (pig) => !NON_MAIN_PEN_PIGS.includes(pig.name.trim().toLowerCase())
+        )
+        .sort((a, b) => a.name.localeCompare(b.name)),
     [allPigs]
   );
 
