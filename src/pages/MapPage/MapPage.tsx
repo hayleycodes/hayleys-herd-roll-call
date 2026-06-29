@@ -30,6 +30,7 @@ import Button from '../../components/ui/Button/Button';
 import Modal from '../../components/ui/Modal/Modal';
 import Loading from '../../components/ui/Loading/Loading';
 import PigPicker, { PigThumb } from '../../components/PigPicker/PigPicker';
+import { FRIEND_CATEGORIES } from '../../constants/friend-categories';
 import './MapPage.css';
 
 const CELL_SIZE = 40; // px per grid cell
@@ -61,16 +62,6 @@ const NON_MAIN_PEN_PIGS = ['spud', 'pie', 'tornado pig'];
 
 // Objects that are scenery, not spaces — greyed out and not markable.
 const DISABLED_OBJECT_IDS = new Set(['tree', 'r2d2']);
-
-// Optional behaviour tags for a sighting of 2+ pigs together.
-const BEHAVIOURS: { value: FriendCategory; label: string }[] = [
-  { value: 'snacking', label: '🍴 Snacking' },
-  { value: 'grooming', label: '🧼 Grooming' },
-  { value: 'following', label: '🐾 Following' },
-  { value: 'sharing_house', label: '🏠 Sharing a house' },
-  { value: 'booping_noses', label: '👃 Booping noses' },
-  { value: 'resting_together', label: '😴 Resting together' },
-];
 
 // Objects that imply a behaviour, pre-selected when marking pigs there.
 const DEFAULT_BEHAVIOUR: Record<string, FriendCategory> = {
@@ -724,7 +715,7 @@ const MapPage = () => {
                 footer={
                   selectedPigs.size >= 2 ? (
                     <div className="behaviourChips">
-                      {BEHAVIOURS.map((b) => (
+                      {FRIEND_CATEGORIES.map((b) => (
                         <button
                           key={b.value}
                           type="button"
