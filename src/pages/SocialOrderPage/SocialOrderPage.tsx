@@ -7,7 +7,7 @@ import {
   deleteSocialOrderItem,
   getSocialOrder,
 } from '../../services/pig-social-order.service';
-import { getAllPigs } from '../../services/pigs.service';
+import { createPigSighting, getAllPigs } from '../../services/pigs.service';
 import {
   computePeckingOrder,
   type PeckingEntry,
@@ -107,6 +107,12 @@ const SocialOrderPage = () => {
       setSubmitting(true);
       setFormError(null);
       await createSocialOrderItem(dominantPigId, submissivePigId);
+      // Recording an observation also counts as sighting both pigs.
+      await Promise.all(
+        [dominantPigId, submissivePigId].map((id) =>
+          createPigSighting(Number(id))
+        )
+      );
       setDominantPigId('');
       setSubmissivePigId('');
       const updatedOrder = await getSocialOrder();

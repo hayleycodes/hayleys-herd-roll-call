@@ -21,7 +21,7 @@ import {
   getSightingEvents,
 } from '../../services/pig-sightings.service';
 import { computeProximityPoints } from '../../services/friendship-proximity';
-import { getAllPigs } from '../../services/pigs.service';
+import { createPigSighting, getAllPigs } from '../../services/pigs.service';
 import './FriendsPage.css';
 
 const CATEGORIES: { value: FriendCategory; label: string }[] = [
@@ -181,7 +181,10 @@ const FriendsPage = () => {
     try {
       setSubmitting(true);
       setFormError(null);
-      await createFriendEvent(category, [...selectedPigs]);
+      const ids = [...selectedPigs];
+      await createFriendEvent(category, ids);
+      // Logging an event also counts as sighting those pigs.
+      await Promise.all(ids.map((id) => createPigSighting(Number(id))));
       setSelectedPigs(new Set());
       setFriendEvents(await getFriendEvents());
     } catch (err) {
