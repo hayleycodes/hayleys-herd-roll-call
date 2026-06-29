@@ -43,6 +43,8 @@
   top: var(--spacing-sm);
   right: var(--spacing-sm);
   z-index: 2;
+  display: flex;
+  gap: var(--spacing-sm);
 }
 
 .mapCanvasWrap {

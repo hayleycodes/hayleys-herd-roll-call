@@ -53,3 +53,18 @@ export const clearPigSighting = async (pigId: number): Promise<void> => {
   });
   if (error) throw new Error(error.message);
 };
+
+// Clear several pigs at once (e.g. resetting the whole map).
+export const clearPigSightings = async (pigIds: number[]): Promise<void> => {
+  if (!pigIds.length) return;
+  const { error } = await sightingEventsTable().insert(
+    pigIds.map((pigId) => ({
+      pig_ids: [pigId],
+      x: 0,
+      y: 0,
+      level: 0,
+      cleared: true,
+    }))
+  );
+  if (error) throw new Error(error.message);
+};

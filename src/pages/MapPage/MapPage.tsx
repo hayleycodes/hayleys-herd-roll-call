@@ -16,6 +16,7 @@ import {
 } from '../../services/pen-objects.service';
 import {
   clearPigSighting,
+  clearPigSightings,
   createSightingEvent,
   getSightingEvents,
 } from '../../services/pig-sightings.service';
@@ -26,6 +27,7 @@ import type {
   SightingEvent,
 } from '../../services/pigs.types';
 import Button from '../../components/ui/Button/Button';
+import Modal from '../../components/ui/Modal/Modal';
 import Loading from '../../components/ui/Loading/Loading';
 import PigPicker, { PigThumb } from '../../components/PigPicker/PigPicker';
 import './MapPage.css';
@@ -134,6 +136,7 @@ const MapPage = () => {
   const [allPigs, setAllPigs] = useState<Pig[]>([]);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   // The cell a sighting is being recorded for. x/y are grid coords (cell
   // centre); col/row drive the cell highlight; houseId highlights a house
   // instead. level 0 = ground floor, 1 = first floor up, etc.
@@ -321,6 +324,19 @@ const MapPage = () => {
     }
   };
 
+  // Clear every pig currently shown on the map.
+  const handleReset = async () => {
+    const pigIds = sightingCells.flatMap((c) => c.pigs.map((p) => Number(p.id)));
+    setConfirmReset(false);
+    if (!pigIds.length) return;
+    try {
+      await clearPigSightings(pigIds);
+      setSightings(await getSightingEvents());
+    } catch (e) {
+      console.error('Failed to reset map', e);
+    }
+  };
+
   const handleSave = async () => {
     if (!marking || selectedPigs.size === 0) return;
     const { x, y, level } = marking;
@@ -400,6 +416,11 @@ const MapPage = () => {
         style={{ maxWidth: GRID_WIDTH + 2 * BORDER_WIDTH }}
       >
         <div className="mapEditButton">
+          {!editMode && sightingCells.length > 0 && (
+            <Button variant="default" onClick={() => setConfirmReset(true)}>
+              🔄 Reset
+            </Button>
+          )}
           <Button
             variant={editMode ? 'success' : 'default'}
             onClick={() => setEditMode((e) => !e)}
@@ -725,6 +746,16 @@ const MapPage = () => {
           )}
         </div>
       </div>
+
+      <Modal isOpen={confirmReset} onClose={() => setConfirmReset(false)}>
+        <p>Clear all pigs from the map?</p>
+        <div className="confirmActions">
+          <Button onClick={() => setConfirmReset(false)}>Cancel</Button>
+          <Button variant="danger" onClick={handleReset}>
+            Reset
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
