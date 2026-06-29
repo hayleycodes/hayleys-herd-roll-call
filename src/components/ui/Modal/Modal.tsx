@@ -5,9 +5,20 @@ type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  // 'sheet' (default) slides up from the bottom; 'large' is a centered modal
+  // that fills most of the page.
+  variant?: 'sheet' | 'large';
+  // Show an × close button in the top-right corner.
+  showClose?: boolean;
 };
 
-const Modal = ({ isOpen, onClose, children }: ModalProps) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  children,
+  variant = 'sheet',
+  showClose = false,
+}: ModalProps) => {
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(false);
 
@@ -39,11 +50,24 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   if (!mounted) return null;
 
   return (
-    <div className={`modalOverlay ${active ? 'open' : ''}`} onClick={onClose}>
+    <div
+      className={`modalOverlay ${variant === 'large' ? 'modalOverlayCenter' : ''} ${active ? 'open' : ''}`}
+      onClick={onClose}
+    >
       <div
-        className={`modalSheet ${active ? 'open' : ''}`}
+        className={`modalSheet ${variant === 'large' ? 'modalLarge' : ''} ${active ? 'open' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
+        {showClose && (
+          <button
+            type="button"
+            className="modalClose"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ×
+          </button>
+        )}
         {children}
       </div>
     </div>

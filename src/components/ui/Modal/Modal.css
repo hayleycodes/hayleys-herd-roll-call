@@ -42,6 +42,50 @@
   transform: translateY(0);
 }
 
+/* Centered, large modal that fills most of the page */
+.modalOverlayCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+}
+
+.modalSheet.modalLarge {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  max-width: 900px;
+  height: 90vh;
+  max-height: 90vh;
+  border-radius: 16px;
+  transform: scale(0.96);
+}
+
+.modalSheet.modalLarge.open {
+  transform: scale(1);
+}
+
+/* Close button */
+.modalClose {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+}
+
+.modalClose:hover {
+  color: var(--text);
+}
+
 .modalOverlay p {
   font-size: 24px;
   text-align: center;
