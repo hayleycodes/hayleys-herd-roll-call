@@ -334,7 +334,12 @@ const MapPage = () => {
   const handleSave = async () => {
     if (!marking || selectedPigs.size === 0) return;
     const { x, y, level } = marking;
-    const ids = [...selectedPigs];
+    // Include any pigs already in the cell so an interaction (e.g. Chai joins
+    // Nacho for a snack) can be logged for the whole group without removing and
+    // re-adding the pigs already there.
+    const ids = [
+      ...new Set([...pigsHere.map((p) => Number(p.id)), ...selectedPigs]),
+    ];
     // Behaviour only applies to a group; a lone pig is just a location.
     const tag = ids.length >= 2 ? behaviour : null;
     setMarking(null);
@@ -393,6 +398,12 @@ const MapPage = () => {
     ? (sightingCells.find((c) => c.x === marking.x && c.y === marking.y)
         ?.pigs ?? [])
     : [];
+
+  // Everyone involved in a potential interaction: pigs already in the cell plus
+  // the newly selected ones. A behaviour can be tagged once this reaches 2.
+  const interactionPigIds = [
+    ...new Set([...pigsHere.map((p) => Number(p.id)), ...selectedPigs]),
+  ];
 
   if (loading) return <Loading />;
 
@@ -725,7 +736,7 @@ const MapPage = () => {
                   ) : null
                 }
                 footer={
-                  selectedPigs.size >= 2 ? (
+                  interactionPigIds.length >= 2 ? (
                     <div className="behaviourChips">
                       {FRIEND_CATEGORIES.map((b) => (
                         <button
