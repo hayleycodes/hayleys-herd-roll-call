@@ -1,6 +1,9 @@
 .mapPage {
   width: 100%;
-  height: calc(100vh - var(--header-height));
+  /* Fit within the viewport so the box never runs past the bottom of the page:
+     subtract the sticky header, its 20px bottom margin and the wrapper's
+     bottom padding. The map itself scrolls inside the box. */
+  height: calc(100vh - var(--header-height) - 20px - var(--wrapper-padding));
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -11,14 +14,14 @@
   margin: 0 auto;
   box-sizing: border-box;
   background-color: #ffe9f0;
-  border: var(--border-width) var(--border-style) var(--accent-pink);
+  border: 3px var(--border-style) var(--accent-pink);
   border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
 }
 
 .mapHeader h2 {
   margin: 0;
-  padding: var(--spacing-sm) 0;
-  font-size: var(--font-size-xl);
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-lg);
   color: var(--text);
   text-align: center;
 }
@@ -51,7 +54,7 @@
   position: relative;
   flex: 1;
   overflow: auto;
-  border: var(--border-width) var(--border-style) var(--accent-pink);
+  border: 3px var(--border-style) var(--accent-pink);
   border-top: none;
   border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
   background: #fff5f8;

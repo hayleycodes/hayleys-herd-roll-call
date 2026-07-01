@@ -39,7 +39,7 @@ const GRID_ROWS = 23;
 
 const GRID_WIDTH = CELL_SIZE * GRID_COLS;
 const GRID_HEIGHT = CELL_SIZE * GRID_ROWS;
-const BORDER_WIDTH = 5; // matches --border-width on .mapCanvasWrap
+const BORDER_WIDTH = 3; // matches the border on .mapCanvasWrap
 
 // Disabled / out-of-bounds region of the pen, in grid cells: top-left (4,0)
 // to bottom-right (18,4).
