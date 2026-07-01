@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type {
   PigFamily,
   PigFamilyMember,
@@ -7,9 +7,19 @@ import {
   createPigRelationship,
   deletePigRelationship,
 } from '../../services/pig-relationships.service';
-import type { Pig, RelationshipType } from '../../services/pigs.types';
+import type {
+  FriendEvent,
+  Pig,
+  RelationshipType,
+  SightingEvent,
+} from '../../services/pigs.types';
+import { getFriendEvents } from '../../services/pig-friends.service';
+import { getSightingEvents } from '../../services/pig-sightings.service';
+import { getAllPigsIncludingPassed } from '../../services/pigs.service';
+import { computeFriendData, relsForPig } from '../../services/friendship';
 import PigCard from '../PigList/PigCard/PigCard';
 import PigPicker from '../PigPicker/PigPicker';
+import FriendBars from '../FriendBars/FriendBars';
 import Panel from '../ui/Panel/Panel';
 import Modal from '../ui/Modal/Modal';
 import Button from '../ui/Button/Button';
@@ -40,6 +50,36 @@ const FamilyPanel = ({
     label: string;
   } | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Friend data (loaded independently of family relationships) powering the
+  // Friends bar chart at the bottom of the panel.
+  const [friendEvents, setFriendEvents] = useState<FriendEvent[]>([]);
+  const [sightingEvents, setSightingEvents] = useState<SightingEvent[]>([]);
+  const [friendPigs, setFriendPigs] = useState<Pig[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      getFriendEvents(),
+      getSightingEvents(),
+      getAllPigsIncludingPassed(),
+    ])
+      .then(([friends, sightings, pigs]) => {
+        setFriendEvents(friends);
+        setSightingEvents(sightings);
+        setFriendPigs(pigs);
+      })
+      .catch((err) => console.error('Failed to load friends:', err));
+  }, []);
+
+  const { historyEvents, friendPairs } = useMemo(
+    () => computeFriendData(friendEvents, sightingEvents, friendPigs),
+    [friendEvents, sightingEvents, friendPigs]
+  );
+
+  const friendRels = useMemo(
+    () => relsForPig(currentPigId, friendPairs),
+    [currentPigId, friendPairs]
+  );
 
   const handleAdd = async (section: SectionKey) => {
     if (!selectedPigId) return;
@@ -202,6 +242,21 @@ const FamilyPanel = ({
         'No foster family recorded',
         'foster family',
         true
+      )}
+
+      <div className="familySectionHeader">
+        <h3>Friends 💕</h3>
+      </div>
+      {friendRels.length === 0 ? (
+        <div className="emptyFamily">
+          <p className="muted">No friends recorded yet 🌱</p>
+        </div>
+      ) : (
+        <FriendBars
+          selfId={currentPigId}
+          rels={friendRels}
+          historyEvents={historyEvents}
+        />
       )}
 
       <Modal isOpen={!!deletingMember} onClose={() => setDeletingMember(null)}>
