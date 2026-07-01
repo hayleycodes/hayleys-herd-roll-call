@@ -1,0 +1,144 @@
+/* Horizontal relationship bar chart with fold-down interactions */
+
+.friendBars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.friendBarRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: inherit;
+  text-decoration: none;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: var(--spacing-xxs);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  text-align: left;
+}
+
+.friendBarRow:focus-visible {
+  outline: 3px solid var(--accent-pink);
+  outline-offset: 2px;
+}
+
+.friendBarLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.friendBarLabel .pigPickerThumb {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.friendBarName {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friendBarTrack {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: color-mix(in srgb, var(--accent-pink) 18%, white);
+  border-radius: var(--border-radius-sm);
+  min-height: 28px;
+}
+
+.friendBarFill {
+  height: 28px;
+  border-radius: var(--border-radius-sm);
+  background: var(--accent-pink);
+  min-width: 4px;
+  transition: width 0.3s ease;
+}
+
+.friendBarValue {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--primary-dark);
+  white-space: nowrap;
+  padding-right: var(--spacing-xs);
+}
+
+.friendBarChevron {
+  flex-shrink: 0;
+  color: var(--primary-dark);
+  font-size: var(--font-size-sm);
+}
+
+/* Interactions revealed when a bar is expanded */
+
+/* Fold-down wrapper: animating max-height gives a smooth reveal in BOTH
+   directions and reliably collapses to a true 0 height when closed. The open
+   max-height just needs to exceed any realistic list height. */
+.friendInteractionsWrap {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.friendInteractionsWrap.open {
+  max-height: 600px;
+  opacity: 1;
+}
+
+.friendInteractions {
+  list-style: none;
+  margin: 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  background: color-mix(in srgb, var(--accent-pink) 12%, white);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .friendInteractionsWrap {
+    transition: none;
+  }
+}
+
+.friendInteraction {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.friendInteractionLabel {
+  font-weight: var(--font-weight-bold);
+}
+
+.friendInteractionTime {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.friendInteractionEmpty {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}

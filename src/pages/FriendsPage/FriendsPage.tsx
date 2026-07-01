@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { subMonths } from 'date-fns';
 import PigCard from '../../components/PigList/PigCard/PigCard';
 import Loading from '../../components/ui/Loading/Loading';
 import Button from '../../components/ui/Button/Button';
 import Modal from '../../components/ui/Modal/Modal';
 import Panel from '../../components/ui/Panel/Panel';
+import FriendBars from '../../components/FriendBars/FriendBars';
 import { PigThumb } from '../../components/PigPicker/PigPicker';
 import type {
   FriendCategory,
@@ -22,53 +21,18 @@ import {
   deleteSightingEvent,
   getSightingEvents,
 } from '../../services/pig-sightings.service';
-import {
-  computeProximityEvents,
-  computeProximityPoints,
-} from '../../services/friendship-proximity';
 import { createPigSighting, getAllPigs } from '../../services/pigs.service';
 import {
   FRIEND_CATEGORIES,
   friendCategoryLabel,
 } from '../../constants/friend-categories';
+import {
+  computeFriendData,
+  relsForPig,
+  TIERS,
+  type BondEvent,
+} from '../../services/friendship';
 import './FriendsPage.css';
-
-// Friendship strength only reflects the last 2 months — relationships change.
-const FRIENDSHIP_MONTHS = 2;
-const parseTs = (ts: string | null) => Date.parse((ts ?? '').replace(' ', 'T'));
-
-// Relationship strength: 1 point per shared event. Tiers are just a friendly
-// label over the raw points total. Ordered strongest first.
-const TIERS = [
-  { key: 'inseparable', icon: '💞', label: 'Inseparable', min: 10 },
-  { key: 'close', icon: '💖', label: 'Close Friends', min: 6 },
-  { key: 'friends', icon: '💕', label: 'Friends', min: 3 },
-  { key: 'acquaintances', icon: '🌱', label: 'Acquaintances', min: 0 },
-] as const;
-
-type TierKey = (typeof TIERS)[number]['key'];
-
-const tierFor = (points: number) =>
-  TIERS.find((t) => points >= t.min) ?? TIERS[TIERS.length - 1];
-
-type FriendPair = {
-  key: string;
-  pigA: Pig;
-  pigB: Pig;
-  points: number;
-};
-
-// A bonding event from any source: a logged friend event, a map sighting of
-// 2+ pigs together, or a derived proximity moment (pigs sighted near each
-// other). Proximity events aren't stored, so they can't be deleted.
-type BondEvent = {
-  uid: string;
-  rawId: number;
-  source: 'logged' | 'map' | 'proximity';
-  category: FriendCategory | null;
-  pigIds: number[];
-  ts: string;
-};
 
 const FriendsPage = () => {
   const [friendEvents, setFriendEvents] = useState<FriendEvent[]>([]);
@@ -97,128 +61,12 @@ const FriendsPage = () => {
     [allPigs]
   );
 
-  // Only count events from the last 2 months.
-  const cutoff = useMemo(
-    () => subMonths(new Date(), FRIENDSHIP_MONTHS).getTime(),
-    []
+  // Derive ranked pairs, per-pig tier stats and the full event history from
+  // the raw friend/sighting data (scoped to the last 2 months).
+  const { historyEvents, friendPairs, statsByPig } = useMemo(
+    () => computeFriendData(friendEvents, sightingEvents, allPigs),
+    [friendEvents, sightingEvents, allPigs]
   );
-
-  // Logged friend events + map sightings of 2+ pigs (last 2 months), newest
-  // first.
-  const bondEvents = useMemo<BondEvent[]>(() => {
-    const logged: BondEvent[] = friendEvents
-      .filter((e) => parseTs(e.observed_at ?? e.created_at) >= cutoff)
-      .map((e) => ({
-        uid: `f-${e.id}`,
-        rawId: e.id,
-        source: 'logged',
-        category: e.category,
-        pigIds: e.pig_ids,
-        ts: e.observed_at ?? e.created_at ?? '',
-      }));
-    const fromMap: BondEvent[] = sightingEvents
-      .filter(
-        (s) =>
-          s.pig_ids.length >= 2 &&
-          parseTs(s.observed_at ?? s.created_at) >= cutoff
-      )
-      .map((s) => ({
-        uid: `s-${s.id}`,
-        rawId: s.id,
-        source: 'map',
-        category: (s.behaviour as FriendCategory | null) ?? null,
-        pigIds: s.pig_ids,
-        ts: s.observed_at ?? s.created_at ?? '',
-      }));
-    return [...logged, ...fromMap].sort((a, b) => b.ts.localeCompare(a.ts));
-  }, [friendEvents, sightingEvents, cutoff]);
-
-  // Sightings within the scoring window, shared by proximity calculations.
-  const recentSightings = useMemo(
-    () =>
-      sightingEvents.filter(
-        (s) => parseTs(s.observed_at ?? s.created_at) >= cutoff
-      ),
-    [sightingEvents, cutoff]
-  );
-
-  // Proximity points (pigs sighted near each other) from the last 2 months.
-  const proximityPoints = useMemo(
-    () => computeProximityPoints(recentSightings),
-    [recentSightings]
-  );
-
-  // Proximity moments as displayable events for the history list.
-  const proximityEvents = useMemo<BondEvent[]>(
-    () =>
-      computeProximityEvents(recentSightings).map((ev) => ({
-        uid: `p-${ev.pigIds[0]}-${ev.pigIds[1]}-${ev.t}`,
-        rawId: 0,
-        source: 'proximity',
-        category: null,
-        pigIds: ev.pigIds,
-        ts: new Date(ev.t).toISOString(),
-      })),
-    [recentSightings]
-  );
-
-  // All events shown in the history, newest first.
-  const historyEvents = useMemo(
-    () =>
-      [...bondEvents, ...proximityEvents].sort(
-        (a, b) => parseTs(b.ts) - parseTs(a.ts)
-      ),
-    [bondEvents, proximityEvents]
-  );
-
-  // Rank pairs by total points: +1 for each explicit event they shared, plus
-  // their proximity points (0.5 each).
-  const friendPairs = useMemo(() => {
-    const points = new Map<string, number>();
-    const add = (key: string, n: number) =>
-      points.set(key, (points.get(key) ?? 0) + n);
-
-    for (const ev of bondEvents) {
-      const ids = ev.pigIds.filter((id) => pigById.has(id));
-      for (let i = 0; i < ids.length; i++) {
-        for (let j = i + 1; j < ids.length; j++) {
-          add(
-            ids[i] < ids[j] ? `${ids[i]}-${ids[j]}` : `${ids[j]}-${ids[i]}`,
-            1
-          );
-        }
-      }
-    }
-    for (const [key, pts] of proximityPoints) add(key, pts);
-
-    const pairs: FriendPair[] = [];
-    for (const [key, pts] of points) {
-      const [lo, hi] = key.split('-').map(Number);
-      const pigA = pigById.get(lo);
-      const pigB = pigById.get(hi);
-      if (pigA && pigB) pairs.push({ key, pigA, pigB, points: pts });
-    }
-    return pairs.sort((a, b) => b.points - a.points);
-  }, [bondEvents, proximityPoints, pigById]);
-
-  // For each pig, how many friends fall into each strength tier.
-  const statsByPig = useMemo(() => {
-    const stats = new Map<number, Record<TierKey, number>>();
-    const ensure = (id: number) => {
-      let s = stats.get(id);
-      if (!s) {
-        s = { inseparable: 0, close: 0, friends: 0, acquaintances: 0 };
-        stats.set(id, s);
-      }
-      return s;
-    };
-    for (const pair of friendPairs) {
-      const tier = tierFor(pair.points);
-      ensure(Number(pair.pigA.id))[tier.key]++;
-      ensure(Number(pair.pigB.id))[tier.key]++;
-    }
-    return stats;
-  }, [friendPairs]);
 
   // Order pigs by relationship strength: most friends in the strongest tier
   // first, falling back to the next tier down, then alphabetically.
@@ -241,20 +89,10 @@ const FriendsPage = () => {
   }, [sortedPigs, statsByPig]);
 
   // Friends of the pig whose modal is open, strongest first, for the bar chart.
-  const selectedPigRels = useMemo(() => {
-    if (!selectedPig) return [];
-    return friendPairs
-      .filter(
-        (p) =>
-          Number(p.pigA.id) === Number(selectedPig.id) ||
-          Number(p.pigB.id) === Number(selectedPig.id)
-      )
-      .map((p) => {
-        const partner =
-          Number(p.pigA.id) === Number(selectedPig.id) ? p.pigB : p.pigA;
-        return { partner, points: p.points, tier: tierFor(p.points) };
-      });
-  }, [selectedPig, friendPairs]);
+  const selectedPigRels = useMemo(
+    () => (selectedPig ? relsForPig(Number(selectedPig.id), friendPairs) : []),
+    [selectedPig, friendPairs]
+  );
 
   const load = async () => {
     try {
@@ -488,54 +326,19 @@ const FriendsPage = () => {
         variant="large"
         showClose
       >
-        {selectedPig &&
-          (() => {
-            // Bar widths are scaled against the strongest relationship.
-            const maxPoints = selectedPigRels.reduce(
-              (m, r) => Math.max(m, r.points),
-              0
-            );
-            return (
-              <>
-                <h3 className="friendRelHeading">
-                  <PigThumb imagePath={selectedPig.image_paths?.[0] ?? null} />
-                  {selectedPig.name}'s Friends
-                </h3>
-                {selectedPigRels.length === 0 ? (
-                  <p className="friendStatEmpty">No friends yet 🌱</p>
-                ) : (
-                  <div className="friendBars">
-                    {selectedPigRels.map((r) => (
-                      <Link
-                        key={r.partner.id}
-                        to={`/pigs/${r.partner.id}`}
-                        className="friendBarRow"
-                        title={r.tier.label}
-                      >
-                        <span className="friendBarLabel">
-                          <PigThumb
-                            imagePath={r.partner.image_paths?.[0] ?? null}
-                          />
-                          <span className="friendBarName">{r.partner.name}</span>
-                        </span>
-                        <span className="friendBarTrack">
-                          <span
-                            className="friendBarFill"
-                            style={{
-                              width: `${maxPoints ? (r.points / maxPoints) * 100 : 0}%`,
-                            }}
-                          />
-                          <span className="friendBarValue">
-                            {r.tier.icon} {r.points}
-                          </span>
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </>
-            );
-          })()}
+        {selectedPig && (
+          <>
+            <h3 className="friendRelHeading">
+              <PigThumb imagePath={selectedPig.image_paths?.[0] ?? null} />
+              {selectedPig.name}'s Friends
+            </h3>
+            <FriendBars
+              selfId={Number(selectedPig.id)}
+              rels={selectedPigRels}
+              historyEvents={historyEvents}
+            />
+          </>
+        )}
       </Modal>
 
       <Modal isOpen={!!deletingItem} onClose={() => setDeletingItem(null)}>
