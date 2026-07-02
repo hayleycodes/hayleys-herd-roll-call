@@ -32,6 +32,7 @@ import {
   TIERS,
   type BondEvent,
 } from '../../services/friendship';
+import { getFriendshipSummary } from '../../services/friendship-summary.service';
 import './FriendsPage.css';
 
 const FriendsPage = () => {
@@ -50,6 +51,9 @@ const FriendsPage = () => {
   const [activeTab, setActiveTab] = useState<'friends' | 'observations'>(
     'friends'
   );
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   const pigById = useMemo(
     () => new Map(allPigs.map((p) => [Number(p.id), p])),
@@ -63,10 +67,11 @@ const FriendsPage = () => {
 
   // Derive ranked pairs, per-pig tier stats and the full event history from
   // the raw friend/sighting data (scoped to the last 2 months).
-  const { historyEvents, friendPairs, statsByPig } = useMemo(
+  const friendData = useMemo(
     () => computeFriendData(friendEvents, sightingEvents, allPigs),
     [friendEvents, sightingEvents, allPigs]
   );
+  const { historyEvents, friendPairs, statsByPig } = friendData;
 
   // Order pigs by relationship strength: most friends in the strongest tier
   // first, falling back to the next tier down, then alphabetically.
@@ -115,6 +120,23 @@ const FriendsPage = () => {
   useEffect(() => {
     load();
   }, []);
+
+  const handleSummarise = async () => {
+    try {
+      setSummaryLoading(true);
+      setSummaryError(null);
+      // Collapse any previous summary first so the grid slides back up, then
+      // slides down again when the new one arrives.
+      setSummary(null);
+      setSummary(await getFriendshipSummary(friendData, allPigs));
+    } catch (err) {
+      setSummaryError(
+        err instanceof Error ? err.message : 'Failed to generate summary'
+      );
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
 
   const togglePig = (id: number) => {
     setSelectedPigs((prev) => {
@@ -186,6 +208,34 @@ const FriendsPage = () => {
         </div>
 
         {activeTab === 'friends' && (
+          <>
+          <div className="friendSummary">
+            <Button onClick={handleSummarise} disabled={summaryLoading}>
+              {summaryLoading ? 'Thinking…' : '✨ Summarise the herd'}
+            </Button>
+            {summaryLoading && (
+              <div
+                className="friendSummarySkeleton"
+                aria-busy="true"
+                aria-live="polite"
+              >
+                <span className="srOnly">Asking Gemini about the herd…</span>
+                <span className="skeletonLine" aria-hidden="true"></span>
+                <span className="skeletonLine" aria-hidden="true"></span>
+                <span className="skeletonLine" aria-hidden="true"></span>
+                <span
+                  className="skeletonLine short"
+                  aria-hidden="true"
+                ></span>
+              </div>
+            )}
+            {summaryError && <p className="formError">{summaryError}</p>}
+            <div className={`friendSummaryReveal${summary ? ' open' : ''}`}>
+              <div className="friendSummaryRevealInner">
+                {summary && <p className="friendSummaryText">{summary}</p>}
+              </div>
+            </div>
+          </div>
           <div className="friendsStatsGrid">
             {pigsByStrength.map((pig) => {
               const stats = statsByPig.get(Number(pig.id));
@@ -236,6 +286,7 @@ const FriendsPage = () => {
               );
             })}
           </div>
+          </>
         )}
 
         {activeTab === 'observations' && (
