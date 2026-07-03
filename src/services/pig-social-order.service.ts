@@ -58,7 +58,7 @@ export const getTopPigIds = async (): Promise<Set<number>> => {
   const ids = new Set<number>();
   for (const group of groups) {
     if (group.rank === 1 && group.metrics.descendants > 0) {
-      group.pigs.forEach((pig) => ids.add(pig.id));
+      ids.add(group.pig.id);
     }
   }
   return ids;

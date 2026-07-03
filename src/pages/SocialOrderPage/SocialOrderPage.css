@@ -207,10 +207,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.graphRankRow.graphRankLoop {
-  border: 2px dashed var(--primary-dark);
-}
-
 .graphRankNum {
   flex-shrink: 0;
   width: 32px;
@@ -231,13 +227,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-xs);
-}
-
-.graphRankLoopTag {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  color: var(--primary-dark);
-  width: 100%;
 }
 
 .graphRankPigCard {

@@ -7,9 +7,8 @@ export type GraphMetrics = {
 };
 
 export type GraphRankGroup = {
-  rank: number; // 1-based; tied groups share a rank
-  pigs: Pig[]; // more than one => a dominance loop (co-equal tier)
-  isLoop: boolean;
+  rank: number; // 1-based; pigs with identical metrics share a rank
+  pig: Pig;
   metrics: GraphMetrics;
 };
 
@@ -19,146 +18,72 @@ export type GraphRankGroup = {
  *
  * Each observation is a directed edge dominant ▸ submissive. The score is
  * transitive: dominating a pig who themselves dominates others counts for
- * more than dominating a dead end.
- *
- * Cycles (A▸B▸C▸A) make any transitive measure ill-defined, so we first
- * condense strongly-connected components (Tarjan) into co-equal tiers — pigs
- * in a loop can't be ranked against each other, so they share a row. The
- * resulting condensed graph is acyclic, and every metric below is well-defined
- * on it.
+ * more than dominating a dead end. The dominance graph is built loop-free
+ * (see buildDominanceGraph), so every metric below is well-defined.
  *
  * Three metrics, combined lexicographically (descendants, then chain depth,
  * then power):
  *  - descendants: distinct pigs reachable downstream (empire size)
- *  - chain:       longest tier-depth beneath (how deep the hierarchy runs)
+ *  - chain:       longest chain beneath (how deep the hierarchy runs)
  *  - power:       "clout" — recursively rewards dominating pigs who are
  *                 themselves powerful, so beating a strong pig beats a dead end
- *
- * Conflicting observations of the same pair are resolved by recency.
  */
 export function computeGraphRanking(
   pigs: Pig[],
   items: SocialOrderItem[]
 ): GraphRankGroup[] {
-  // 1. Build the directed dominance graph (pairs resolved by recency).
   const { pigById, involved, out } = buildDominanceGraph(pigs, items);
   if (!involved.size) return [];
 
-  const nodes = [...involved];
-
-  // 2. Tarjan's SCC: collapse dominance loops into co-equal components.
-  const index = new Map<number, number>();
-  const low = new Map<number, number>();
-  const onStack = new Set<number>();
-  const stack: number[] = [];
-  let idx = 0;
-  const comp = new Map<number, number>(); // pig id -> scc index
-  const sccs: number[][] = []; // scc index -> member pig ids
-
-  const strongconnect = (v: number) => {
-    index.set(v, idx);
-    low.set(v, idx);
-    idx++;
-    stack.push(v);
-    onStack.add(v);
-    for (const w of out.get(v) ?? []) {
-      if (!index.has(w)) {
-        strongconnect(w);
-        low.set(v, Math.min(low.get(v)!, low.get(w)!));
-      } else if (onStack.has(w)) {
-        low.set(v, Math.min(low.get(v)!, index.get(w)!));
-      }
-    }
-    if (low.get(v) === index.get(v)) {
-      const members: number[] = [];
-      let w: number;
-      do {
-        w = stack.pop()!;
-        onStack.delete(w);
-        comp.set(w, sccs.length);
-        members.push(w);
-      } while (w !== v);
-      sccs.push(members);
-    }
-  };
-  for (const v of nodes) if (!index.has(v)) strongconnect(v);
-
-  // 3. Condensed DAG adjacency between SCCs.
-  const sccOut = new Map<number, Set<number>>();
-  for (const [a, targets] of out) {
-    const ca = comp.get(a)!;
-    for (const b of targets) {
-      const cb = comp.get(b)!;
-      if (ca === cb) continue;
-      if (!sccOut.has(ca)) sccOut.set(ca, new Set());
-      sccOut.get(ca)!.add(cb);
-    }
-  }
-
-  // 4. Reachable SCCs (downstream, excluding self) — memoised over the DAG.
+  // The graph is acyclic, so each metric recurses safely over `out`.
   const reachCache = new Map<number, Set<number>>();
-  const reachSccs = (c: number): Set<number> => {
-    const cached = reachCache.get(c);
+  const reach = (v: number): Set<number> => {
+    const cached = reachCache.get(v);
     if (cached) return cached;
     const result = new Set<number>();
-    reachCache.set(c, result); // acyclic, so safe to set before recursing
-    for (const child of sccOut.get(c) ?? []) {
+    reachCache.set(v, result); // acyclic, so safe to set before recursing
+    for (const child of out.get(v) ?? []) {
       result.add(child);
-      for (const d of reachSccs(child)) result.add(d);
+      for (const d of reach(child)) result.add(d);
     }
     return result;
   };
-  const descendantCount = (c: number): number => {
-    let n = 0;
-    for (const sc of reachSccs(c)) n += sccs[sc].length;
-    return n;
-  };
 
-  // 5. Longest chain (tier depth) beneath each SCC.
+  // Longest chain (tier depth) beneath a pig.
   const chainCache = new Map<number, number>();
-  const chain = (c: number): number => {
-    const cached = chainCache.get(c);
+  const chain = (v: number): number => {
+    const cached = chainCache.get(v);
     if (cached !== undefined) return cached;
     let best = 0;
-    for (const child of sccOut.get(c) ?? []) best = Math.max(best, 1 + chain(child));
-    chainCache.set(c, best);
+    for (const child of out.get(v) ?? []) best = Math.max(best, 1 + chain(child));
+    chainCache.set(v, best);
     return best;
   };
 
-  // 6. "Clout": a transitive strength score that rewards dominating tiers
-  //    that are themselves powerful, so beating a strong pig is worth more
-  //    than beating a dead end. For each tier directly below, add its size
-  //    plus its own clout. A pig that dominates nobody scores 0 (no floor).
+  // "Clout": a transitive strength score that rewards dominating pigs who are
+  // themselves powerful, so beating a strong pig is worth more than beating a
+  // dead end. A pig that dominates nobody scores 0 (no floor).
   const powerCache = new Map<number, number>();
-  const power = (c: number): number => {
-    const cached = powerCache.get(c);
+  const power = (v: number): number => {
+    const cached = powerCache.get(v);
     if (cached !== undefined) return cached;
     let total = 0;
-    for (const child of sccOut.get(c) ?? []) {
-      total += sccs[child].length + power(child);
-    }
-    powerCache.set(c, total);
+    for (const child of out.get(v) ?? []) total += 1 + power(child);
+    powerCache.set(v, total);
     return total;
   };
 
-  // 7. Build one group per SCC, sort, and assign ranks (ties share a rank).
-  const groups = sccs.map((members, c) => {
-    const memberPigs = members
-      .map((id) => pigById.get(id)!)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    return {
-      pigs: memberPigs,
-      isLoop: members.length > 1,
-      metrics: { descendants: descendantCount(c), chain: chain(c), power: power(c) },
-    };
-  });
+  const groups = [...involved].map((id) => ({
+    pig: pigById.get(id)!,
+    metrics: { descendants: reach(id).size, chain: chain(id), power: power(id) },
+  }));
 
   groups.sort(
     (a, b) =>
       b.metrics.descendants - a.metrics.descendants ||
       b.metrics.chain - a.metrics.chain ||
       b.metrics.power - a.metrics.power ||
-      a.pigs[0].name.localeCompare(b.pigs[0].name)
+      a.pig.name.localeCompare(b.pig.name)
   );
 
   let rank = 0;
@@ -183,13 +108,11 @@ export type PigGraphDetail = {
   dominates: Pig[]; // pigs this pig directly dominates
   descendants: Pig[]; // all pigs dominated directly or indirectly
   longestChain: Pig[]; // a longest dominance chain starting at this pig
-  inLoopWith: Pig[]; // other pigs sharing a dominance loop with this one
 };
 
 /**
  * The dominance subgraph around a single pig: its direct neighbours, every
- * pig it dominates transitively, its longest chain, and any loop it sits in.
- * Cycle-safe — traversals never revisit a pig.
+ * pig it dominates transitively, and its longest chain.
  */
 export function computePigGraphDetail(
   pigs: Pig[],
@@ -208,37 +131,25 @@ export function computePigGraphDetail(
   const dominates = toPigs(out.get(pigId) ?? []);
   const dominatedBy = toPigs(inMap.get(pigId) ?? []);
 
-  // Reachable sets in each direction (cycle-safe via a visited set).
-  const reachable = (start: number, edges: Map<number, Set<number>>) => {
-    const seen = new Set<number>();
-    const stack = [...(edges.get(start) ?? [])];
-    while (stack.length) {
-      const node = stack.pop()!;
-      if (seen.has(node)) continue;
-      seen.add(node);
-      for (const next of edges.get(node) ?? []) if (!seen.has(next)) stack.push(next);
-    }
-    return seen;
-  };
-  const downstream = reachable(pigId, out);
-  const upstream = reachable(pigId, inMap);
+  // Every pig reachable downstream (the graph is acyclic).
+  const downstream = new Set<number>();
+  const stack = [...(out.get(pigId) ?? [])];
+  while (stack.length) {
+    const node = stack.pop()!;
+    if (downstream.has(node)) continue;
+    downstream.add(node);
+    for (const next of out.get(node) ?? []) if (!downstream.has(next)) stack.push(next);
+  }
 
-  // A pig reachable both downstream and upstream shares a loop with this pig.
-  const loop = [...downstream].filter((id) => upstream.has(id));
-
-  // Longest simple chain downward (no revisits — safe even with loops).
+  // Longest chain downward.
   let best: number[] = [pigId];
   const path: number[] = [pigId];
-  const onPath = new Set([pigId]);
   const walk = (node: number) => {
     if (path.length > best.length) best = [...path];
     for (const next of out.get(node) ?? []) {
-      if (onPath.has(next)) continue;
-      onPath.add(next);
       path.push(next);
       walk(next);
       path.pop();
-      onPath.delete(next);
     }
   };
   walk(pigId);
@@ -249,7 +160,6 @@ export function computePigGraphDetail(
     dominates,
     descendants: toPigs(downstream),
     longestChain: best.map((id) => pigById.get(id)!),
-    inLoopWith: toPigs(loop),
   };
 }
 
@@ -337,9 +247,19 @@ type DominanceGraph = {
   inMap: Map<number, Set<number>>; // pig -> pigs that dominate it
 };
 
+type DominanceEdge = { from: number; to: number; weight: number };
+
 /**
- * Resolves observations into a directed dominance graph. Each unordered pair
- * is collapsed to its most recent direction (a later reversal flips the edge).
+ * Resolves observations into a directed, acyclic dominance graph.
+ *
+ * Each unordered pair is collapsed to a single edge by *tally*: it points
+ * toward whichever pig won more often (a lone stale reversal no longer flips an
+ * established relationship). An even tally falls back to the most recent
+ * observation. The edge's weight is the margin — how lopsided the rivalry is.
+ *
+ * Genuine dominance loops (A▸B▸C▸A) are then broken by cutting their weakest
+ * edge, so the flimsiest rivalry gives way and the standoff becomes a clean
+ * ranking. See {@link breakCycles}.
  */
 function buildDominanceGraph(
   pigs: Pig[],
@@ -347,32 +267,147 @@ function buildDominanceGraph(
 ): DominanceGraph {
   const pigById = new Map(pigs.map((p) => [p.id, p]));
 
-  const latestByPair = new Map<string, SocialOrderItem>();
+  // Tally wins each way per unordered pair, keeping the most recent
+  // observation as a tiebreak for when the two directions are even.
+  type PairTally = {
+    lo: number;
+    hi: number;
+    loWins: number; // times `lo` dominated `hi`
+    hiWins: number; // times `hi` dominated `lo`
+    latest: SocialOrderItem;
+  };
+  const pairs = new Map<string, PairTally>();
   for (const item of items) {
     if (!pigById.has(item.dominant_pig_id)) continue;
     if (!pigById.has(item.submissive_pig_id)) continue;
-    const lo = Math.min(item.dominant_pig_id, item.submissive_pig_id);
-    const hi = Math.max(item.dominant_pig_id, item.submissive_pig_id);
-    const key = `${lo}#${hi}`;
-    const existing = latestByPair.get(key);
-    if (!existing || isMoreRecent(item, existing)) latestByPair.set(key, item);
-  }
-
-  const involved = new Set<number>();
-  const out = new Map<number, Set<number>>();
-  const inMap = new Map<number, Set<number>>();
-  for (const item of latestByPair.values()) {
     const d = item.dominant_pig_id;
     const s = item.submissive_pig_id;
-    involved.add(d);
-    involved.add(s);
-    if (!out.has(d)) out.set(d, new Set());
-    out.get(d)!.add(s);
-    if (!inMap.has(s)) inMap.set(s, new Set());
-    inMap.get(s)!.add(d);
+    const lo = Math.min(d, s);
+    const hi = Math.max(d, s);
+    const key = `${lo}#${hi}`;
+    let pair = pairs.get(key);
+    if (!pair) {
+      pair = { lo, hi, loWins: 0, hiWins: 0, latest: item };
+      pairs.set(key, pair);
+    }
+    if (d === lo) pair.loWins++;
+    else pair.hiWins++;
+    if (isMoreRecent(item, pair.latest)) pair.latest = item;
+  }
+
+  // Resolve each pair to one directed edge. Direction by tally; even tally
+  // falls back to the most recent observation. Weight = margin of victory.
+  const edges: DominanceEdge[] = [];
+  for (const pair of pairs.values()) {
+    let from: number;
+    let to: number;
+    if (pair.loWins > pair.hiWins) {
+      from = pair.lo;
+      to = pair.hi;
+    } else if (pair.hiWins > pair.loWins) {
+      from = pair.hi;
+      to = pair.lo;
+    } else {
+      from = pair.latest.dominant_pig_id;
+      to = pair.latest.submissive_pig_id;
+    }
+    edges.push({ from, to, weight: Math.abs(pair.loWins - pair.hiWins) });
+  }
+
+  const kept = breakCycles(edges);
+
+  // Every pig with an observation stays "involved" even if its only edge was
+  // cut — take the node set from all resolved pairs, not just the kept edges.
+  const involved = new Set<number>();
+  for (const e of edges) {
+    involved.add(e.from);
+    involved.add(e.to);
+  }
+
+  const out = new Map<number, Set<number>>();
+  const inMap = new Map<number, Set<number>>();
+  for (const e of kept) {
+    if (!out.has(e.from)) out.set(e.from, new Set());
+    out.get(e.from)!.add(e.to);
+    if (!inMap.has(e.to)) inMap.set(e.to, new Set());
+    inMap.get(e.to)!.add(e.from);
   }
 
   return { pigById, involved, out, inMap };
+}
+
+/**
+ * Greedily breaks every dominance loop, cutting the weakest edge each time.
+ *
+ * While any cycle remains, we find the edges that lie on one (both endpoints in
+ * the same non-trivial strongly-connected component) and remove the one with
+ * the smallest weight — the least decisive rivalry. Ties are cut in a stable
+ * order so the result is deterministic. Finding a true minimum feedback arc set
+ * is NP-hard, but for a herd this greedy heuristic is more than enough.
+ */
+function breakCycles(edges: DominanceEdge[]): DominanceEdge[] {
+  const kept = [...edges];
+  for (;;) {
+    const comp = stronglyConnectedComponents(kept);
+    const onCycle = kept.filter((e) => comp.get(e.from) === comp.get(e.to));
+    if (onCycle.length === 0) return kept;
+    onCycle.sort(
+      (a, b) => a.weight - b.weight || a.from - b.from || a.to - b.to
+    );
+    kept.splice(kept.indexOf(onCycle[0]), 1);
+  }
+}
+
+/**
+ * Tarjan's SCC over an edge list. Returns a map from node id to component id;
+ * two nodes share an id iff they sit on a common cycle.
+ */
+function stronglyConnectedComponents(
+  edges: DominanceEdge[]
+): Map<number, number> {
+  const out = new Map<number, number[]>();
+  const nodes = new Set<number>();
+  for (const e of edges) {
+    nodes.add(e.from);
+    nodes.add(e.to);
+    if (!out.has(e.from)) out.set(e.from, []);
+    out.get(e.from)!.push(e.to);
+  }
+
+  const index = new Map<number, number>();
+  const low = new Map<number, number>();
+  const onStack = new Set<number>();
+  const stack: number[] = [];
+  const comp = new Map<number, number>();
+  let idx = 0;
+  let sccCount = 0;
+
+  const strongconnect = (v: number) => {
+    index.set(v, idx);
+    low.set(v, idx);
+    idx++;
+    stack.push(v);
+    onStack.add(v);
+    for (const w of out.get(v) ?? []) {
+      if (!index.has(w)) {
+        strongconnect(w);
+        low.set(v, Math.min(low.get(v)!, low.get(w)!));
+      } else if (onStack.has(w)) {
+        low.set(v, Math.min(low.get(v)!, index.get(w)!));
+      }
+    }
+    if (low.get(v) === index.get(v)) {
+      const c = sccCount++;
+      let w: number;
+      do {
+        w = stack.pop()!;
+        onStack.delete(w);
+        comp.set(w, c);
+      } while (w !== v);
+    }
+  };
+  for (const v of nodes) if (!index.has(v)) strongconnect(v);
+  return comp;
 }
 
 function recencyKey(item: SocialOrderItem): string {

@@ -355,15 +355,13 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
   // Look up a pig's rank/metrics for the detail header and tree nodes.
   const groupByPigId = useMemo(() => {
     const map = new Map<number, (typeof groups)[number]>();
-    for (const group of groups)
-      for (const pig of group.pigs) map.set(pig.id, group);
+    for (const group of groups) map.set(group.pig.id, group);
     return map;
   }, [groups]);
 
   const metricsById = useMemo(() => {
     const map = new Map<number, GraphMetrics>();
-    for (const group of groups)
-      for (const pig of group.pigs) map.set(pig.id, group.metrics);
+    for (const group of groups) map.set(group.pig.id, group.metrics);
     return map;
   }, [groups]);
 
@@ -417,15 +415,15 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
       <ol className="graphRankList">
         {groups.map((group) => (
           <li
-            className={`graphRankRow${group.rank === 1 ? ' graphRankTop' : ''}${group.isLoop ? ' graphRankLoop' : ''}`}
-            key={group.pigs.map((p) => p.id).join('-')}
+            className={`graphRankRow${group.rank === 1 ? ' graphRankTop' : ''}`}
+            key={group.pig.id}
             role="button"
             tabIndex={0}
-            onClick={() => selectPig(group.pigs[0])}
+            onClick={() => selectPig(group.pig)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                selectPig(group.pigs[0]);
+                selectPig(group.pig);
               }
             }}
           >
@@ -434,17 +432,11 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
             </span>
 
             <div className="graphRankPigs">
-              {group.isLoop && (
-                <span className="graphRankLoopTag">🔁 loop</span>
-              )}
-              {group.pigs.map((pig) => (
-                <GraphPig
-                  key={pig.id}
-                  pig={pig}
-                  onSelect={selectPig}
-                  className="graphRankPigCard"
-                />
-              ))}
+              <GraphPig
+                pig={group.pig}
+                onSelect={selectPig}
+                className="graphRankPigCard"
+              />
             </div>
 
             <div className="graphRankMetrics">
@@ -485,13 +477,6 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
                 );
               })()}
             </div>
-
-            {detail.inLoopWith.length > 0 && (
-              <section className="graphDetailSection">
-                <p className="graphDetailHeading">🔁 In a loop with</p>
-                <PigRow pigs={detail.inLoopWith} onSelect={selectPig} />
-              </section>
-            )}
 
             {detail.dominatedBy.length > 0 && (
               <section className="graphDetailSection">
