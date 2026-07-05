@@ -34,7 +34,7 @@ import {
   savePigImages,
   getPig,
   getAllPigsIncludingPassed,
-  updateDescription,
+  updatePigNameAndDescription,
   createPigSighting,
 } from '../../services/pigs.service';
 
@@ -116,6 +116,7 @@ const PigPage = () => {
   );
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
   const [descriptionDraft, setDescriptionDraft] = useState('');
 
   const [health, setHealth] = useState<any[]>([]);
@@ -257,7 +258,11 @@ const PigPage = () => {
     if (!pig) return;
 
     try {
-      const updated = await updateDescription(pig.id, descriptionDraft);
+      const updated = await updatePigNameAndDescription(
+        pig.id,
+        nameDraft.trim() || pig.name,
+        descriptionDraft
+      );
       setPig(updated);
       setIsEditingDescription(false);
     } catch (err: any) {
@@ -438,10 +443,11 @@ const PigPage = () => {
             <EmojiButton
               variant="pig"
               onClick={() => {
+                setNameDraft(pig.name);
                 setDescriptionDraft(pig.description ?? '');
                 setIsEditingDescription(true);
               }}
-              aria-label="Edit description"
+              aria-label="Edit name and description"
             >
               ✏️
             </EmojiButton>
@@ -515,7 +521,17 @@ const PigPage = () => {
         </div>
 
         <div className="detailLabel">
-          <h1 className="pigName">{pig.name}</h1>
+          {isEditingDescription ? (
+            <input
+              type="text"
+              className="pigName nameEditInput"
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              placeholder="Name"
+            />
+          ) : (
+            <h1 className="pigName">{pig.name}</h1>
+          )}
           {pig.last_sighted && (
             <span className="detailSighted">
               Last sighted:{' '}

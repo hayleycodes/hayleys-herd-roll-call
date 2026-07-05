@@ -37,13 +37,14 @@ export const getPig = async (id: number): Promise<Pig> => {
   return data;
 };
 
-export const updateDescription = async (
+export const updatePigNameAndDescription = async (
   id: number,
+  name: string,
   description: string
 ): Promise<Pig> => {
   const { data, error } = await supabase
     .from('pigs')
-    .update({ description })
+    .update({ name, description })
     .eq('id', id)
     .select()
     .single();
