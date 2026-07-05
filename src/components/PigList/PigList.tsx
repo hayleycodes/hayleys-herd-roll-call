@@ -7,6 +7,7 @@ import type { Pig } from '../../services/pigs.types';
 import {
   createPigSighting,
   setPigLastSighted,
+  setPigPinned,
 } from '../../services/pigs.service';
 import { addPigMood, MOOD_OPTIONS } from '../../services/pig-moods.service';
 import '../../components/MoodPanel/MoodPanel.css';
@@ -70,6 +71,9 @@ const PigList = ({
   const resortPigs = () => {
     setPigs((prev) =>
       [...prev].sort((a, b) => {
+        const aPinned = a.pinned ? 0 : 1;
+        const bPinned = b.pinned ? 0 : 1;
+        if (aPinned !== bPinned) return aPinned - bPinned;
         if (sickPigIds) {
           const aSick = sickPigIds.has(a.id) ? 0 : 1;
           const bSick = sickPigIds.has(b.id) ? 0 : 1;
@@ -81,6 +85,25 @@ const PigList = ({
         );
       })
     );
+  };
+
+  const handleTogglePin = async (pig: Pig) => {
+    const nextPinned = !pig.pinned;
+    setPigs((prev) =>
+      prev.map((p) => (p.id === pig.id ? { ...p, pinned: nextPinned } : p))
+    );
+    resortPigs();
+
+    try {
+      await setPigPinned(pig.id, nextPinned);
+    } catch (err) {
+      console.error(err);
+      // Roll back on failure
+      setPigs((prev) =>
+        prev.map((p) => (p.id === pig.id ? { ...p, pinned: !nextPinned } : p))
+      );
+      resortPigs();
+    }
   };
 
   const clearSighted = (pigId: number) => {
@@ -215,8 +238,10 @@ const PigList = ({
               sighted={sightedPigs.has(pig.id)}
               crowned={topPigIds?.has(pig.id)}
               highlightUnseen={unseenFilterActive}
+              pinned={pig.pinned}
               onEyeClick={(origin) => handleSighting(pig, origin)}
               onUndoClick={() => handleUndo(pig)}
+              onPinClick={() => handleTogglePin(pig)}
             />
           </motion.div>
         ))}

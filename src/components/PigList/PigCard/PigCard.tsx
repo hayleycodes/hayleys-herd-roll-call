@@ -18,10 +18,12 @@ type Props = {
   sighted?: boolean;
   highlightUnseen?: boolean;
   crowned?: boolean;
+  pinned?: boolean;
   popPhase?: 'a' | 'b' | null;
   popIndex?: number;
   onEyeClick?: (origin: { x: number; y: number }) => void;
   onUndoClick?: () => void;
+  onPinClick?: () => void;
 };
 
 const PigCard = ({
@@ -35,10 +37,12 @@ const PigCard = ({
   sighted,
   highlightUnseen,
   crowned,
+  pinned,
   popPhase,
   popIndex,
   onEyeClick,
   onUndoClick,
+  onPinClick,
 }: Props) => {
   const { imageUrl, imageLoading, imageReady } = useRandomPigImage(
     pig.image_paths
@@ -66,7 +70,7 @@ const PigCard = ({
 
   return (
     <div
-      className={`pigCard ${pigColorClass}${fading ? ' pigCardFading' : ''}${popClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}`}
+      className={`pigCard ${pigColorClass}${fading ? ' pigCardFading' : ''}${popClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}${pinned ? ' pigCardPinned' : ''}`}
       style={
         popPhase
           ? ({
@@ -94,6 +98,20 @@ const PigCard = ({
             >
               👑
             </span>
+          )}
+          {onPinClick && (
+            <EmojiButton
+              className={`pinButton${pinned ? ' pinButtonActive' : ''}`}
+              size="sm"
+              variant="pig"
+              aria-label={pinned ? `Unpin ${pig.name}` : `Pin ${pig.name} to top`}
+              onClick={(e) => {
+                e.preventDefault();
+                onPinClick();
+              }}
+            >
+              📌
+            </EmojiButton>
           )}
           {onEyeClick &&
             (sighted ? (

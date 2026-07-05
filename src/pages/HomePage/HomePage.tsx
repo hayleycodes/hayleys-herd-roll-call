@@ -43,8 +43,11 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
         if (tags.includes('sick')) sickIds.add(pigId);
       }
 
-      // Sort sick pigs to the top, then by last_sighted
+      // Sort pinned pigs to the very top, then sick, then by last_sighted
       const sorted = [...allPigs].sort((a, b) => {
+        const aPinned = a.pinned ? 0 : 1;
+        const bPinned = b.pinned ? 0 : 1;
+        if (aPinned !== bPinned) return aPinned - bPinned;
         const aSick = sickIds.has(a.id) ? 0 : 1;
         const bSick = sickIds.has(b.id) ? 0 : 1;
         if (aSick !== bSick) return aSick - bSick;

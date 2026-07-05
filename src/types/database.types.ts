@@ -304,6 +304,7 @@ export type Database = {
           last_sighted: string | null
           name: string
           passed_away: string | null
+          pinned: boolean
         }
         Insert: {
           created_at?: string
@@ -317,6 +318,7 @@ export type Database = {
           last_sighted?: string | null
           name: string
           passed_away?: string | null
+          pinned?: boolean
         }
         Update: {
           created_at?: string
@@ -330,6 +332,7 @@ export type Database = {
           last_sighted?: string | null
           name?: string
           passed_away?: string | null
+          pinned?: boolean
         }
         Relationships: []
       }

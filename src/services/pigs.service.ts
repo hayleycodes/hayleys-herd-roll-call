@@ -84,6 +84,18 @@ export const setPigLastSighted = async (
   return data;
 };
 
+export const setPigPinned = async (id: number, pinned: boolean) => {
+  const { data, error } = await supabase
+    .from('pigs')
+    .update({ pinned })
+    .eq('id', id)
+    .select();
+
+  if (error) throw new Error(error.message);
+
+  return data;
+};
+
 export const savePigImages = async (pigId: number, imagePaths: string[]) => {
   const { data, error } = await supabase
     .from('pigs')

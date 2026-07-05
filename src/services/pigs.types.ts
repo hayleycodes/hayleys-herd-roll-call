@@ -7,6 +7,7 @@ export interface Pig {
   last_sighted: string | null;
   image_paths: string[];
   passed_away?: string | null;
+  pinned?: boolean;
 }
 
 export interface HealthRecord {
