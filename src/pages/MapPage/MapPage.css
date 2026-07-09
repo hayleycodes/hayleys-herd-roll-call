@@ -145,6 +145,12 @@
   cursor: pointer;
 }
 
+/* Newly-selected pigs (pending add), shown in the same strip. */
+.cellPigSelected {
+  background: white;
+  border-style: dashed;
+}
+
 .cellPigRemove {
   font-weight: var(--font-weight-bold);
   color: var(--text-red);

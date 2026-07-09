@@ -715,11 +715,11 @@ const MapPage = () => {
                 dropUp={marking.dropUp}
                 align={marking.align}
                 header={
-                  pigsHere.length ? (
+                  pigsHere.length || selectedPigs.size ? (
                     <div className="cellPigsHere">
                       {pigsHere.map((pig) => (
                         <button
-                          key={pig.id}
+                          key={`here-${pig.id}`}
                           type="button"
                           className="cellPigHere"
                           onClick={() => handleRemovePig(Number(pig.id))}
@@ -732,6 +732,23 @@ const MapPage = () => {
                           <span className="cellPigRemove">×</span>
                         </button>
                       ))}
+                      {mainPenPigs
+                        .filter((pig) => selectedPigs.has(pig.id))
+                        .map((pig) => (
+                          <button
+                            key={`sel-${pig.id}`}
+                            type="button"
+                            className="cellPigHere cellPigSelected"
+                            onClick={() => togglePig(pig.id)}
+                            title={`Deselect ${pig.name}`}
+                          >
+                            <PigThumb
+                              imagePath={pig.image_paths?.[0] ?? null}
+                            />
+                            <span>{pig.name}</span>
+                            <span className="cellPigRemove">×</span>
+                          </button>
+                        ))}
                     </div>
                   ) : null
                 }

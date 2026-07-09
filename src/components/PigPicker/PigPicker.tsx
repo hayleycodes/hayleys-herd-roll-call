@@ -148,26 +148,6 @@ const PigPicker = ({
               autoFocus
             />
           </div>
-          {multiSelect && selectedPigIds.length > 0 && (
-            <div className="pigPickerChips">
-              {selectedPigIds.map((id) => {
-                const pig = pigs.find((p) => p.id === id);
-                if (!pig) return null;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    className="pigPickerChip"
-                    onClick={() => onToggle?.(id)}
-                    title={`Remove ${pig.name}`}
-                  >
-                    <span>{pig.name}</span>
-                    <span className="pigPickerChipRemove">×</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
               <button
