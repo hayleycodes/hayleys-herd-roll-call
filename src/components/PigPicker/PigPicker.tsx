@@ -89,9 +89,44 @@ const PigPicker = ({
         onClose?.();
       }
     };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDropdownOpen(false);
+        onClose?.();
+      }
+    };
     document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
   }, [dropdownOpen]);
+
+  // Keyboard-driven flow from the search box: Enter picks the top match
+  // (single-select selects & closes; multi-select toggles it on and clears the
+  // box for the next one), and Enter on an empty box confirms the selection.
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    if (multiSelect) {
+      if (query.trim()) {
+        const top = filteredPigs[0];
+        if (top) {
+          onToggle?.(top.id);
+          setQuery('');
+        }
+      } else if (selectedPigIds.length > 0) {
+        onSave?.();
+      }
+    } else {
+      const top = filteredPigs[0];
+      if (top) {
+        onSelect(top.id);
+        setDropdownOpen(false);
+      }
+    }
+  };
 
   const openDropdown = () => {
     if (!dropdownOpen && dropdownRef.current) {
@@ -143,8 +178,14 @@ const PigPicker = ({
               type="text"
               className="pigPickerSearchInput"
               placeholder="Search pigs..."
+              title={
+                multiSelect
+                  ? 'Enter to add the top match, Enter on an empty box to save, Esc to close'
+                  : 'Enter to pick the top match, Esc to close'
+              }
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               autoFocus
             />
             {query && (
@@ -174,15 +215,17 @@ const PigPicker = ({
             {filteredPigs.length === 0 && (
               <div className="pigPickerEmpty">No pigs found</div>
             )}
-            {filteredPigs.map((pig) => {
+            {filteredPigs.map((pig, index) => {
               const active = multiSelect
                 ? selectedPigIds.includes(pig.id)
                 : pig.id === selectedPigId;
+              // Highlight the top match so it's clear what Enter will pick.
+              const topMatch = index === 0 && query.trim().length > 0;
               return (
                 <button
                   key={pig.id}
                   type="button"
-                  className={`pigPickerOption ${active ? 'pigPickerOptionActive' : ''}`}
+                  className={`pigPickerOption ${active ? 'pigPickerOptionActive' : ''}${topMatch ? ' pigPickerOptionTop' : ''}`}
                   onClick={() => {
                     if (multiSelect) {
                       onToggle?.(pig.id);
