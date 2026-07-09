@@ -19,19 +19,24 @@ export const usePigImage = (imagePath: string | null | undefined) => {
     setImageLoading(true);
     setImageReady(false);
     const load = async () => {
-      const { signedUrl } = await getPigImageUrl(imagePath);
-      const img = new Image();
-      img.onload = () => {
-        setImageUrl(signedUrl);
+      try {
+        const { signedUrl } = await getPigImageUrl(imagePath);
+        const img = new Image();
+        img.onload = () => {
+          setImageUrl(signedUrl);
+          setImageLoading(false);
+          requestAnimationFrame(() => setImageReady(true));
+        };
+        img.onerror = () => {
+          setImageUrl(signedUrl);
+          setImageLoading(false);
+          setImageReady(true);
+        };
+        img.src = signedUrl;
+      } catch {
+        // Signing failed — drop the spinner and fall back to the placeholder.
         setImageLoading(false);
-        requestAnimationFrame(() => setImageReady(true));
-      };
-      img.onerror = () => {
-        setImageUrl(signedUrl);
-        setImageLoading(false);
-        setImageReady(true);
-      };
-      img.src = signedUrl;
+      }
     };
     load();
   }, [imagePath]);
