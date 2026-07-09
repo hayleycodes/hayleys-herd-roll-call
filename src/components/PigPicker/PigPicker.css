@@ -155,12 +155,48 @@
   transform: rotate(225deg);
 }
 
+/* Text search box */
+.pigPickerSearch {
+  padding: var(--spacing-xs);
+  border-bottom: 2px solid var(--picker-color);
+}
+
+.pigPickerSearchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px var(--spacing-xs);
+  border: 2px solid var(--picker-color);
+  border-radius: var(--border-radius-sm);
+  background: white;
+  font-family: var(--primary-font);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.pigPickerSearchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.pigPickerSearchInput:focus {
+  outline: none;
+  background: var(--picker-hover);
+}
+
 .pigPickerMenuInner {
   display: grid;
   grid-template-columns: 1fr 1fr;
   max-height: 200px;
   overflow-y: auto;
   border-radius: var(--border-radius-sm);
+}
+
+.pigPickerEmpty {
+  grid-column: 1 / -1;
+  padding: var(--spacing-xs);
+  font-family: var(--primary-font);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-align: center;
 }
 
 .pigPickerOption {

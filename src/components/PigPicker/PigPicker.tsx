@@ -64,12 +64,22 @@ const PigPicker = ({
 }: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(defaultOpen);
   const [alignRight, setAlignRight] = useState(true);
+  const [query, setQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedPig = pigs.find((p) => p.id === selectedPigId) ?? null;
 
+  const filteredPigs = query.trim()
+    ? pigs.filter((p) =>
+        p.name.toLowerCase().includes(query.trim().toLowerCase()),
+      )
+    : pigs;
+
   useEffect(() => {
-    if (!dropdownOpen) return;
+    if (!dropdownOpen) {
+      setQuery('');
+      return;
+    }
     const handleClick = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -128,6 +138,16 @@ const PigPicker = ({
         >
           {title && <div className="pigPickerTitle">{title}</div>}
           {header}
+          <div className="pigPickerSearch">
+            <input
+              type="text"
+              className="pigPickerSearchInput"
+              placeholder="Search pigs..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+            />
+          </div>
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
               <button
@@ -141,7 +161,10 @@ const PigPicker = ({
                 <span>No pig</span>
               </button>
             )}
-            {pigs.map((pig) => {
+            {filteredPigs.length === 0 && (
+              <div className="pigPickerEmpty">No pigs found</div>
+            )}
+            {filteredPigs.map((pig) => {
               const active = multiSelect
                 ? selectedPigIds.includes(pig.id)
                 : pig.id === selectedPigId;
