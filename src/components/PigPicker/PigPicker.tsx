@@ -147,6 +147,16 @@ const PigPicker = ({
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
             />
+            {query && (
+              <button
+                type="button"
+                className="pigPickerSearchClear"
+                onClick={() => setQuery('')}
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
           </div>
           <div className="pigPickerMenuInner">
             {view === 'compact' && selectedPig && (
