@@ -12,12 +12,17 @@ import {
   computePeckingOrder,
   type PeckingEntry,
 } from '../../services/social-order-ranking';
+import {
+  computeDavidScore,
+  type DavidEntry,
+} from '../../services/social-order-david';
 import './SocialOrderPage.css';
 import PigPicker from '../../components/PigPicker/PigPicker';
 import Button from '../../components/ui/Button/Button';
 import Modal from '../../components/ui/Modal/Modal';
 import Panel from '../../components/ui/Panel/Panel';
 import SocialGraph from './SocialGraph';
+import AlgorithmInfo from './AlgorithmInfo';
 
 const SocialOrderPage = () => {
   const [socialOrder, setSocialOrder] = useState<SocialOrderItem[]>([]);
@@ -33,11 +38,16 @@ const SocialOrderPage = () => {
   );
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    'ranking' | 'graph' | 'observations'
+    'ranking' | 'david' | 'graph' | 'observations'
   >('ranking');
 
   const { ranked, unranked } = useMemo(
     () => computePeckingOrder(allPigs, socialOrder),
+    [allPigs, socialOrder]
+  );
+
+  const { ranked: davidRanked, unranked: davidUnranked } = useMemo(
+    () => computeDavidScore(allPigs, socialOrder),
     [allPigs, socialOrder]
   );
 
@@ -51,6 +61,16 @@ const SocialOrderPage = () => {
     }
     return groups;
   }, [ranked]);
+
+  const davidGroups = useMemo(() => {
+    const groups: DavidEntry[][] = [];
+    for (const entry of davidRanked) {
+      const last = groups[groups.length - 1];
+      if (last && last[0].rank === entry.rank) last.push(entry);
+      else groups.push([entry]);
+    }
+    return groups;
+  }, [davidRanked]);
 
   const dominantPigs = useMemo(
     () =>
@@ -144,6 +164,12 @@ const SocialOrderPage = () => {
           Pecking Order 👑
         </button>
         <button
+          className={activeTab === 'david' ? 'active' : ''}
+          onClick={() => setActiveTab('david')}
+        >
+          Rating ⭐
+        </button>
+        <button
           className={activeTab === 'graph' ? 'active' : ''}
           onClick={() => setActiveTab('graph')}
         >
@@ -159,6 +185,22 @@ const SocialOrderPage = () => {
 
       {activeTab === 'ranking' && (
         <div className="peckingOrder">
+          <AlgorithmInfo summary="Copeland score 👑 — wins minus losses, each rival counted once.">
+            <p>
+              Every pig you've faced counts once. If you've scrapped more than
+              once, only the <strong>most recent</strong> result counts. Your
+              score is simply <strong>(pigs you beat) − (pigs that beat you)</strong>,
+              and pigs with the same score share a rank.
+            </p>
+            <p>
+              It's deliberately <strong>flat</strong>: beating the boss is worth
+              exactly the same as beating a newbie, and it doesn't care how
+              strong your rivals are. Transparent and easy to reason about — but a
+              pig who's only ever bullied weaklings can outrank one who lost a
+              single close contest to the champion. The ▲/▼ show how many pigs
+              you beat and lost to.
+            </p>
+          </AlgorithmInfo>
           {ranked.length === 0 ? (
             <p className="muted peckingEmpty">
               No dominance observations yet. Add some in the Observations tab.
@@ -198,6 +240,81 @@ const SocialOrderPage = () => {
               <p className="muted peckingUnrankedHeading">Not ranked yet</p>
               <div className="peckingUnrankedList">
                 {unranked.map((pig) => (
+                  <div className="peckingPigCard" key={pig.id}>
+                    <PigCard pig={pig} hideLastSeen />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'david' && (
+        <div className="peckingOrder">
+          <AlgorithmInfo summary="David's score ⭐ — beating a strong pig counts for more; a hybrid of the other two tabs.">
+            <p>
+              <strong>What the ⭐ number means:</strong> a strength rating where
+              the herd always averages 0. Positive = above-average dominant,
+              negative = below-average pushover, and higher always ranks higher.
+              The <em>gap</em> between two pigs shows how lopsided things are.
+            </p>
+            <p>
+              <strong>How it's built, per pig:</strong> (1) your{' '}
+              <strong>win share</strong> in each rivalry (won 2 of 3 = 0.67),
+              pulled toward 50/50 for thin records so a single scrap isn't
+              treated as proof; (2) a <strong>quality bonus</strong> — for each
+              pig you beat, a slice of <em>their</em> strength too, so beating the
+              boss pays far more than beating a nobody; (3) the same two things
+              subtracted for the pigs you lost to.
+            </p>
+            <p>
+              This is the balanced pick: stable like the Pecking Order (one scrap
+              won't crown or sink a pig) but rewards beating the strong like the
+              Graph — without the Graph's habit of collapsing a whole empire on a
+              single lost rivalry.
+            </p>
+          </AlgorithmInfo>
+          {davidRanked.length === 0 ? (
+            <p className="muted peckingEmpty">
+              No dominance observations yet. Add some in the Observations tab.
+            </p>
+          ) : (
+            <ol className="peckingList">
+              {davidGroups.map((group) => (
+                <li
+                  className={`peckingRow${group[0].rank === 1 ? ' peckingTop' : ''}${group.length > 1 ? ' peckingTie' : ''}${group.length > 4 ? ' peckingCrowded' : ''}`}
+                  key={group[0].rank}
+                >
+                  <span className="peckingRank">
+                    {group[0].rank === 1 ? '👑' : group[0].rank}
+                  </span>
+                  <div className="peckingMembers">
+                    {group.map((entry) => (
+                      <div className="peckingMember" key={entry.pig.id}>
+                        <div className="peckingPigCard">
+                          <PigCard pig={entry.pig} hideLastSeen />
+                        </div>
+                        <span className="peckingRecord">
+                          <span className="davidScore">
+                            ⭐ {entry.score.toFixed(1)}
+                          </span>
+                          <span className="peckingWins">▲ {entry.wins}</span>
+                          <span className="peckingLosses">▼ {entry.losses}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+
+          {davidUnranked.length > 0 && (
+            <div className="peckingUnranked">
+              <p className="muted peckingUnrankedHeading">Not ranked yet</p>
+              <div className="peckingUnrankedList">
+                {davidUnranked.map((pig) => (
                   <div className="peckingPigCard" key={pig.id}>
                     <PigCard pig={pig} hideLastSeen />
                   </div>

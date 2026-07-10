@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import PigCard from '../../components/PigList/PigCard/PigCard';
 import Modal from '../../components/ui/Modal/Modal';
+import AlgorithmInfo from './AlgorithmInfo';
 import { getPigColorClass } from '../../constants/colors';
 import { usePigImage } from '../../hooks/usePigImage';
 import type { Pig, SocialOrderItem } from '../../services/pigs.types';
@@ -19,6 +20,27 @@ type Props = {
   pigs: Pig[];
   socialOrder: SocialOrderItem[];
 };
+
+/** The Graph tab's algorithm summary + fold-down explanation. */
+const EmpireInfo = () => (
+  <AlgorithmInfo summary="Empire model 🕸️ — ranks by how many pigs you dominate, directly or through the pigs beneath you.">
+    <p>
+      Each rivalry becomes an arrow pointing at the loser, forming a tree of who
+      outranks whom. Pigs are then ranked by the size of their{' '}
+      <strong>empire</strong>: <strong>🐖 Boss Pig of</strong> counts everyone
+      below you (directly or indirectly), then <strong>🪜 Chain</strong> (how
+      many tiers run beneath you), then <strong>💪 Power</strong> (clout — extra
+      credit for dominating pigs who are themselves powerful).
+    </p>
+    <p>
+      Beat the current boss and you <strong>inherit their whole empire</strong>,
+      leaping to #1. The flip side: your rank can rest on a single arrow, so one
+      lost rivalry can collapse a big empire in one go — that's why a pig can
+      drop from top to bottom overnight. Standoffs (A beats B beats C beats A)
+      are resolved by cutting the weakest rivalry in the loop.
+    </p>
+  </AlgorithmInfo>
+);
 
 // A PigCard that, instead of navigating to the pig's page, selects it so we
 // can show its dominance subgraph. Intercepting in the capture phase marks the
@@ -388,9 +410,12 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
 
   if (!groups.length) {
     return (
-      <p className="muted socialGraphEmpty">
-        No dominance observations yet. Add some in the Observations tab.
-      </p>
+      <div className="graphRank">
+        <EmpireInfo />
+        <p className="muted socialGraphEmpty">
+          No dominance observations yet. Add some in the Observations tab.
+        </p>
+      </div>
     );
   }
 
@@ -398,6 +423,7 @@ const SocialGraph = ({ pigs, socialOrder }: Props) => {
 
   return (
     <div className="graphRank">
+      <EmpireInfo />
       {forest.length > 0 && (
         <section className="graphOverview">
           <p className="graphOverviewHeading">🌳 The whole herd</p>

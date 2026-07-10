@@ -138,6 +138,14 @@
   color: #c62828;
 }
 
+.davidScore {
+  color: var(--primary, #7c5cff);
+}
+
+.peckingTop .davidScore {
+  color: #ffe08a;
+}
+
 .peckingTop .peckingWins {
   color: #7ee787;
 }
@@ -175,6 +183,70 @@
   text-align: center;
   font-size: var(--font-size-sm);
   margin: 0 0 var(--spacing-sm);
+}
+
+/* ---- Per-tab "more info" fold-down ---- */
+
+.algoInfo {
+  margin-bottom: var(--spacing-sm);
+}
+
+.algoInfoToggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--primary, #7c5cff);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.algoInfoToggle:hover {
+  text-decoration: underline;
+}
+
+/* Slide the panel open/closed by animating the grid row from 0fr to 1fr —
+   works in both directions because the content stays mounted. */
+.algoInfoReveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
+}
+
+.algoInfoReveal.algoInfoOpen {
+  grid-template-rows: 1fr;
+}
+
+.algoInfoRevealInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.algoInfoDetails {
+  max-width: 42rem;
+  margin: var(--spacing-xs) auto 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md, 12px);
+  background: rgba(124, 92, 255, 0.08);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .algoInfoReveal {
+    transition: none;
+  }
+}
+
+.algoInfoDetails p {
+  margin: 0 0 var(--spacing-sm);
+}
+
+.algoInfoDetails p:last-child {
+  margin-bottom: 0;
 }
 
 .graphRankList {
