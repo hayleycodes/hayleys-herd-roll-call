@@ -35,26 +35,36 @@ import './MapPage.css';
 
 const CELL_SIZE = 40; // px per grid cell
 const GRID_COLS = 19;
-const GRID_ROWS = 23;
+const GRID_ROWS = 24;
 
 const GRID_WIDTH = CELL_SIZE * GRID_COLS;
 const GRID_HEIGHT = CELL_SIZE * GRID_ROWS;
 const BORDER_WIDTH = 3; // matches the border on .mapCanvasWrap
 
-// Disabled / out-of-bounds region of the pen, in grid cells: top-left (4,0)
-// to bottom-right (18,4).
-const DISABLED_AREA = { col: 4, row: 0, width: 17, height: 4 };
-
 // Disabled bottom-right corner, cut at 45°. The hypotenuse runs from (13,26)
 // to (18,21); the right-angle corner sits at (18,26).
 const DISABLED_CORNER: number[] = [
   12 * CELL_SIZE,
-  23 * CELL_SIZE,
+  24 * CELL_SIZE,
   19 * CELL_SIZE,
-  20 * CELL_SIZE,
   21 * CELL_SIZE,
-  23 * CELL_SIZE,
+  21 * CELL_SIZE,
+  24 * CELL_SIZE,
 ];
+
+// Greyed-out, non-markable dead zones, in grid cells: { col, row, width,
+// height } giving the top-left cell and size.
+const DISABLED_AREAS: {
+  col: number;
+  row: number;
+  width: number;
+  height: number;
+}[] = [{ col: 9, row: 12, width: 1, height: 1 }];
+
+// Fences — drawn as thick lines along cell edges. Each entry is a run of grid
+// points [col, row, col, row, ...]; coordinates are cell corners, so a fence
+// along the bottom of the top row runs at row 1.
+const FENCES: number[][] = [[4, 5, GRID_COLS, 5]];
 
 // Pigs that don't live in the main pen, so they shouldn't show up when marking
 // sightings on this map.
@@ -72,11 +82,13 @@ const snap = (value: number) => Math.round(value / CELL_SIZE);
 
 // Whether a cell falls inside one of the greyed-out, non-markable zones.
 const isDisabledCell = (col: number, row: number): boolean => {
-  const inArea =
-    col >= DISABLED_AREA.col &&
-    col < DISABLED_AREA.col + DISABLED_AREA.width &&
-    row >= DISABLED_AREA.row &&
-    row < DISABLED_AREA.row + DISABLED_AREA.height;
+  const inArea = DISABLED_AREAS.some(
+    (a) =>
+      col >= a.col &&
+      col < a.col + a.width &&
+      row >= a.row &&
+      row < a.row + a.height
+  );
   if (inArea) return true;
 
   // Point-in-triangle for the cut corner (vertices in cell coords).
@@ -181,7 +193,18 @@ const MapPage = () => {
         getSightingEvents(),
       ]);
       if (saved.length) {
-        setHouses(saved);
+        // Merge in any objects from the static layout that aren't in the saved
+        // map yet, so newly added houses appear (at their default position)
+        // without wiping the user's arrangement.
+        const savedIds = new Set(saved.map((h) => h.id));
+        const missing = penObjects.filter((h) => !savedIds.has(h.id));
+        if (missing.length) {
+          const merged = [...saved, ...missing];
+          await savePenObjects(merged);
+          setHouses(merged);
+        } else {
+          setHouses(saved);
+        }
       } else {
         await savePenObjects(penObjects);
         setHouses(penObjects);
@@ -320,7 +343,9 @@ const MapPage = () => {
 
   // Clear every pig currently shown on the map.
   const handleReset = async () => {
-    const pigIds = sightingCells.flatMap((c) => c.pigs.map((p) => Number(p.id)));
+    const pigIds = sightingCells.flatMap((c) =>
+      c.pigs.map((p) => Number(p.id))
+    );
     setConfirmReset(false);
     if (!pigIds.length) return;
     try {
@@ -456,16 +481,29 @@ const MapPage = () => {
                 height={GRID_HEIGHT}
                 fill="#fff5f8"
               />
-              <Rect
-                x={DISABLED_AREA.col * CELL_SIZE}
-                y={DISABLED_AREA.row * CELL_SIZE}
-                width={DISABLED_AREA.width * CELL_SIZE}
-                height={DISABLED_AREA.height * CELL_SIZE}
-                fill="#b8b8c0"
-              />
               <Line points={DISABLED_CORNER} closed fill="#b8b8c0" />
+              {DISABLED_AREAS.map((a, i) => (
+                <Rect
+                  key={`disabled-${i}`}
+                  x={a.col * CELL_SIZE}
+                  y={a.row * CELL_SIZE}
+                  width={a.width * CELL_SIZE}
+                  height={a.height * CELL_SIZE}
+                  fill="#b8b8c0"
+                />
+              ))}
               {gridLines.map((pts, i) => (
                 <Line key={i} points={pts} stroke="#ffd6e0" strokeWidth={1} />
+              ))}
+              {FENCES.map((pts, i) => (
+                <Line
+                  key={`fence-${i}`}
+                  points={pts.map((v) => v * CELL_SIZE)}
+                  stroke={PINK_ACCENT}
+                  strokeWidth={6}
+                  lineCap="round"
+                  lineJoin="round"
+                />
               ))}
             </Layer>
 
@@ -493,7 +531,9 @@ const MapPage = () => {
                     : PINK_FILL;
                 // Disabled scenery is grey, so its border/shadow are grey too.
                 const strokeColor = disabled ? '#8a8a92' : SHAPE_STYLE.stroke;
-                const shadowColor = disabled ? '#5c5c64' : SHAPE_STYLE.shadowColor;
+                const shadowColor = disabled
+                  ? '#5c5c64'
+                  : SHAPE_STYLE.shadowColor;
                 const labelFill = selected ? '#ffffff' : LABEL_STYLE.fill;
                 return (
                   <Group
@@ -725,9 +765,7 @@ const MapPage = () => {
                           onClick={() => handleRemovePig(Number(pig.id))}
                           title={`Remove ${pig.name}`}
                         >
-                          <PigThumb
-                            imagePath={pig.image_paths?.[0] ?? null}
-                          />
+                          <PigThumb imagePath={pig.image_paths?.[0] ?? null} />
                           <span>{pig.name}</span>
                           <span className="cellPigRemove">×</span>
                         </button>
