@@ -190,15 +190,17 @@ const FamilyPanel = ({
         <div className="family">
           {members.map((member) => (
             <div key={member.pig.id} className="relationshipCard">
-              <EmojiButton
-                className="relationshipDeleteBtn"
-                size="sm"
-                onClick={() =>
-                  setDeletingMember({ member, label: relationLabel })
-                }
-              >
-                🗑️
-              </EmojiButton>
+              {!member.inferred && (
+                <EmojiButton
+                  className="relationshipDeleteBtn"
+                  size="sm"
+                  onClick={() =>
+                    setDeletingMember({ member, label: relationLabel })
+                  }
+                >
+                  🗑️
+                </EmojiButton>
+              )}
               <PigCard
                 pig={member.pig}
                 passed={!!member.pig.passed_away}
