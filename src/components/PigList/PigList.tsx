@@ -11,7 +11,7 @@ import {
 } from '../../services/pigs.service';
 import { addPigMood, MOOD_OPTIONS } from '../../services/pig-moods.service';
 import '../../components/MoodPanel/MoodPanel.css';
-import { FEATURE_MOOD } from '../../config/features';
+import { FEATURE_MOOD, FEATURE_PIN } from '../../config/features';
 import PassedPigList from './PassedPigList/PassedPigList';
 import Modal from '../ui/Modal/Modal';
 import Button from '../ui/Button/Button';
@@ -241,7 +241,9 @@ const PigList = ({
               pinned={pig.pinned}
               onEyeClick={(origin) => handleSighting(pig, origin)}
               onUndoClick={() => handleUndo(pig)}
-              onPinClick={() => handleTogglePin(pig)}
+              onPinClick={
+                FEATURE_PIN ? () => handleTogglePin(pig) : undefined
+              }
             />
           </motion.div>
         ))}
