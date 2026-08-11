@@ -10,7 +10,6 @@ import EmojiButton from '../../ui/EmojiButton/EmojiButton';
 type Props = {
   pig: Pig;
   relationship?: string;
-  fading?: boolean;
   passed?: boolean;
   sick?: boolean;
   notSightedToday?: boolean;
@@ -19,8 +18,6 @@ type Props = {
   highlightUnseen?: boolean;
   crowned?: boolean;
   pinned?: boolean;
-  popPhase?: 'a' | 'b' | null;
-  popIndex?: number;
   onEyeClick?: (origin: { x: number; y: number }) => void;
   onUndoClick?: () => void;
   onPinClick?: () => void;
@@ -29,7 +26,6 @@ type Props = {
 const PigCard = ({
   pig,
   relationship,
-  fading,
   passed,
   sick,
   notSightedToday,
@@ -38,8 +34,6 @@ const PigCard = ({
   highlightUnseen,
   crowned,
   pinned,
-  popPhase,
-  popIndex,
   onEyeClick,
   onUndoClick,
   onPinClick,
@@ -58,11 +52,6 @@ const PigCard = ({
 
   const pigColorClass = getPigColorClass(pig.id, sick);
   const eyeUnseen = notSightedToday && !sick;
-  const popClass = popPhase
-    ? popPhase === 'a'
-      ? ' pigCardPopA'
-      : ' pigCardPopB'
-    : '';
 
   const handleTap = () => {
     setWiggling(true);
@@ -70,17 +59,13 @@ const PigCard = ({
 
   return (
     <div
-      className={`pigCard ${pigColorClass}${fading ? ' pigCardFading' : ''}${popClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}${pinned ? ' pigCardPinned' : ''}`}
+      className={`pigCard ${pigColorClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}${pinned ? ' pigCardPinned' : ''}`}
       style={
-        popPhase
+        passed
           ? ({
-              animationDelay: `${(popIndex ?? 0) * 0.04}s`,
+              '--float-delay': `${(pig.id * 1.37) % 7}s`,
             } as React.CSSProperties)
-          : passed
-            ? ({
-                '--float-delay': `${(pig.id * 1.37) % 7}s`,
-              } as React.CSSProperties)
-            : undefined
+          : undefined
       }
       onClick={handleTap}
     >
