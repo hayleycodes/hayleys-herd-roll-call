@@ -60,6 +60,12 @@ const PigList = ({
   const [confettiOrigin, setConfettiOrigin] = useState<
     { x: number; y: number } | undefined
   >();
+  // Toggles 'a'/'b' each time a sighted pig leaves so the pop keyframe replays
+  // on the cards that shift up to fill the gap.
+  const [popPhase, setPopPhase] = useState<'a' | 'b' | null>(null);
+  // Only cards at or below this index pop — the ones from the departed pig's
+  // old position down, i.e. the region that actually shifts.
+  const [popFromIndex, setPopFromIndex] = useState(0);
   // Pigs sighted this session, mapped to their previous last_sighted value so
   // the sighting can be undone.
   const [sightedPigs, setSightedPigs] = useState<Map<number, string | null>>(
@@ -131,6 +137,12 @@ const PigList = ({
   ) => {
     const now = new Date().toISOString();
     const prevLastSighted = pig.last_sighted ?? null;
+    // Where the pig sits now; when she leaves, everything from here down shifts
+    // up, so only those cards should pop.
+    const oldIndex = Math.max(
+      0,
+      pigs.findIndex((p) => p.id === pig.id)
+    );
 
     setConfettiOrigin(origin);
     setShowConfetti(true);
@@ -146,8 +158,7 @@ const PigList = ({
     // Without the unseen filter the pig stays in place, so record the sighting
     // right away — just confetti, no reshuffle. With the filter active, defer it
     // until the confetti has played (below): dropping last_sighted removes the
-    // card from the filtered list, and AnimatePresence fades it out while the
-    // cards below slide up to fill the gap.
+    // card from the filtered list, and the cards below pop up to fill the gap.
     if (!unseenFilterActive) markSighted();
 
     try {
@@ -172,10 +183,15 @@ const PigList = ({
       setTimeout(() => clearSighted(pig.id), 60000)
     );
 
-    // Let the confetti play, then drop the pig from the filtered list so it
-    // animates out (see AnimatePresence in the render).
+    // Let the confetti play, then drop the pig from the filtered list. Her card
+    // fades out (AnimatePresence exit) while the cards below pop up to fill the
+    // gap (popPhase toggle re-runs the pigCardPop keyframe on them).
     if (unseenFilterActive) {
-      setTimeout(markSighted, 800);
+      setTimeout(() => {
+        markSighted();
+        setPopFromIndex(oldIndex);
+        setPopPhase((p) => (p === 'a' ? 'b' : 'a'));
+      }, 800);
     }
 
     if (FEATURE_MOOD) {
@@ -230,15 +246,16 @@ const PigList = ({
         animate="show"
       >
         <AnimatePresence mode="popLayout">
-          {pigs.map((pig) => (
+          {pigs.map((pig, i) => (
             <motion.div
               key={pig.id}
-              layout
               variants={listItemVariants}
               exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.3 } }}
             >
               <PigCard
                 pig={pig}
+                popPhase={i >= popFromIndex ? popPhase : null}
+                popIndex={i - popFromIndex}
                 sick={sickPigIds?.has(pig.id)}
                 notSightedToday={
                   !pig.last_sighted ||
