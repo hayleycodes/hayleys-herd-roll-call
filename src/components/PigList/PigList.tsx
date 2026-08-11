@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import PigCard from './PigCard/PigCard';
 import './PigList.css';
 import type { Pig } from '../../services/pigs.types';
@@ -16,6 +16,24 @@ import PassedPigList from './PassedPigList/PassedPigList';
 import Modal from '../ui/Modal/Modal';
 import Button from '../ui/Button/Button';
 import Confetti from '../ui/Confetti/Confetti';
+
+// Stagger the cards in one at a time whenever the grid (re)mounts — on page
+// load and whenever the unseen filter toggles.
+const listContainerVariants: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.04 },
+  },
+};
+
+const listItemVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.6 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.3, ease: 'easeOut' },
+  },
+};
 
 type PigListProps = {
   pigs: Pig[];
@@ -42,13 +60,6 @@ const PigList = ({
   const [confettiOrigin, setConfettiOrigin] = useState<
     { x: number; y: number } | undefined
   >();
-  const [fadingPigId, setFadingPigId] = useState<number | null>(null);
-  // Toggles 'a'/'b' on each re-sort so the pop keyframe replays (alternating
-  // between two identical animations restarts them without remounting cards).
-  const [popPhase, setPopPhase] = useState<'a' | 'b' | null>(null);
-  // Only cards at or below this index pop — i.e. from the sighted pig's old
-  // position down, the region that actually shifts when it moves to the bottom.
-  const [popFromIndex, setPopFromIndex] = useState(0);
   // Pigs sighted this session, mapped to their previous last_sighted value so
   // the sighting can be undone.
   const [sightedPigs, setSightedPigs] = useState<Map<number, string | null>>(
@@ -120,21 +131,24 @@ const PigList = ({
   ) => {
     const now = new Date().toISOString();
     const prevLastSighted = pig.last_sighted ?? null;
-    // Position the pig occupies now; everything from here down shifts when it
-    // moves to the bottom, so only these cards should pop.
-    const oldIndex = Math.max(
-      0,
-      pigs.findIndex((p) => p.id === pig.id)
-    );
 
     setConfettiOrigin(origin);
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 1800);
 
     setSightedPigs((prev) => new Map(prev).set(pig.id, prevLastSighted));
-    setPigs((prev) =>
-      prev.map((p) => (p.id === pig.id ? { ...p, last_sighted: now } : p))
-    );
+
+    const markSighted = () =>
+      setPigs((prev) =>
+        prev.map((p) => (p.id === pig.id ? { ...p, last_sighted: now } : p))
+      );
+
+    // Without the unseen filter the pig stays in place, so record the sighting
+    // right away — just confetti, no reshuffle. With the filter active, defer it
+    // until the confetti has played (below): dropping last_sighted removes the
+    // card from the filtered list, and AnimatePresence fades it out while the
+    // cards below slide up to fill the gap.
+    if (!unseenFilterActive) markSighted();
 
     try {
       await createPigSighting(pig.id);
@@ -158,17 +172,10 @@ const PigList = ({
       setTimeout(() => clearSighted(pig.id), 60000)
     );
 
-    // With the unseen filter active, the sighted pig drops out of the list, so
-    // fade the card out then let the cards below pop up to fill the gap. Without
-    // the filter she stays in place (alphabetical), so play only the confetti.
+    // Let the confetti play, then drop the pig from the filtered list so it
+    // animates out (see AnimatePresence in the render).
     if (unseenFilterActive) {
-      setTimeout(() => setFadingPigId(pig.id), 800);
-      setTimeout(() => {
-        setFadingPigId(null);
-        resortPigs();
-        setPopFromIndex(oldIndex);
-        setPopPhase((p) => (p === 'a' ? 'b' : 'a'));
-      }, 1200);
+      setTimeout(markSighted, 800);
     }
 
     if (FEATURE_MOOD) {
@@ -214,41 +221,43 @@ const PigList = ({
   return (
     <>
       <Confetti active={showConfetti} origin={confettiOrigin} />
-      <div className="pigList">
-        {pigs.map((pig, i) => (
-          <motion.div
-            key={pig.id}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{
-              delay: i * 0.05,
-              duration: 0.3,
-              ease: 'easeOut',
-            }}
-          >
-            <PigCard
-              pig={pig}
-              fading={pig.id === fadingPigId}
-              popPhase={i >= popFromIndex ? popPhase : null}
-              popIndex={i - popFromIndex}
-              sick={sickPigIds?.has(pig.id)}
-              notSightedToday={
-                !pig.last_sighted ||
-                new Date(pig.last_sighted).toDateString() !== today
-              }
-              sighted={sightedPigs.has(pig.id)}
-              crowned={topPigIds?.has(pig.id)}
-              highlightUnseen={unseenFilterActive}
-              pinned={pig.pinned}
-              onEyeClick={(origin) => handleSighting(pig, origin)}
-              onUndoClick={() => handleUndo(pig)}
-              onPinClick={
-                FEATURE_PIN ? () => handleTogglePin(pig) : undefined
-              }
-            />
-          </motion.div>
-        ))}
-      </div>
+      <motion.div
+        // Remounting on filter toggle replays the staggered entrance.
+        key={String(unseenFilterActive)}
+        className="pigList"
+        variants={listContainerVariants}
+        initial="hidden"
+        animate="show"
+      >
+        <AnimatePresence mode="popLayout">
+          {pigs.map((pig) => (
+            <motion.div
+              key={pig.id}
+              layout
+              variants={listItemVariants}
+              exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.3 } }}
+            >
+              <PigCard
+                pig={pig}
+                sick={sickPigIds?.has(pig.id)}
+                notSightedToday={
+                  !pig.last_sighted ||
+                  new Date(pig.last_sighted).toDateString() !== today
+                }
+                sighted={sightedPigs.has(pig.id)}
+                crowned={topPigIds?.has(pig.id)}
+                highlightUnseen={unseenFilterActive}
+                pinned={pig.pinned}
+                onEyeClick={(origin) => handleSighting(pig, origin)}
+                onUndoClick={() => handleUndo(pig)}
+                onPinClick={
+                  FEATURE_PIN ? () => handleTogglePin(pig) : undefined
+                }
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
       <PassedPigList passedPigs={passedPigs} />
 
