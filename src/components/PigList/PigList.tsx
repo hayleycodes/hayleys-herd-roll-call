@@ -79,10 +79,7 @@ const PigList = ({
           const bSick = sickPigIds.has(b.id) ? 0 : 1;
           if (aSick !== bSick) return aSick - bSick;
         }
-        return (
-          new Date(a.last_sighted ?? 0).getTime() -
-          new Date(b.last_sighted ?? 0).getTime()
-        );
+        return a.name.localeCompare(b.name);
       })
     );
   };
@@ -161,14 +158,18 @@ const PigList = ({
       setTimeout(() => clearSighted(pig.id), 60000)
     );
 
-    // After the confetti plays, fade the card out then re-sort it to the bottom.
-    setTimeout(() => setFadingPigId(pig.id), 800);
-    setTimeout(() => {
-      setFadingPigId(null);
-      resortPigs();
-      setPopFromIndex(oldIndex);
-      setPopPhase((p) => (p === 'a' ? 'b' : 'a'));
-    }, 1200);
+    // With the unseen filter active, the sighted pig drops out of the list, so
+    // fade the card out then let the cards below pop up to fill the gap. Without
+    // the filter she stays in place (alphabetical), so play only the confetti.
+    if (unseenFilterActive) {
+      setTimeout(() => setFadingPigId(pig.id), 800);
+      setTimeout(() => {
+        setFadingPigId(null);
+        resortPigs();
+        setPopFromIndex(oldIndex);
+        setPopPhase((p) => (p === 'a' ? 'b' : 'a'));
+      }, 1200);
+    }
 
     if (FEATURE_MOOD) {
       setSightingStep('mood');
