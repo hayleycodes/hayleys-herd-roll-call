@@ -1,0 +1,9 @@
+# CPU-only torch (see Dockerfile for the --index-url that fetches CPU wheels)
+torch==2.8.0
+torchvision==0.23.0
+ultralytics==8.4.126
+transformers==4.46.3
+opencv-python-headless==4.10.0.84
+supabase==2.9.1
+numpy==1.26.4
+Pillow==11.3.0

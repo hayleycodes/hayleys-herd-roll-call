@@ -27,3 +27,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Scratch data
+tmp/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ML model weights (downloaded/mounted, not versioned)
+*.pt
+services/pig-recognizer/weights/
