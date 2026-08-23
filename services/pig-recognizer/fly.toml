@@ -18,6 +18,10 @@ primary_region = "syd"   # close to the cameras (Australia)
   CROP_PREFIX = "recognition"
   DETECTOR_MODEL = "yolov8s-worldv2.pt"
 
+# Define the worker process group and its command.
+[processes]
+  worker = "python main.py"
+
 # One always-on Machine. Bump memory to 2048 if torch OOMs at 1024.
 # Secrets (NOT set here): fly secrets set SUPABASE_URL=... \
 #   SUPABASE_SERVICE_ROLE_KEY=... PIG_CAM_RTSP=...
@@ -25,6 +29,4 @@ primary_region = "syd"   # close to the cameras (Australia)
   size = "shared-cpu-1x"
   memory = "1024mb"
   cpus = 1
-
-[[vm.processes]]
-  worker = "python main.py"
+  processes = ["worker"]
