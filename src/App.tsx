@@ -23,6 +23,7 @@ import TagsPage from './pages/TagsPage/TagsPage.tsx';
 import MoodPage from './pages/MoodPage/MoodPage.tsx';
 import MapPage from './pages/MapPage/MapPage.tsx';
 import FriendsPage from './pages/FriendsPage/FriendsPage.tsx';
+import ReviewPage from './pages/ReviewPage/ReviewPage.tsx';
 import Loading from './components/ui/Loading/Loading.tsx';
 
 function App() {
@@ -73,6 +74,9 @@ function App() {
             </Link>
             <Link to="/health-log">
               <EmojiButton>🏥</EmojiButton>
+            </Link>
+            <Link to="/review">
+              <EmojiButton>📷</EmojiButton>
             </Link>
             <EmojiButton onClick={() => setIsRollcallOpen(true)}>
               🍎
@@ -158,6 +162,14 @@ function App() {
             element={
               <PageTransition>
                 <FriendsPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/review"
+            element={
+              <PageTransition>
+                <ReviewPage />
               </PageTransition>
             }
           />

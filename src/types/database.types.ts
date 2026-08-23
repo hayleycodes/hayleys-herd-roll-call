@@ -185,6 +185,44 @@ export type Database = {
           },
         ]
       }
+      pig_reference_embeddings: {
+        Row: {
+          camera: string | null
+          created_at: string
+          crop_path: string | null
+          embedding: string
+          id: number
+          pig_id: number
+          source: string
+        }
+        Insert: {
+          camera?: string | null
+          created_at?: string
+          crop_path?: string | null
+          embedding: string
+          id?: never
+          pig_id: number
+          source?: string
+        }
+        Update: {
+          camera?: string | null
+          created_at?: string
+          crop_path?: string | null
+          embedding?: string
+          id?: never
+          pig_id?: number
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pig_reference_embeddings_pig_id_fkey"
+            columns: ["pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pig_relationships: {
         Row: {
           created_at: string | null
@@ -336,6 +374,53 @@ export type Database = {
         }
         Relationships: []
       }
+      sighting_candidates: {
+        Row: {
+          best_pig_id: number | null
+          camera: string | null
+          confidence: number | null
+          created_at: string
+          crop_path: string
+          embedding: string
+          id: number
+          observed_at: string
+          status: string
+          top_guesses: Json | null
+        }
+        Insert: {
+          best_pig_id?: number | null
+          camera?: string | null
+          confidence?: number | null
+          created_at?: string
+          crop_path: string
+          embedding: string
+          id?: never
+          observed_at?: string
+          status?: string
+          top_guesses?: Json | null
+        }
+        Update: {
+          best_pig_id?: number | null
+          camera?: string | null
+          confidence?: number | null
+          created_at?: string
+          crop_path?: string
+          embedding?: string
+          id?: never
+          observed_at?: string
+          status?: string
+          top_guesses?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sighting_candidates_best_pig_id_fkey"
+            columns: ["best_pig_id"]
+            isOneToOne: false
+            referencedRelation: "pigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sighting_events: {
         Row: {
           behaviour: string | null
@@ -466,7 +551,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_pig_references: {
+        Args: { match_count?: number; query_embedding: string }
+        Returns: {
+          pig_id: number
+          similarity: number
+          source: string
+        }[]
+      }
     }
     Enums: {
       death_status: "unknown"

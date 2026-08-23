@@ -1,0 +1,178 @@
+.reviewPage {
+  padding-bottom: var(--spacing-lg);
+}
+
+/* Let the pig-picker dropdown escape the panel instead of being clipped. */
+.reviewPage .panel,
+.reviewPage .panelContent {
+  overflow: visible;
+}
+
+.reviewAllCaughtUp {
+  text-align: center;
+  font-size: var(--font-size-lg);
+  padding: var(--spacing-lg) 0;
+}
+
+.reviewList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.reviewCard {
+  display: flex;
+  gap: var(--spacing-sm);
+  background: var(--surface-alt);
+  border: 2px solid var(--accent-blue);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+  transition: opacity 0.2s ease;
+}
+
+.reviewCardBusy {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.reviewCrop {
+  flex: 0 0 auto;
+  width: 110px;
+  height: 110px;
+  padding: 0;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--surface);
+  background-size: cover;
+  background-position: center;
+  cursor: zoom-in;
+}
+
+.reviewCropFull {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+  margin: 0 auto;
+  border-radius: var(--border-radius-sm);
+  object-fit: contain;
+}
+
+.reviewCropPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+}
+
+.reviewCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+  flex: 1;
+}
+
+.reviewMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.reviewBadge {
+  background: var(--accent-blue);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  padding: 2px 8px;
+  font-size: var(--font-size-sm);
+}
+
+.reviewMuted {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.reviewGuesses {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.reviewGuess {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-translucent);
+  border: 2px solid var(--primary);
+  border-radius: 999px;
+  padding: 3px 10px 3px 3px;
+  font-family: var(--primary-font);
+  font-size: var(--font-size-md);
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.reviewGuess:hover:not(:disabled) {
+  background: var(--primary);
+  color: white;
+}
+
+.reviewGuess:disabled {
+  cursor: default;
+}
+
+.reviewGuessActive {
+  background: var(--primary);
+  color: white;
+}
+
+.reviewGuessActive .reviewGuessSim {
+  color: white;
+}
+
+.reviewGuessName {
+  font-weight: var(--font-weight-bold);
+}
+
+.reviewGuessSim {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.reviewGuess:hover:not(:disabled) .reviewGuessSim {
+  color: white;
+}
+
+.reviewNoGuess {
+  margin: 0;
+}
+
+.reviewActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-xxs);
+}
+
+.reviewSave {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-xxs);
+}
+
+.reviewSaveLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  .reviewCrop {
+    width: 84px;
+    height: 84px;
+  }
+}
