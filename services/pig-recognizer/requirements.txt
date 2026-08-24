@@ -2,6 +2,9 @@
 torch==2.8.0
 torchvision==0.23.0
 ultralytics>=8.3
+# YOLO-World set_classes() needs CLIP. Pin it here so it's installed at build
+# time rather than lazily git-installed at runtime (which was crash-looping).
+clip @ git+https://github.com/ultralytics/CLIP.git
 transformers>=4.46,<5
 opencv-python-headless>=4.10
 supabase>=2.9,<3

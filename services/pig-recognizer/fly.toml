@@ -27,6 +27,6 @@ primary_region = "syd"   # close to the cameras (Australia)
 #   SUPABASE_SERVICE_ROLE_KEY=... PIG_CAM_RTSP=...
 [[vm]]
   size = "shared-cpu-1x"
-  memory = "1024mb"
+  memory = "2048mb"
   cpus = 1
   processes = ["worker"]
