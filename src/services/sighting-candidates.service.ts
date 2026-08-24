@@ -17,7 +17,7 @@ export interface SightingCandidate {
   best_pig_id: number | null;
   top_guesses: CandidateGuess[] | null;
   confidence: number | null;
-  status: 'pending' | 'confirmed' | 'rejected' | 'auto';
+  status: 'pending' | 'confirmed' | 'rejected' | 'auto' | 'unknown';
   camera: string | null;
   observed_at: string | null;
   created_at: string | null;
@@ -49,11 +49,23 @@ export const confirmCandidate = async (
   if (error) throw new Error(error.message);
 };
 
-// Dismiss a candidate (not a pig, bad crop, or don't-know) without touching the
-// gallery. Kept for the record, just no longer in the queue.
+// Dismiss a candidate (not a pig or bad crop) without touching the gallery.
+// Kept for the record, just no longer in the queue.
 export const rejectCandidate = async (candidateId: number): Promise<void> => {
   const { error } = await candidatesTable()
     .update({ status: 'rejected' })
+    .eq('id', candidateId);
+  if (error) throw new Error(error.message);
+};
+
+// Set aside a real-pig crop that's too ambiguous to identify. Permanently
+// removes it from the pending queue, but stays distinct from 'rejected' so
+// these can be revisited or reported separately later.
+export const markCandidateUnknown = async (
+  candidateId: number
+): Promise<void> => {
+  const { error } = await candidatesTable()
+    .update({ status: 'unknown' })
     .eq('id', candidateId);
   if (error) throw new Error(error.message);
 };

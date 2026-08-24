@@ -5,6 +5,7 @@ import {
   getPendingCandidates,
   confirmCandidate,
   rejectCandidate,
+  markCandidateUnknown,
   type SightingCandidate,
 } from '../../services/sighting-candidates.service';
 import { getAllPigsIncludingPassed } from '../../services/pigs.service';
@@ -123,6 +124,20 @@ const ReviewPage = () => {
     }
   };
 
+  // Too hard to tell: permanently set the candidate aside as 'unknown' so it
+  // leaves the queue for good, without labelling it as a pig or rejecting it.
+  const handleUnknown = async (candidateId: number) => {
+    setBusyId(candidateId);
+    try {
+      await markCandidateUnknown(candidateId);
+      remove(candidateId);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   if (loading) return <Loading />;
   if (error) return <p>{error}</p>;
 
@@ -203,6 +218,13 @@ const ReviewPage = () => {
                         theme="blue"
                         title="Someone else?"
                       />
+                      <Button
+                        variant="default"
+                        disabled={busy}
+                        onClick={() => handleUnknown(c.id)}
+                      >
+                        I don't know 🤷
+                      </Button>
                       <Button
                         variant="danger"
                         disabled={busy}
