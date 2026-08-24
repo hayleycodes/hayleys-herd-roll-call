@@ -1,8 +1,9 @@
 FROM python:3.11-slim
 
 # ffmpeg for RTSP frame grabs; libs OpenCV needs at runtime.
+# git so ultralytics can install its CLIP fork (needed by YOLO-World set_classes).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg libglib2.0-0 libgl1 \
+    ffmpeg libglib2.0-0 libgl1 git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -17,7 +18,10 @@ RUN pip install --no-cache-dir \
 COPY . .
 
 # Pre-download model weights into the image so boot doesn't fetch them.
-RUN python -c "from ultralytics import YOLO; YOLO('yolov8s-worldv2.pt')" \
+# set_classes() triggers the CLIP install/download — do it now so boot is offline.
+RUN python -c "from ultralytics import YOLO; \
+m = YOLO('yolov8s-worldv2.pt'); \
+m.set_classes(['guinea pig', 'small animal', 'rodent'])" \
  && python -c "from transformers import AutoModel, AutoImageProcessor; \
 AutoModel.from_pretrained('facebook/dinov2-small'); \
 AutoImageProcessor.from_pretrained('facebook/dinov2-small')"
