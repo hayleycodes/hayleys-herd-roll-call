@@ -2,10 +2,18 @@
   padding-bottom: var(--spacing-lg);
 }
 
-/* Let the pig-picker dropdown escape the panel instead of being clipped. */
+/* Let the pig-picker dropdown escape the panel instead of being clipped.
+   Because this disables the panel's own corner clipping, round the white
+   panelContent background to match so it doesn't bleed a square edge over the
+   panel's rounded corners. */
 .reviewPage .panel,
 .reviewPage .panelContent {
   overflow: visible;
+}
+
+.reviewPage .panelContent {
+  border-bottom-left-radius: var(--border-radius-sm);
+  border-bottom-right-radius: var(--border-radius-sm);
 }
 
 .reviewAllCaughtUp {
@@ -14,19 +22,57 @@
   padding: var(--spacing-lg) 0;
 }
 
-.reviewList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+.reviewCarousel {
+  position: relative;
+}
+
+.reviewArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid var(--accent-blue);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--accent-blue);
+  font-size: var(--font-size-2xl);
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.reviewArrowPrev {
+  left: calc(-1 * var(--spacing-sm));
+}
+
+.reviewArrowNext {
+  right: calc(-1 * var(--spacing-sm));
+}
+
+.reviewArrow:hover:not(:disabled) {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.reviewArrow:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 
 .reviewCard {
+  flex: 1;
+  min-width: 0;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: var(--spacing-sm);
   background: var(--surface-alt);
   border: 2px solid var(--accent-blue);
   border-radius: var(--border-radius-md);
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md);
   transition: opacity 0.2s ease;
 }
 
@@ -37,11 +83,12 @@
 
 .reviewCrop {
   flex: 0 0 auto;
-  width: 110px;
-  height: 110px;
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 1;
   padding: 0;
   border: none;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-md);
   background-color: var(--surface);
   background-size: cover;
   background-position: center;
@@ -67,24 +114,18 @@
 .reviewCardBody {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  align-items: center;
+  gap: var(--spacing-sm);
   min-width: 0;
-  flex: 1;
+  width: 100%;
 }
 
 .reviewMeta {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
   flex-wrap: wrap;
-}
-
-.reviewBadge {
-  background: var(--accent-blue);
-  color: white;
-  border-radius: var(--border-radius-sm);
-  padding: 2px 8px;
-  font-size: var(--font-size-sm);
 }
 
 .reviewMuted {
@@ -92,11 +133,26 @@
   font-size: var(--font-size-sm);
 }
 
+.reviewFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: auto;
+}
+
 .reviewGuesses {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
   flex-wrap: wrap;
+}
+
+/* Keep the "Select a pig" trigger sized to its content so it sits inline with
+   the round guess chips instead of stretching to fill the row. */
+.reviewGuesses .pigPickerTrigger {
+  width: auto;
 }
 
 .reviewGuess {
@@ -152,6 +208,7 @@
 .reviewActions {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
   flex-wrap: wrap;
   margin-top: var(--spacing-xxs);
@@ -160,6 +217,7 @@
 .reviewSave {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
   flex-wrap: wrap;
   margin-top: var(--spacing-xxs);
@@ -171,8 +229,23 @@
 }
 
 @media (max-width: 600px) {
-  .reviewCrop {
-    width: 84px;
-    height: 84px;
+  .reviewArrow {
+    width: 36px;
+    height: 36px;
+    font-size: var(--font-size-xl);
+  }
+
+  /* Sit the arrows just inside the card edges so they aren't clipped at the
+     viewport edge on narrow screens. */
+  .reviewArrowPrev {
+    left: var(--spacing-xs);
+  }
+
+  .reviewArrowNext {
+    right: var(--spacing-xs);
+  }
+
+  .reviewCard {
+    padding: var(--spacing-sm);
   }
 }

@@ -59,21 +59,35 @@ const ReviewPage = () => {
   const [busyId, setBusyId] = useState<number | null>(null);
   // Pending (not-yet-saved) pig selection per candidate id.
   const [selection, setSelection] = useState<Record<number, number>>({});
+  // Which card in the carousel is currently shown.
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const [cands, allPigs] = await Promise.all([
-          getPendingCandidates(),
-          getAllPigsIncludingPassed(),
-        ]);
-        setCandidates(cands);
-        setPigs(allPigs);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      // On first load a freshly-issued JWT can have an `iat` a fraction of a
+      // second ahead of Supabase's auth clock, which is rejected as "JWT
+      // issued at future". It self-heals within a second, so retry once
+      // before surfacing the error to the page.
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const [cands, allPigs] = await Promise.all([
+            getPendingCandidates(),
+            getAllPigsIncludingPassed(),
+          ]);
+          setCandidates(cands);
+          setPigs(allPigs);
+          break;
+        } catch (err: any) {
+          const isClockSkew = /issued at future/i.test(err?.message ?? '');
+          if (isClockSkew && attempt === 0) {
+            await new Promise((r) => setTimeout(r, 1500));
+            continue;
+          }
+          setError(err.message);
+          break;
+        }
       }
+      setLoading(false);
     };
     load();
   }, []);
@@ -87,8 +101,17 @@ const ReviewPage = () => {
   // Only living pigs are pickable in the fallback selector.
   const livingPigs = useMemo(() => pigs.filter((p) => !p.passed_away), [pigs]);
 
+  // Drop a resolved card. Keep the index pointing at whatever slides into its
+  // place (the next card), clamping so it never runs off the end.
   const remove = (id: number) =>
-    setCandidates((prev) => prev.filter((c) => c.id !== id));
+    setCandidates((prev) => {
+      const next = prev.filter((c) => c.id !== id);
+      setIndex((i) => Math.max(0, Math.min(i, next.length - 1)));
+      return next;
+    });
+
+  const goPrev = () => setIndex((i) => Math.max(0, i - 1));
+  const goNext = () => setIndex((i) => Math.min(candidates.length - 1, i + 1));
 
   const select = (candidateId: number, pigId: number) =>
     setSelection((prev) => ({ ...prev, [candidateId]: pigId }));
@@ -147,16 +170,27 @@ const ReviewPage = () => {
         {candidates.length === 0 ? (
           <p className="reviewAllCaughtUp">All caught up! 🎉</p>
         ) : (
-          <div className="reviewList">
-            {candidates.map((c) => {
-              const busy = busyId === c.id;
-              const guesses = (c.top_guesses ?? []).filter((g) =>
-                pigsById.has(g.pig_id)
-              );
-              const selectedPigId = selection[c.id];
-              const selectedPig =
-                selectedPigId != null ? pigsById.get(selectedPigId) : undefined;
-              return (
+          (() => {
+            const c = candidates[index];
+            const busy = busyId === c.id;
+            const guesses = (c.top_guesses ?? []).filter((g) =>
+              pigsById.has(g.pig_id)
+            );
+            const selectedPigId = selection[c.id];
+            const selectedPig =
+              selectedPigId != null ? pigsById.get(selectedPigId) : undefined;
+            return (
+              <div className="reviewCarousel">
+                <button
+                  type="button"
+                  className="reviewArrow reviewArrowPrev"
+                  aria-label="Previous candidate"
+                  disabled={index === 0}
+                  onClick={goPrev}
+                >
+                  ‹
+                </button>
+
                 <div
                   key={c.id}
                   className={`reviewCard ${busy ? 'reviewCardBusy' : ''}`}
@@ -164,51 +198,28 @@ const ReviewPage = () => {
                   <CropImage path={c.crop_path} />
 
                   <div className="reviewCardBody">
-                    <div className="reviewMeta">
-                      {c.camera && (
-                        <span className="reviewBadge">📷 {c.camera}</span>
-                      )}
-                      {c.created_at && (
-                        <span className="reviewMuted">
-                          {formatDistanceToNow(new Date(c.created_at), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                      )}
-                    </div>
-
-                    {guesses.length > 0 ? (
-                      <div className="reviewGuesses">
-                        <span className="reviewMuted">Best guesses:</span>
-                        {guesses.slice(0, 3).map((g) => {
-                          const pig = pigsById.get(g.pig_id)!;
-                          const active = selectedPigId === g.pig_id;
-                          return (
-                            <button
-                              key={g.pig_id}
-                              type="button"
-                              className={`reviewGuess ${active ? 'reviewGuessActive' : ''}`}
-                              disabled={busy}
-                              onClick={() => select(c.id, g.pig_id)}
-                            >
-                              <PigThumb
-                                imagePath={pig.image_paths?.[0] ?? null}
-                              />
-                              <span className="reviewGuessName">{pig.name}</span>
-                              <span className="reviewGuessSim">
-                                {Math.round(g.similarity * 100)}%
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="reviewMuted reviewNoGuess">
-                        No confident guess yet — pick the pig below.
-                      </p>
-                    )}
-
-                    <div className="reviewActions">
+                    <div className="reviewGuesses">
+                      {guesses.slice(0, 3).map((g) => {
+                        const pig = pigsById.get(g.pig_id)!;
+                        const active = selectedPigId === g.pig_id;
+                        return (
+                          <button
+                            key={g.pig_id}
+                            type="button"
+                            className={`reviewGuess ${active ? 'reviewGuessActive' : ''}`}
+                            disabled={busy}
+                            onClick={() => select(c.id, g.pig_id)}
+                          >
+                            <PigThumb
+                              imagePath={pig.image_paths?.[0] ?? null}
+                            />
+                            <span className="reviewGuessName">{pig.name}</span>
+                            <span className="reviewGuessSim">
+                              {Math.round(g.similarity * 100)}%
+                            </span>
+                          </button>
+                        );
+                      })}
                       <PigPicker
                         pigs={livingPigs}
                         selectedPigId={selectedPigId ?? ''}
@@ -218,19 +229,22 @@ const ReviewPage = () => {
                         theme="blue"
                         title="Someone else?"
                       />
+                    </div>
+
+                    <div className="reviewActions">
                       <Button
                         variant="default"
                         disabled={busy}
                         onClick={() => handleUnknown(c.id)}
                       >
-                        I don't know 🤷
+                        I don't know 🤷‍♀️
                       </Button>
                       <Button
                         variant="danger"
                         disabled={busy}
                         onClick={() => handleReject(c.id)}
                       >
-                        Not a pig 🙅
+                        Not a pig 🙅‍♀️
                       </Button>
                     </div>
 
@@ -255,11 +269,34 @@ const ReviewPage = () => {
                         </Button>
                       </div>
                     )}
+
+                    <div className="reviewFooter">
+                      {c.created_at && (
+                        <span className="reviewMuted">
+                          {formatDistanceToNow(new Date(c.created_at), {
+                            addSuffix: true,
+                          })}
+                        </span>
+                      )}
+                      <span className="reviewMuted">
+                        {index + 1} / {candidates.length}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                <button
+                  type="button"
+                  className="reviewArrow reviewArrowNext"
+                  aria-label="Next candidate"
+                  disabled={index >= candidates.length - 1}
+                  onClick={goNext}
+                >
+                  ›
+                </button>
+              </div>
+            );
+          })()
         )}
       </Panel>
     </div>
