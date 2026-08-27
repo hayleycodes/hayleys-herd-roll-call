@@ -35,7 +35,7 @@ DAYLIGHT_END_HOUR = _i("DAYLIGHT_END_HOUR", 20)     # exclusive
 # Smaller YOLO-World keeps the Fly RAM tier low; bump to m/x for more recall.
 DETECTOR_MODEL = os.environ.get("DETECTOR_MODEL", "yolov8s-worldv2.pt")
 DETECTOR_PROMPTS = ["guinea pig", "small animal", "rodent"]
-DETECTION_CONF = _f("DETECTION_CONF", 0.02)         # low; camera pigs score low
+DETECTION_CONF = _f("DETECTION_CONF", 0.15)         # raised from 0.02: merged two-pig blobs score low, so this favors clean single-pig boxes
 EMBED_MODEL = os.environ.get("EMBED_MODEL", "facebook/dinov2-small")  # 384-dim
 
 # --- Decision thresholds -----------------------------------------------------
