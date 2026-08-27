@@ -59,13 +59,46 @@ def _decide(guesses):
     return status, top["pig_id"], top["similarity"]
 
 
-def _process_crop(crop_bgr, camera, index):
+def _make_review_image(frame, box, context=0.6, dim=0.45, line=0.008):
+    """Build the image a human reviews: a wider view around the detected pig with
+    everything outside the detection box darkened and a box outline drawn, so it's
+    obvious which pig this candidate refers to when several share the frame.
+
+    `box` is the tight detection (x1, y1, x2, y2) in full-frame coords. This does
+    NOT touch the embedding crop — matching still uses the tight crop only.
+    """
+    h, w = frame.shape[:2]
+    x1, y1, x2, y2 = box
+    bw, bh = x2 - x1, y2 - y1
+
+    # Wider window around the detection, clamped to the frame.
+    px, py = int(context * bw), int(context * bh)
+    vx1, vy1 = max(0, x1 - px), max(0, y1 - py)
+    vx2, vy2 = min(w, x2 + px), min(h, y2 + py)
+    view = frame[vy1:vy2, vx1:vx2].copy()
+    if view.size == 0:
+        return None
+
+    # Darken the whole view, then paste the un-dimmed detection region back on top
+    # so the target pig stays bright and everything around it recedes.
+    dimmed = (view * dim).astype(view.dtype)
+    ix1, iy1 = x1 - vx1, y1 - vy1
+    ix2, iy2 = x2 - vx1, y2 - vy1
+    dimmed[iy1:iy2, ix1:ix2] = view[iy1:iy2, ix1:ix2]
+
+    # Outline the detection box (thickness scales with view size, min 2px).
+    thick = max(2, int(line * max(dimmed.shape[:2])))
+    cv2.rectangle(dimmed, (ix1, iy1), (ix2, iy2), (80, 200, 255), thick)
+    return dimmed
+
+
+def _process_crop(crop_bgr, review_bgr, camera, index):
     crop_rgb = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB)
     embedding = models.embed(crop_rgb)
     guesses = _aggregate(db.match_references(embedding))
     status, best_pig_id, confidence = _decide(guesses)
 
-    ok, buf = cv2.imencode(".jpg", crop_bgr)
+    ok, buf = cv2.imencode(".jpg", review_bgr)
     crop_path = db.upload_crop(buf.tobytes(), camera, index)
 
     db.create_candidate(
@@ -101,14 +134,21 @@ def run_once():
         print(f"[{camera}] {len(boxes)} detection(s)")
         h, w = frame.shape[:2]
         for i, (x1, y1, x2, y2) in enumerate(boxes):
+            # Tight crop (small pad) for the embedding — must stay just this pig
+            # so neighbours don't pollute the match.
             pad = int(0.05 * max(x2 - x1, y2 - y1))
-            x1, y1 = max(0, x1 - pad), max(0, y1 - pad)
-            x2, y2 = min(w, x2 + pad), min(h, y2 + pad)
-            crop = frame[y1:y2, x1:x2]
+            cx1, cy1 = max(0, x1 - pad), max(0, y1 - pad)
+            cx2, cy2 = min(w, x2 + pad), min(h, y2 + pad)
+            crop = frame[cy1:cy2, cx1:cx2]
             if crop.size == 0:
                 continue
+            # Wider review image with the target pig highlighted, so a human can
+            # tell which pig this candidate is when the frame has several.
+            review = _make_review_image(frame, (x1, y1, x2, y2))
+            if review is None or review.size == 0:
+                review = crop
             try:
-                status, pid, conf = _process_crop(crop, camera, i)
+                status, pid, conf = _process_crop(crop, review, camera, i)
                 print(f"[{camera}] crop {i}: {status} pig={pid} conf={conf}")
             except Exception as e:
                 print(f"[{camera}] crop {i} failed: {e}")
