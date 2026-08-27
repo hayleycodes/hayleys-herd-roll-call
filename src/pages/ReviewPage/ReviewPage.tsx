@@ -248,27 +248,31 @@ const ReviewPage = () => {
                       </Button>
                     </div>
 
-                    {selectedPig && (
-                      <div className="reviewSave">
-                        <span className="reviewSaveLabel">
-                          Save as <strong>{selectedPig.name}</strong>?
-                        </span>
-                        <Button
-                          variant="default"
-                          disabled={busy}
-                          onClick={() => clearSelection(c.id)}
-                        >
-                          Clear
-                        </Button>
-                        <Button
-                          variant="success"
-                          disabled={busy}
-                          onClick={() => handleConfirm(c.id, selectedPig.id)}
-                        >
-                          Save ✅
-                        </Button>
-                      </div>
-                    )}
+                    {/* Always reserve this row so selecting a pig doesn't
+                        resize the card and jump the layout. */}
+                    <div className="reviewSave">
+                      {selectedPig && (
+                        <>
+                          <span className="reviewSaveLabel">
+                            Save as <strong>{selectedPig.name}</strong>?
+                          </span>
+                          <Button
+                            variant="default"
+                            disabled={busy}
+                            onClick={() => clearSelection(c.id)}
+                          >
+                            Clear
+                          </Button>
+                          <Button
+                            variant="success"
+                            disabled={busy}
+                            onClick={() => handleConfirm(c.id, selectedPig.id)}
+                          >
+                            Save ✅
+                          </Button>
+                        </>
+                      )}
+                    </div>
 
                     <div className="reviewFooter">
                       {c.created_at && (

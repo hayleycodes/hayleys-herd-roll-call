@@ -221,6 +221,9 @@
   gap: var(--spacing-xs);
   flex-wrap: wrap;
   margin-top: var(--spacing-xxs);
+  /* Reserve the height of the (button-tall) save row even when empty, so
+     selecting a pig reveals the buttons without resizing the card. */
+  min-height: 40px;
 }
 
 .reviewSaveLabel {
