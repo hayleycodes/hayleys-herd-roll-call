@@ -24,6 +24,37 @@
 
 .reviewCarousel {
   position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Clips the sliding track to a single card's width. */
+.reviewViewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  /* Round the corners so the clipped track's edges match the card. */
+  border-radius: var(--border-radius-md);
+}
+
+/* Holds every card in a horizontal row and slides via translateX. */
+.reviewTrack {
+  display: flex;
+  align-items: flex-start;
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Each card occupies the full viewport width, so the track is N cards wide. */
+.reviewSlide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reviewTrack {
+    transition: none;
+  }
 }
 
 .reviewArrow {
@@ -219,11 +250,19 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
-  flex-wrap: wrap;
+  /* No flex-wrap: the row must never wrap to a second line, or its height
+     would change between the hidden and visible states and resize the card. */
+  flex-wrap: nowrap;
   margin-top: var(--spacing-xxs);
-  /* Reserve the height of the (button-tall) save row even when empty, so
-     selecting a pig reveals the buttons without resizing the card. */
-  min-height: 40px;
+  transition: opacity 0.2s ease;
+}
+
+/* Hidden state keeps the row fully laid out — same content, same height — so
+   the card's size is identical whether or not a pig is selected. Only
+   visibility/opacity change, so revealing it never reflows the card. */
+.reviewSaveHidden {
+  visibility: hidden;
+  opacity: 0;
 }
 
 .reviewSaveLabel {
