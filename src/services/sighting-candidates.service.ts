@@ -1,4 +1,5 @@
 import { supabase } from '../../utils/supabase-client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 // Cast to any since these tables aren't in the generated types yet.
 const candidatesTable = () => (supabase as any).from('sighting_candidates');
@@ -68,4 +69,48 @@ export const markCandidateUnknown = async (
     .update({ status: 'unknown' })
     .eq('id', candidateId);
   if (error) throw new Error(error.message);
+};
+
+// A live change to a candidate row, normalised for the review queue. The caller
+// only cares about the pending queue, so we classify each raw postgres event
+// into what it means for that list:
+//   - 'upsert': row is now pending and should be in the queue (new crop from
+//     the worker, or a row that moved back to pending).
+//   - 'remove': row is no longer pending and should leave the queue (resolved
+//     on another device, rejected, deleted, etc.).
+export type CandidateChange =
+  | { kind: 'upsert'; candidate: SightingCandidate }
+  | { kind: 'remove'; id: number };
+
+// Subscribe to live changes on the pending review queue. Fires `onChange` for
+// every insert/update/delete, pre-classified for the queue. Returns an
+// unsubscribe function. Realtime respects RLS, so the row payloads only arrive
+// for candidates the current session is allowed to read.
+export const subscribeToPendingCandidates = (
+  onChange: (change: CandidateChange) => void
+): (() => void) => {
+  const channel: RealtimeChannel = supabase
+    .channel('sighting_candidates_pending')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'sighting_candidates' },
+      (payload) => {
+        if (payload.eventType === 'DELETE') {
+          const id = (payload.old as { id?: number } | null)?.id;
+          if (id != null) onChange({ kind: 'remove', id });
+          return;
+        }
+        const row = payload.new as SightingCandidate;
+        if (row.status === 'pending') {
+          onChange({ kind: 'upsert', candidate: row });
+        } else {
+          onChange({ kind: 'remove', id: row.id });
+        }
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
