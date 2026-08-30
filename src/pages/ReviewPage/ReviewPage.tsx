@@ -53,7 +53,7 @@ const CropImage = ({ path }: { path: string }) => {
 
 interface ReviewCardProps {
   candidate: SightingCandidate;
-  position: number; // 1-based position for the "n / total" footer
+  position: number;
   total: number;
   busy: boolean;
   pigsById: Map<number, Pig>;
@@ -127,9 +127,6 @@ const ReviewCard = ({
           </Button>
         </div>
 
-        {/* Always render the full save row, toggling only its visibility, so
-            the reserved height exactly matches the real content — selecting a
-            pig reveals the buttons without nudging the card's size. */}
         <div
           className={`reviewSave ${selectedPig ? '' : 'reviewSaveHidden'}`}
           aria-hidden={!selectedPig}
@@ -175,11 +172,7 @@ const ReviewPage = () => {
     useReviewQueue();
   const [pigs, setPigs] = useState<Pig[]>([]);
   const [busyId, setBusyId] = useState<number | null>(null);
-  // Pending (not-yet-saved) pig selection per candidate id.
   const [selection, setSelection] = useState<Record<number, number>>({});
-  // Track the card being viewed by its candidate id, not a raw index, so live
-  // inserts/removals from Realtime don't yank the reviewer onto a different
-  // card. The numeric index is derived from this id each render.
   const [activeId, setActiveId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -194,25 +187,19 @@ const ReviewPage = () => {
     return m;
   }, [pigs]);
 
-  // Only living pigs are pickable in the fallback selector.
   const livingPigs = useMemo(() => pigs.filter((p) => !p.passed_away), [pigs]);
 
-  // Resolve the active id to a position in the current list. Falls back to the
-  // first card when the active one is gone (resolved/removed) or unset.
   const index = useMemo(() => {
     const i = candidates.findIndex((c) => c.id === activeId);
     return i === -1 ? 0 : i;
   }, [candidates, activeId]);
 
-  // Keep activeId anchored to whatever card the derived index lands on, so the
-  // "current card" and the id stay in sync after list changes.
   useEffect(() => {
     const current = candidates[index];
     if (current && current.id !== activeId) setActiveId(current.id);
     if (candidates.length === 0 && activeId !== null) setActiveId(null);
   }, [candidates, index, activeId]);
 
-  // Drop a resolved card, then advance to whatever card slides into its place.
   const remove = (id: number) => {
     const pos = candidates.findIndex((c) => c.id === id);
     const next = candidates.filter((c) => c.id !== id);
@@ -264,8 +251,6 @@ const ReviewPage = () => {
     }
   };
 
-  // Too hard to tell: permanently set the candidate aside as 'unknown' so it
-  // leaves the queue for good, without labelling it as a pig or rejecting it.
   const handleUnknown = async (candidateId: number) => {
     setBusyId(candidateId);
     try {
@@ -298,16 +283,17 @@ const ReviewPage = () => {
               ‹
             </button>
 
-            {/* Viewport clips the track; the track holds every card side by
-                side and slides horizontally so navigation glides rather than
-                swapping instantly. */}
             <div className="reviewViewport">
               <div
                 className="reviewTrack"
                 style={{ transform: `translateX(-${index * 100}%)` }}
               >
                 {candidates.map((c, i) => (
-                  <div className="reviewSlide" key={c.id} aria-hidden={i !== index}>
+                  <div
+                    className="reviewSlide"
+                    key={c.id}
+                    aria-hidden={i !== index}
+                  >
                     <ReviewCard
                       candidate={c}
                       position={i + 1}
