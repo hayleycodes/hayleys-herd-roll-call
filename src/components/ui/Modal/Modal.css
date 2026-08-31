@@ -13,7 +13,6 @@
   pointer-events: auto;
 }
 
-/* The actual bottom sheet */
 .modalSheet {
   position: fixed;
   left: 0;
@@ -27,22 +26,17 @@
   max-height: 70vh;
   overflow-y: auto;
 
-  /* Force hardware acceleration for smoother sliding */
   will-change: transform;
 
-  /* Ensure it starts fully off-screen */
   transform: translateY(100%);
 
-  /* Add a slight cubic-bezier for a more "app-like" feel */
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* slide up animation */
 .modalSheet.open {
   transform: translateY(0);
 }
 
-/* Centered, large modal that fills most of the page */
 .modalOverlayCenter {
   display: flex;
   align-items: center;
