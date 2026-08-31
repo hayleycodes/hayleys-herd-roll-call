@@ -35,10 +35,11 @@ const CropImage = ({ path }: { path: string }) => {
       <button
         type="button"
         className="reviewCrop"
-        style={{ backgroundImage: `url(${url})` }}
         aria-label="Enlarge detected pig photo"
         onClick={() => setEnlarged(true)}
-      />
+      >
+        <img src={url} alt="Detected pig" />
+      </button>
       <Modal
         isOpen={enlarged}
         onClose={() => setEnlarged(false)}

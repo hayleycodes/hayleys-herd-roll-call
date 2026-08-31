@@ -116,29 +116,59 @@
   flex: 0 0 auto;
   width: 100%;
   max-width: 380px;
-  aspect-ratio: 1;
   padding: 0;
   border: none;
   border-radius: var(--border-radius-md);
+  overflow: hidden;
+  line-height: 0;
   background-color: var(--surface);
-  background-size: cover;
-  background-position: center;
   cursor: zoom-in;
 }
 
+/* Show the whole review image (and its full detection box) at natural aspect,
+   rather than cropping it to a square. */
+.reviewCrop img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* On small screens let the crop fill the card edge-to-edge (cancelling the
+   card's padding) for a bigger, more zoomed-in view. */
+@media (max-width: 480px) {
+  .reviewCrop {
+    max-width: none;
+    width: calc(100% + 2 * var(--spacing-md));
+    margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) 0;
+    border-radius: calc(var(--border-radius-md) - 2px)
+      calc(var(--border-radius-md) - 2px) 0 0;
+  }
+}
+
+/* Enlarged crop: frame the image itself with just a white border, no padding,
+   and hug the (square) image rather than filling the 900px large-modal width. */
+.modalLarge:has(> .reviewCropFull) {
+  width: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 6px solid white;
+}
+
+/* Cover-crop like the thumbnail (keeps the pig/box filling the frame) but far
+   larger, so enlarging zooms into the box instead of showing more surroundings. */
 .reviewCropFull {
   display: block;
-  max-width: 100%;
-  max-height: 80vh;
-  margin: 0 auto;
-  border-radius: var(--border-radius-sm);
-  object-fit: contain;
+  width: min(88vw, 88vh);
+  height: min(88vw, 88vh);
+  object-fit: cover;
+  object-position: center;
 }
 
 .reviewCropPlaceholder {
   display: flex;
   align-items: center;
   justify-content: center;
+  aspect-ratio: 1;
   font-size: var(--font-size-2xl);
 }
 
