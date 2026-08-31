@@ -87,8 +87,9 @@ def _make_review_image(frame, box, context=0.6, dim=0.45, line=0.008):
     dimmed[iy1:iy2, ix1:ix2] = view[iy1:iy2, ix1:ix2]
 
     # Outline the detection box (thickness scales with view size, min 2px).
+    # Colour is BGR — (255, 190, 58) is the app's accent blue (#3abeff).
     thick = max(2, int(line * max(dimmed.shape[:2])))
-    cv2.rectangle(dimmed, (ix1, iy1), (ix2, iy2), (80, 200, 255), thick)
+    cv2.rectangle(dimmed, (ix1, iy1), (ix2, iy2), (255, 190, 58), thick)
     return dimmed
 
 
