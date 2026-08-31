@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import './Modal.css';
 
 type ModalProps = {
@@ -49,7 +50,10 @@ const Modal = ({
 
   if (!mounted) return null;
 
-  return (
+  // Portal to the body so the fixed-position overlay escapes any transformed
+  // ancestor (e.g. the review carousel's translateX track), which would
+  // otherwise become its containing block and trap it on-page.
+  return createPortal(
     <div
       className={`modalOverlay ${variant === 'large' ? 'modalOverlayCenter' : ''} ${active ? 'open' : ''}`}
       onClick={onClose}
@@ -70,7 +74,8 @@ const Modal = ({
         )}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
