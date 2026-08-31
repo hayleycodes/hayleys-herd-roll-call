@@ -21,7 +21,7 @@ import PigCard from '../PigList/PigCard/PigCard';
 import PigPicker from '../PigPicker/PigPicker';
 import FriendBars from '../FriendBars/FriendBars';
 import Panel from '../ui/Panel/Panel';
-import Modal from '../ui/Modal/Modal';
+import Dialog from '../ui/Dialog/Dialog';
 import Button from '../ui/Button/Button';
 import EmojiButton from '../ui/EmojiButton/EmojiButton';
 import './FamilyPanel.css';
@@ -261,21 +261,19 @@ const FamilyPanel = ({
         />
       )}
 
-      <Modal isOpen={!!deletingMember} onClose={() => setDeletingMember(null)}>
-        {deletingMember && (
-          <>
-            <p>
-              Remove {deletingMember.member.pig.name} as {deletingMember.label}?
-            </p>
-            <div className="confirmActions">
-              <Button onClick={() => setDeletingMember(null)}>Cancel</Button>
-              <Button onClick={handleDelete} disabled={deleting}>
-                {deleting ? 'Removing...' : 'Remove'}
-              </Button>
-            </div>
-          </>
-        )}
-      </Modal>
+      <Dialog
+        isOpen={!!deletingMember}
+        onClose={() => setDeletingMember(null)}
+        message={
+          deletingMember
+            ? `Remove ${deletingMember.member.pig.name} as ${deletingMember.label}?`
+            : ''
+        }
+        onConfirm={handleDelete}
+        confirmLabel="Remove"
+        busy={deleting}
+        busyLabel="Removing..."
+      />
     </Panel>
   );
 };

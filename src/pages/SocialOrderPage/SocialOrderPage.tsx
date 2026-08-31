@@ -19,7 +19,7 @@ import {
 import './SocialOrderPage.css';
 import PigPicker from '../../components/PigPicker/PigPicker';
 import Button from '../../components/ui/Button/Button';
-import Modal from '../../components/ui/Modal/Modal';
+import Dialog from '../../components/ui/Dialog/Dialog';
 import Panel from '../../components/ui/Panel/Panel';
 import SocialGraph from './SocialGraph';
 import AlgorithmInfo from './AlgorithmInfo';
@@ -379,22 +379,24 @@ const SocialOrderPage = () => {
       )}
       </Panel>
 
-      <Modal isOpen={!!deletingItem} onClose={() => setDeletingItem(null)}>
-        {deletingItem && (
-          <>
-            <p>
+      <Dialog
+        isOpen={!!deletingItem}
+        onClose={() => setDeletingItem(null)}
+        message={
+          deletingItem ? (
+            <>
               Remove {deletingItem.dominant_pig.name} →{' '}
               {deletingItem.submissive_pig.name}?
-            </p>
-            <div className="confirmActions">
-              <Button onClick={() => setDeletingItem(null)}>Cancel</Button>
-              <Button onClick={handleDelete} disabled={deleting}>
-                {deleting ? 'Removing...' : 'Remove'}
-              </Button>
-            </div>
-          </>
-        )}
-      </Modal>
+            </>
+          ) : (
+            ''
+          )
+        }
+        onConfirm={handleDelete}
+        confirmLabel="Remove"
+        busy={deleting}
+        busyLabel="Removing..."
+      />
     </div>
   );
 };

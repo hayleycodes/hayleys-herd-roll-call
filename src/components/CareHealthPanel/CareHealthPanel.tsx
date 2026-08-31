@@ -4,7 +4,7 @@ import './CareHealthPanel.css';
 import Panel from '../ui/Panel/Panel';
 import Button from '../ui/Button/Button';
 import EmojiButton from '../ui/EmojiButton/EmojiButton';
-import Modal from '../ui/Modal/Modal';
+import Dialog from '../ui/Dialog/Dialog';
 import CareTaskCard from '../CareTaskCard/CareTaskCard';
 import HealthForm from '../HealthForm/HealthForm';
 import {
@@ -434,38 +434,29 @@ const CareHealthPanel = ({
         )}
       </div>
 
-      <Modal
+      <Dialog
         isOpen={!!confirmSkipTask}
         onClose={() => setConfirmSkipTask(null)}
-      >
-        <p>
-          Skip {pig.name}'s{' '}
-          {getTaskLabel(confirmSkipTask?.task_type ?? '').toLowerCase()}?
-        </p>
-        <div className="confirmActions">
-          <Button variant="danger" onClick={() => setConfirmSkipTask(null)}>
-            Cancel
-          </Button>
-          <Button variant="success" onClick={handleConfirmSkip}>
-            Confirm
-          </Button>
-        </div>
-      </Modal>
+        message={
+          <>
+            Skip {pig.name}'s{' '}
+            {getTaskLabel(confirmSkipTask?.task_type ?? '').toLowerCase()}?
+          </>
+        }
+        onConfirm={handleConfirmSkip}
+        cancelVariant="danger"
+        confirmVariant="success"
+      />
 
-      <Modal
+      <Dialog
         isOpen={confirmDeleteId !== null}
         onClose={() => setConfirmDeleteId(null)}
-      >
-        <p>Delete this health record?</p>
-        <div className="confirmActions">
-          <Button variant="danger" onClick={() => setConfirmDeleteId(null)}>
-            Cancel
-          </Button>
-          <Button variant="success" onClick={handleConfirmDelete}>
-            Delete
-          </Button>
-        </div>
-      </Modal>
+        message="Delete this health record?"
+        onConfirm={handleConfirmDelete}
+        confirmLabel="Delete"
+        cancelVariant="danger"
+        confirmVariant="success"
+      />
     </Panel>
   );
 };

@@ -27,7 +27,7 @@ import type {
   SightingEvent,
 } from '../../services/pigs.types';
 import Button from '../../components/ui/Button/Button';
-import Modal from '../../components/ui/Modal/Modal';
+import Dialog from '../../components/ui/Dialog/Dialog';
 import Loading from '../../components/ui/Loading/Loading';
 import PigPicker, { PigThumb } from '../../components/PigPicker/PigPicker';
 import { FRIEND_CATEGORIES } from '../../constants/friend-categories';
@@ -816,15 +816,14 @@ const MapPage = () => {
         </div>
       </div>
 
-      <Modal isOpen={confirmReset} onClose={() => setConfirmReset(false)}>
-        <p>Clear all pigs from the map?</p>
-        <div className="confirmActions">
-          <Button onClick={() => setConfirmReset(false)}>Cancel</Button>
-          <Button variant="danger" onClick={handleReset}>
-            Reset
-          </Button>
-        </div>
-      </Modal>
+      <Dialog
+        isOpen={confirmReset}
+        onClose={() => setConfirmReset(false)}
+        message="Clear all pigs from the map?"
+        onConfirm={handleReset}
+        confirmLabel="Reset"
+        confirmVariant="danger"
+      />
     </div>
   );
 };

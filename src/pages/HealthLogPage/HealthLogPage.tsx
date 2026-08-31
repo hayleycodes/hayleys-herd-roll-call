@@ -31,7 +31,7 @@ import {
   createPigWeight,
 } from '../../services/pig-weights.service';
 import Loading from '../../components/ui/Loading/Loading';
-import Modal from '../../components/ui/Modal/Modal';
+import Dialog from '../../components/ui/Dialog/Dialog';
 import Panel from '../../components/ui/Panel/Panel';
 import HealthForm from '../../components/HealthForm/HealthForm';
 import CareTaskCard from '../../components/CareTaskCard/CareTaskCard';
@@ -529,60 +529,47 @@ const HealthLogPage = () => {
               </>
             )}
 
-            <Modal isOpen={!!confirmTask} onClose={() => setConfirmTask(null)}>
-              <p>
-                Mark {confirmTask?.pigs?.name}'s{' '}
-                {getTaskLabel(confirmTask?.task_type ?? '').toLowerCase()} as
-                done?
-              </p>
-              <div className="confirmActions">
-                <Button variant="danger" onClick={() => setConfirmTask(null)}>
-                  Cancel
-                </Button>
-                <Button variant="success" onClick={handleConfirmDone}>
-                  Confirm
-                </Button>
-              </div>
-            </Modal>
+            <Dialog
+              isOpen={!!confirmTask}
+              onClose={() => setConfirmTask(null)}
+              message={
+                <>
+                  Mark {confirmTask?.pigs?.name}'s{' '}
+                  {getTaskLabel(confirmTask?.task_type ?? '').toLowerCase()} as
+                  done?
+                </>
+              }
+              onConfirm={handleConfirmDone}
+              cancelVariant="danger"
+              confirmVariant="success"
+            />
 
-            <Modal
+            <Dialog
               isOpen={!!confirmSkipTask}
               onClose={() => setConfirmSkipTask(null)}
-            >
-              <p>
-                Skip {confirmSkipTask?.pigs?.name}'s{' '}
-                {getTaskLabel(confirmSkipTask?.task_type ?? '').toLowerCase()}?
-              </p>
-              <div className="confirmActions">
-                <Button
-                  variant="danger"
-                  onClick={() => setConfirmSkipTask(null)}
-                >
-                  Cancel
-                </Button>
-                <Button variant="success" onClick={handleConfirmSkip}>
-                  Confirm
-                </Button>
-              </div>
-            </Modal>
+              message={
+                <>
+                  Skip {confirmSkipTask?.pigs?.name}'s{' '}
+                  {getTaskLabel(confirmSkipTask?.task_type ?? '').toLowerCase()}?
+                </>
+              }
+              onConfirm={handleConfirmSkip}
+              cancelVariant="danger"
+              confirmVariant="success"
+            />
           </div>
         )}
       </Panel>
 
-      <Modal
+      <Dialog
         isOpen={confirmDeleteId !== null}
         onClose={() => setConfirmDeleteId(null)}
-      >
-        <p>Delete this health record?</p>
-        <div className="confirmActions">
-          <Button variant="danger" onClick={() => setConfirmDeleteId(null)}>
-            Cancel
-          </Button>
-          <Button variant="success" onClick={handleDelete}>
-            Delete
-          </Button>
-        </div>
-      </Modal>
+        message="Delete this health record?"
+        onConfirm={handleDelete}
+        confirmLabel="Delete"
+        cancelVariant="danger"
+        confirmVariant="success"
+      />
     </div>
   );
 };

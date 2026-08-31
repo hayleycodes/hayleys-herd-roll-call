@@ -3,6 +3,7 @@ import PigCard from '../../components/PigList/PigCard/PigCard';
 import Loading from '../../components/ui/Loading/Loading';
 import Button from '../../components/ui/Button/Button';
 import Modal from '../../components/ui/Modal/Modal';
+import Dialog from '../../components/ui/Dialog/Dialog';
 import Panel from '../../components/ui/Panel/Panel';
 import FriendBars from '../../components/FriendBars/FriendBars';
 import { PigThumb } from '../../components/PigPicker/PigPicker';
@@ -392,25 +393,27 @@ const FriendsPage = () => {
         )}
       </Modal>
 
-      <Modal isOpen={!!deletingItem} onClose={() => setDeletingItem(null)}>
-        {deletingItem && (
-          <>
-            <p>
+      <Dialog
+        isOpen={!!deletingItem}
+        onClose={() => setDeletingItem(null)}
+        message={
+          deletingItem ? (
+            <>
               Remove this{' '}
               {deletingItem.category
                 ? friendCategoryLabel(deletingItem.category)
                 : 'sighting'}{' '}
               event ({deletingItem.pigIds.length} pigs)?
-            </p>
-            <div className="confirmActions">
-              <Button onClick={() => setDeletingItem(null)}>Cancel</Button>
-              <Button onClick={handleDelete} disabled={deleting}>
-                {deleting ? 'Removing...' : 'Remove'}
-              </Button>
-            </div>
-          </>
-        )}
-      </Modal>
+            </>
+          ) : (
+            ''
+          )
+        }
+        onConfirm={handleDelete}
+        confirmLabel="Remove"
+        busy={deleting}
+        busyLabel="Removing..."
+      />
     </div>
   );
 };

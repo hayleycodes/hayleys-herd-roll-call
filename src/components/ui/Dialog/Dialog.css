@@ -1,0 +1,12 @@
+/* Cancel/confirm button row inside a Dialog */
+.dialogActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.dialogActions button {
+  padding: var(--spacing-sm);
+  font-size: 24px;
+}
