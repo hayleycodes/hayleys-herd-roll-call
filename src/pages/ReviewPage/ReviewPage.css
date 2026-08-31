@@ -135,7 +135,7 @@
 
 /* On small screens let the crop fill the card edge-to-edge (cancelling the
    card's padding) for a bigger, more zoomed-in view. */
-@media (max-width: 480px) {
+@media (max-width: 520px) {
   .reviewCrop {
     max-width: none;
     width: calc(100% + 2 * var(--spacing-md));
