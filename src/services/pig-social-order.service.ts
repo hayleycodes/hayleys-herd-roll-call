@@ -1,19 +1,20 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
+import { fetchAllRows } from './fetch-all';
 import type { SocialOrderItem } from './pigs.types';
 import { getAllPigs } from './pigs.service';
 import { computeGraphRanking } from './social-order-graph';
 
 export const getSocialOrder = async (): Promise<SocialOrderItem[]> => {
-  const { data, error } = await supabase
-    .from('social_order')
-    .select(
-      '*, dominant_pig:pigs!social_order_dominant_pig_id_fkey(*), submissive_pig:pigs!social_order_submissive_pig_id_fkey(*)'
-    )
-    .order('created_at', { ascending: false });
-
-  if (error) throw new Error(error.message);
-
-  return data ?? [];
+  // Feeds the graph ranking — page past PostgREST's 1000-row cap.
+  return fetchAllRows<SocialOrderItem>((from, to) =>
+    supabase
+      .from('social_order')
+      .select(
+        '*, dominant_pig:pigs!social_order_dominant_pig_id_fkey(*), submissive_pig:pigs!social_order_submissive_pig_id_fkey(*)'
+      )
+      .order('created_at', { ascending: false })
+      .range(from, to)
+  );
 };
 
 export const getSocialOrderForPig = async (

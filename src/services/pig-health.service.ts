@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 import { markTaskDone } from './recurring-tasks.service';
 import type { HealthRecord } from './pigs.types';
 
@@ -33,7 +33,9 @@ export const getPigHealth = async (pigId: number) => {
   return data ?? [];
 };
 
-export const createPigHealth = async (healthRecord: HealthRecord) => {
+export const createPigHealth = async (
+  healthRecord: Omit<HealthRecord, 'id' | 'created_at'>
+) => {
   const { data, error } = await supabase
     .from('health_data')
     .insert({
@@ -48,12 +50,24 @@ export const createPigHealth = async (healthRecord: HealthRecord) => {
 
   if (error) throw new Error(error.message);
 
-  // Sync recurring task last_completed_at
+  // Sync recurring task last_completed_at. The health record is already saved,
+  // so a task-sync failure must NOT propagate — otherwise the caller retries
+  // and creates a duplicate record. Run them in parallel and swallow failures
+  // (logged), leaving the affected task to show as overdue until next sync.
+  const syncs: Promise<void>[] = [];
   if (healthRecord.nail_clip)
-    await markTaskDone(healthRecord.pig_id, 'nail_clip');
-  if (healthRecord.haircut) await markTaskDone(healthRecord.pig_id, 'haircut');
+    syncs.push(markTaskDone(healthRecord.pig_id, 'nail_clip'));
+  if (healthRecord.haircut)
+    syncs.push(markTaskDone(healthRecord.pig_id, 'haircut'));
   if (healthRecord.parasite_treatment)
-    await markTaskDone(healthRecord.pig_id, 'parasite_treatment');
+    syncs.push(markTaskDone(healthRecord.pig_id, 'parasite_treatment'));
+
+  const results = await Promise.allSettled(syncs);
+  for (const result of results) {
+    if (result.status === 'rejected') {
+      console.error('Failed to sync recurring task after health record:', result.reason);
+    }
+  }
 
   return data;
 };

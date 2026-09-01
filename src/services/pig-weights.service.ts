@@ -1,4 +1,5 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
+import { fetchAllRows } from './fetch-all';
 import type { WeightRecord } from './pigs.types';
 
 export const getPigWeights = async (pigId: number): Promise<WeightRecord[]> => {
@@ -14,26 +15,29 @@ export const getPigWeights = async (pigId: number): Promise<WeightRecord[]> => {
 };
 
 export const getAllWeights = async (): Promise<WeightRecord[]> => {
-  const { data, error } = await supabase
-    .from('weights')
-    .select('*')
-    .order('recorded_at', { ascending: false });
-
-  if (error) throw new Error(error.message);
-
-  return (data as WeightRecord[]) ?? [];
+  // Page past PostgREST's 1000-row cap so the full history is returned.
+  return fetchAllRows<WeightRecord>((from, to) =>
+    supabase
+      .from('weights')
+      .select('*')
+      .order('recorded_at', { ascending: false })
+      .range(from, to)
+  );
 };
 
 export const getLatestWeights = async (): Promise<WeightRecord[]> => {
-  const { data, error } = await supabase
-    .from('weights')
-    .select('*')
-    .order('recorded_at', { ascending: false });
-
-  if (error) throw new Error(error.message);
+  // Must see every row, or a pig whose latest weight sits past the 1000-row cap
+  // would be dropped from the map entirely.
+  const rows = await fetchAllRows<WeightRecord>((from, to) =>
+    supabase
+      .from('weights')
+      .select('*')
+      .order('recorded_at', { ascending: false })
+      .range(from, to)
+  );
 
   const latest = new Map<number, WeightRecord>();
-  for (const record of (data as WeightRecord[]) ?? []) {
+  for (const record of rows) {
     if (!latest.has(record.pig_id)) {
       latest.set(record.pig_id, record);
     }

@@ -1,15 +1,19 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
+import { fetchAllRows } from './fetch-all';
 import type { FriendCategory, FriendEvent } from './pigs.types';
 
 export const getFriendEvents = async (): Promise<FriendEvent[]> => {
-  const { data, error } = await supabase
-    .from('friend_events')
-    .select('*')
-    .order('created_at', { ascending: false });
+  // Feeds friendship computations — page past PostgREST's 1000-row cap.
+  const rows = await fetchAllRows((from, to) =>
+    supabase
+      .from('friend_events')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(from, to)
+  );
 
-  if (error) throw new Error(error.message);
   // bigint[] comes back as strings from PostgREST — coerce to numbers.
-  return ((data ?? []) as any[]).map((r) => ({
+  return rows.map((r) => ({
     ...r,
     pig_ids: (r.pig_ids ?? []).map(Number),
   })) as FriendEvent[];

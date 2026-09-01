@@ -1,5 +1,5 @@
 import { differenceInDays } from 'date-fns';
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 import type { PigRecurringTask } from './pigs.types';
 
 // --- Per-pig recurring tasks ---
@@ -158,18 +158,22 @@ export const markTaskDone = async (
   taskType: string
 ): Promise<void> => {
   // Update recurring tasks
-  await supabase
+  const { error: updateError } = await supabase
     .from('pig_recurring_tasks')
     .update({ last_completed_at: new Date().toISOString() })
     .eq('pig_id', pigId)
     .eq('task_type', taskType)
     .not('frequency_days_override', 'is', null);
 
+  if (updateError) throw new Error(updateError.message);
+
   // Delete matching one-off tasks (they're done)
-  await supabase
+  const { error: deleteError } = await supabase
     .from('pig_recurring_tasks')
     .delete()
     .eq('pig_id', pigId)
     .eq('task_type', taskType)
     .is('frequency_days_override', null);
+
+  if (deleteError) throw new Error(deleteError.message);
 };

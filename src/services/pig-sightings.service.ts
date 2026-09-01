@@ -1,18 +1,22 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
+import { fetchAllRows } from './fetch-all';
 import type { SightingEvent } from './pigs.types';
 
-// Cast to any since this table isn't in the generated types yet
-const sightingEventsTable = () => (supabase as any).from('sighting_events');
+const sightingEventsTable = () => supabase.from('sighting_events');
 
 export const getSightingEvents = async (): Promise<SightingEvent[]> => {
-  const { data, error } = await sightingEventsTable()
-    .select('*')
-    .order('observed_at', { ascending: false, nullsFirst: false })
-    .order('created_at', { ascending: false });
+  // Feeds friendship/proximity computations, so it must not truncate at
+  // PostgREST's 1000-row cap — page through all rows.
+  const rows = await fetchAllRows((from, to) =>
+    sightingEventsTable()
+      .select('*')
+      .order('observed_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .range(from, to)
+  );
 
-  if (error) throw new Error(error.message);
   // bigint[] comes back as strings from PostgREST — coerce to numbers.
-  return ((data ?? []) as any[]).map((r) => ({
+  return rows.map((r) => ({
     ...r,
     pig_ids: (r.pig_ids ?? []).map(Number),
   })) as SightingEvent[];

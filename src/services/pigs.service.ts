@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 import type { Pig } from './pigs.types';
 
 export const getAllPigs = async (): Promise<Pig[]> => {
@@ -65,6 +65,11 @@ export const createPigSighting = async (id: number) => {
     .select();
 
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error(
+      'Update failed — check that an UPDATE policy exists for pigs in Supabase'
+    );
+  }
 
   return data;
 };
@@ -80,6 +85,11 @@ export const setPigLastSighted = async (
     .select();
 
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error(
+      'Update failed — check that an UPDATE policy exists for pigs in Supabase'
+    );
+  }
 
   return data;
 };
@@ -92,6 +102,11 @@ export const setPigPinned = async (id: number, pinned: boolean) => {
     .select();
 
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error(
+      'Update failed — check that an UPDATE policy exists for pigs in Supabase'
+    );
+  }
 
   return data;
 };
