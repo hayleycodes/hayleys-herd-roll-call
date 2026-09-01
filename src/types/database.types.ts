@@ -551,6 +551,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      confirm_sighting_candidate: {
+        Args: { candidate_id: number; pig_id: number }
+        Returns: undefined
+      }
       match_pig_references: {
         Args: { match_count?: number; query_embedding: string }
         Returns: {

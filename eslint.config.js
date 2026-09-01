@@ -34,5 +34,16 @@ export default defineConfig([
                 version: 'detect',
             },
         },
+        rules: {
+            // The codebase deliberately uses `type` aliases (including the
+            // generated database.types.ts, which can't be hand-edited), so the
+            // stylistic `interface`/`Record` preferences from
+            // tseslint.configs.stylistic don't apply here.
+            '@typescript-eslint/consistent-type-definitions': 'off',
+            '@typescript-eslint/consistent-indexed-object-style': 'off',
+            // The UI copy is casual and apostrophe-heavy; escaping every one as
+            // &apos; hurts readability more than it helps.
+            'react/no-unescaped-entities': 'off',
+        },
     },
 ]);
