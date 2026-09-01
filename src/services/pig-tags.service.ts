@@ -1,10 +1,9 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 
 export type TagDefinition = { tag: string; label: string };
 
-// Cast to any since these aren't in the generated types yet
-const pigTagsTable = () => (supabase as any).from('pig_tags');
-const tagDefinitionsTable = () => (supabase as any).from('tag_definitions');
+const pigTagsTable = () => supabase.from('pig_tags');
+const tagDefinitionsTable = () => supabase.from('tag_definitions');
 
 export const getTagDefinitions = async (): Promise<TagDefinition[]> => {
   const { data, error } = await tagDefinitionsTable()
@@ -27,7 +26,7 @@ export const getPigTags = async (pigId: number): Promise<string[]> => {
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []).map((r: any) => r.tag);
+  return (data ?? []).map((r) => r.tag);
 };
 
 export const addPigTag = async (pigId: number, tag: string) => {
@@ -51,7 +50,8 @@ export const getAllPigTags = async (): Promise<Map<number, string[]>> => {
   if (error) throw new Error(error.message);
 
   const map = new Map<number, string[]>();
-  for (const row of (data ?? []) as any[]) {
+  for (const row of data ?? []) {
+    if (row.pig_id == null) continue;
     const existing = map.get(row.pig_id) ?? [];
     existing.push(row.tag);
     map.set(row.pig_id, existing);

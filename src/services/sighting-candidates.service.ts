@@ -1,8 +1,26 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { Database } from '../types/database.types';
 
-// Cast to any since these tables aren't in the generated types yet.
-const candidatesTable = () => (supabase as any).from('sighting_candidates');
+const candidatesTable = () => supabase.from('sighting_candidates');
+
+type CandidateRow = Database['public']['Tables']['sighting_candidates']['Row'];
+
+// The DB row types `status` as a plain string and `top_guesses` as opaque Json;
+// narrow them into the SightingCandidate shape the review queue relies on.
+const mapCandidateRow = (
+  row: Omit<CandidateRow, 'embedding'>
+): SightingCandidate => ({
+  id: row.id,
+  crop_path: row.crop_path,
+  best_pig_id: row.best_pig_id,
+  top_guesses: row.top_guesses as CandidateGuess[] | null,
+  confidence: row.confidence,
+  status: row.status as SightingCandidate['status'],
+  camera: row.camera,
+  observed_at: row.observed_at,
+  created_at: row.created_at,
+});
 
 // One ranked guess from the worker: which pig, how similar, how many references
 // that pig has in the gallery so far.
@@ -34,7 +52,7 @@ export const getPendingCandidates = async (): Promise<SightingCandidate[]> => {
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data ?? []) as SightingCandidate[];
+  return (data ?? []).map(mapCandidateRow);
 };
 
 // Confirm which pig a candidate is: promotes its embedding into the gallery,
@@ -43,7 +61,7 @@ export const confirmCandidate = async (
   candidateId: number,
   pigId: number
 ): Promise<void> => {
-  const { error } = await (supabase as any).rpc('confirm_sighting_candidate', {
+  const { error } = await supabase.rpc('confirm_sighting_candidate', {
     candidate_id: candidateId,
     pig_id: pigId,
   });
@@ -100,11 +118,11 @@ export const subscribeToPendingCandidates = (
           if (id != null) onChange({ kind: 'remove', id });
           return;
         }
-        const row = payload.new as SightingCandidate;
-        if (row.status === 'pending') {
-          onChange({ kind: 'upsert', candidate: row });
+        const candidate = mapCandidateRow(payload.new as CandidateRow);
+        if (candidate.status === 'pending') {
+          onChange({ kind: 'upsert', candidate });
         } else {
-          onChange({ kind: 'remove', id: row.id });
+          onChange({ kind: 'remove', id: candidate.id });
         }
       }
     )

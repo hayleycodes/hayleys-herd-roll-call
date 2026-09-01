@@ -1,8 +1,7 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 import type { MoodRecord } from './pigs.types';
 
-// Cast to any since pig_moods isn't in the generated types yet
-const pigMoodsTable = () => (supabase as any).from('pig_moods');
+const pigMoodsTable = () => supabase.from('pig_moods');
 
 export const MOOD_OPTIONS = [
   { mood: 'sleepy', label: 'Sleepy 😴' },
@@ -35,7 +34,7 @@ export const getPigMoods = async (pigId: number): Promise<MoodRecord[]> => {
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []).map((r) => ({ ...r, created_at: r.created_at ?? '' }));
 };
 
 export const addPigMood = async (
