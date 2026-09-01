@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { supabase } from '../utils/supabase-client';
+import { lazy, Suspense, useRef, useState } from 'react';
+import { supabase } from './lib/supabase-client';
 import { useAuth } from './hooks/useAuth';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
@@ -14,17 +14,18 @@ import { FEATURE_MOOD } from './config/features';
 
 import LoginPage from './pages/LoginPage/LoginPage';
 import HomePage from './pages/HomePage/HomePage';
-import PigPage from './pages/PigPage/PigPage';
 import SocialOrderPage from './pages/SocialOrderPage/SocialOrderPage.tsx';
-import FamilyTreePage from './pages/FamilyTreePage/FamilyTreePage.tsx';
 import HealthLogPage from './pages/HealthLogPage/HealthLogPage.tsx';
-import WeightsPage from './pages/WeightsPage/WeightsPage.tsx';
-import TagsPage from './pages/TagsPage/TagsPage.tsx';
 import MoodPage from './pages/MoodPage/MoodPage.tsx';
-import MapPage from './pages/MapPage/MapPage.tsx';
 import FriendsPage from './pages/FriendsPage/FriendsPage.tsx';
 import ReviewPage from './pages/ReviewPage/ReviewPage.tsx';
 import Loading from './components/ui/Loading/Loading.tsx';
+
+// Heavy single-route deps (emoji-picker-react, reactflow, konva) are
+// code-split so they load only when their route is visited.
+const PigPage = lazy(() => import('./pages/PigPage/PigPage.tsx'));
+const FamilyTreePage = lazy(() => import('./pages/FamilyTreePage/FamilyTreePage.tsx'));
+const MapPage = lazy(() => import('./pages/MapPage/MapPage.tsx'));
 
 function App() {
   const { session, loading } = useAuth();
@@ -92,6 +93,7 @@ function App() {
       </header>
 
       <AnimatePresence mode="wait">
+        <Suspense fallback={<Loading />}>
         <Routes location={location} key={location.pathname}>
           <Route
             path="/"
@@ -134,22 +136,6 @@ function App() {
             }
           />
           <Route
-            path="/weights"
-            element={
-              <PageTransition>
-                <WeightsPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/tags"
-            element={
-              <PageTransition>
-                <TagsPage />
-              </PageTransition>
-            }
-          />
-          <Route
             path="/map"
             element={
               <PageTransition>
@@ -184,6 +170,7 @@ function App() {
             />
           )}
         </Routes>
+        </Suspense>
       </AnimatePresence>
       <RollcallOverlay
         isOpen={isRollcallOpen}

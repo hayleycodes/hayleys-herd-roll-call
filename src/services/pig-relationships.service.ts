@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 import type { Pig, RelationshipType } from './pigs.types';
 
 export type PigFamilyMember = {

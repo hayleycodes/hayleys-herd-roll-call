@@ -1,5 +1,5 @@
 import imageCompression from 'browser-image-compression';
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 
 export const compressImage = async (file: File): Promise<File> => {
   const options = {

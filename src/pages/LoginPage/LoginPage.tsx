@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../../../utils/supabase-client';
+import { supabase } from '../../lib/supabase-client';
 import './LoginPage.css';
 import Input from '../../components/ui/Input/Input';
 import Button from '../../components/ui/Button/Button';

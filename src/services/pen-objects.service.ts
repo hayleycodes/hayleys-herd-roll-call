@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabase-client';
+import { supabase } from '../lib/supabase-client';
 import type { Tables, TablesInsert } from '../types/database.types';
 import type { PenObject } from '../pages/MapPage/objects';
 
