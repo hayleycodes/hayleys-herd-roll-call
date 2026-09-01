@@ -35,6 +35,7 @@ import {
 } from '../../services/friendship';
 import { getFriendshipSummary } from '../../services/friendship-summary.service';
 import './FriendsPage.css';
+import { getErrorMessage } from '../../lib/get-error-message';
 
 const FriendsPage = () => {
   const [friendEvents, setFriendEvents] = useState<FriendEvent[]>([]);
@@ -111,8 +112,8 @@ const FriendsPage = () => {
       setFriendEvents(friendData);
       setSightingEvents(sightingData);
       setAllPigs(pigsData);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

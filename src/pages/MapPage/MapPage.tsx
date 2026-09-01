@@ -9,6 +9,7 @@ import {
   Group,
   Text,
 } from 'react-konva';
+import type Konva from 'konva';
 import { penObjects, type PenObject } from './objects';
 import {
   getPenObjects,
@@ -79,6 +80,17 @@ const DEFAULT_BEHAVIOUR: Record<string, FriendCategory> = {
 };
 
 const snap = (value: number) => Math.round(value / CELL_SIZE);
+
+const sightingTs = (s: SightingEvent) => s.observed_at ?? s.created_at ?? '';
+
+// Grid lines depend only on constants, so build them once at module load.
+const GRID_LINES: number[][] = [];
+for (let i = 0; i <= GRID_COLS; i++) {
+  GRID_LINES.push([i * CELL_SIZE, 0, i * CELL_SIZE, GRID_HEIGHT]);
+}
+for (let j = 0; j <= GRID_ROWS; j++) {
+  GRID_LINES.push([0, j * CELL_SIZE, GRID_WIDTH, j * CELL_SIZE]);
+}
 
 // Whether a cell falls inside one of the greyed-out, non-markable zones.
 const isDisabledCell = (col: number, row: number): boolean => {
@@ -280,8 +292,8 @@ const MapPage = () => {
     }
   };
 
-  const handleCellClick = (stage: any, houseId?: string) => {
-    const p = stage.getPointerPosition();
+  const handleCellClick = (stage: Konva.Stage | null, houseId?: string) => {
+    const p = stage?.getPointerPosition();
     if (!p) return;
     const col = Math.floor(p.x / CELL_SIZE);
     const row = Math.floor(p.y / CELL_SIZE);
@@ -381,27 +393,22 @@ const MapPage = () => {
     }
   };
 
-  // Build the grid lines once.
-  const gridLines: number[][] = [];
-  for (let i = 0; i <= GRID_COLS; i++) {
-    gridLines.push([i * CELL_SIZE, 0, i * CELL_SIZE, GRID_HEIGHT]);
-  }
-  for (let j = 0; j <= GRID_ROWS; j++) {
-    gridLines.push([0, j * CELL_SIZE, GRID_WIDTH, j * CELL_SIZE]);
-  }
+  const gridLines = GRID_LINES;
 
   // Each pig's most recent sighting, grouped by cell, so we can show their
-  // photo where they were last seen.
+  // photo where they were last seen. The memo is correct and pure; the React
+  // Compiler bails on preserving it (this build doesn't run the compiler
+  // anyway), so the preserve-manual-memoization rule is a false positive here.
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const sightingCells = useMemo(() => {
     const pigById = new Map(allPigs.map((p) => [Number(p.id), p]));
-    const tsOf = (s: SightingEvent) => s.observed_at ?? s.created_at ?? '';
 
     // Latest event seen for each pig.
     const latest = new Map<number, SightingEvent>();
     for (const s of sightings) {
       for (const pigId of s.pig_ids) {
         const current = latest.get(pigId);
-        if (!current || tsOf(s) > tsOf(current)) latest.set(pigId, s);
+        if (!current || sightingTs(s) > sightingTs(current)) latest.set(pigId, s);
       }
     }
 
@@ -740,7 +747,9 @@ const MapPage = () => {
               <PigPicker
                 pigs={mainPenPigs}
                 selectedPigId=""
-                onSelect={() => {}}
+                onSelect={() => {
+                  /* multiSelect mode uses onToggle instead */
+                }}
                 multiSelect
                 selectedPigIds={[...selectedPigs]}
                 onToggle={togglePig}

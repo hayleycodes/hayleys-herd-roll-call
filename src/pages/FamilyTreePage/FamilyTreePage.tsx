@@ -5,11 +5,12 @@ import ReactFlow, {
   Handle,
   Position,
   type Node,
+  type NodeProps,
   type Edge,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { supabase } from '../../../utils/supabase-client';
+import { supabase } from '../../lib/supabase-client';
 import PigCard from '../../components/PigList/PigCard/PigCard';
 import './FamilyTreePage.css';
 import type { Pig, PigRelationship } from '../../services/pigs.types';
@@ -20,7 +21,7 @@ const NODE_HEIGHT = 150;
 const X_GAP = 160;
 const Y_GAP = 200;
 
-const PigNode = ({ data }: any) => {
+const PigNode = ({ data }: NodeProps<{ pig: Pig }>) => {
   return (
     <div
       style={{
@@ -66,25 +67,36 @@ const FamilyTreePage = () => {
   const [pigs, setPigs] = useState<Pig[]>([]);
   const [relationships, setRelationships] = useState<PigRelationship[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let alive = true;
     const load = async () => {
       setLoading(true);
+      try {
+        const [pigsRes, relRes] = await Promise.all([
+          supabase.from('pigs').select('*'),
+          supabase.from('pig_relationships').select('*'),
+        ]);
 
-      const [pigsRes, relRes] = await Promise.all([
-        supabase.from('pigs').select('*'),
-        supabase.from('pig_relationships').select('*'),
-      ]);
+        if (pigsRes.error) throw pigsRes.error;
+        if (relRes.error) throw relRes.error;
 
-      if (pigsRes.error) throw pigsRes.error;
-      if (relRes.error) throw relRes.error;
-
-      setPigs(pigsRes.data ?? []);
-      setRelationships((relRes.data ?? []) as PigRelationship[]);
-      setLoading(false);
+        if (!alive) return;
+        setPigs(pigsRes.data ?? []);
+        setRelationships((relRes.data ?? []) as PigRelationship[]);
+      } catch (err) {
+        if (alive)
+          setError(err instanceof Error ? err.message : 'Failed to load family tree');
+      } finally {
+        if (alive) setLoading(false);
+      }
     };
 
     load();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const { nodes, edges } = useMemo(() => {
@@ -353,6 +365,7 @@ const FamilyTreePage = () => {
   }, [pigs, relationships]);
 
   if (loading) return <Loading />;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="pageLayout">

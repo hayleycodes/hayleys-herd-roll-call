@@ -55,7 +55,9 @@ import type {
   WeightRecord,
   MoodRecord,
   PigRecurringTask,
+  HealthRecord,
 } from '../../services/pigs.types';
+import { getErrorMessage } from '../../lib/get-error-message';
 
 const PIG_QUOTES = [
   'Wheek wheek! 🐹',
@@ -119,7 +121,7 @@ const PigPage = () => {
   const [nameDraft, setNameDraft] = useState('');
   const [descriptionDraft, setDescriptionDraft] = useState('');
 
-  const [health, setHealth] = useState<any[]>([]);
+  const [health, setHealth] = useState<HealthRecord[]>([]);
   const [latestWeight, setLatestWeight] = useState<WeightRecord | null>(null);
   const [moods, setMoods] = useState<MoodRecord[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -166,6 +168,20 @@ const PigPage = () => {
     { x: number; y: number } | undefined
   >();
 
+  // Track sighting-flow timers so they can be cleared on unmount.
+  const sightingTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const scheduleSightingTimer = (fn: () => void, ms: number) => {
+    const id = setTimeout(fn, ms);
+    sightingTimers.current.push(id);
+    return id;
+  };
+  useEffect(() => {
+    const timers = sightingTimers.current;
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+
   const handleConfirm = async () => {
     if (!selectedPig) return;
 
@@ -179,12 +195,12 @@ const PigPage = () => {
       setPig((prev) => (prev ? { ...prev, last_sighted: now } : null));
 
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 2500);
+      scheduleSightingTimer(() => setShowConfetti(false), 2500);
       if (FEATURE_MOOD) {
         setSightingStep('mood');
       } else {
         setSightingStep('logged');
-        setTimeout(() => closeSightingModal(), 800);
+        scheduleSightingTimer(() => closeSightingModal(), 800);
       }
     } catch (err) {
       console.error('Failed to save sighting:', err);
@@ -199,7 +215,7 @@ const PigPage = () => {
     const updated = await getPigMoods(pig.id);
     setMoods(updated);
     setSightingStep('logged');
-    setTimeout(() => {
+    scheduleSightingTimer(() => {
       setSelectedPig(null);
       setSightingStep('confirm');
     }, 1200);
@@ -207,7 +223,7 @@ const PigPage = () => {
 
   const closeSightingModal = () => {
     setSelectedPig(null);
-    setTimeout(() => setSightingStep('confirm'), 300);
+    scheduleSightingTimer(() => setSightingStep('confirm'), 300);
   };
 
   const MAX_PHOTOS = 3;
@@ -265,8 +281,8 @@ const PigPage = () => {
       );
       setPig(updated);
       setIsEditingDescription(false);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     }
   };
 
@@ -299,6 +315,7 @@ const PigPage = () => {
   }, [pig?.id]);
 
   useEffect(() => {
+    let alive = true;
     const load = async () => {
       try {
         if (!id) throw new Error('Missing pig id');
@@ -330,6 +347,7 @@ const PigPage = () => {
           getTopPigIds(),
         ]);
 
+        if (!alive) return;
         setPig(pigData);
         setIsTopPig(topIds.has(pigId));
         setHealth(healthData);
@@ -340,14 +358,17 @@ const PigPage = () => {
         if (weightsData.length > 0) setLatestWeight(weightsData[0]);
         setMoods(moodsData);
         setRecurringTasks(recurringData);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (alive) setError(getErrorMessage(err));
       } finally {
-        setLoading(false);
+        if (alive) setLoading(false);
       }
     };
 
     load();
+    return () => {
+      alive = false;
+    };
   }, [id]);
 
   useEffect(() => {

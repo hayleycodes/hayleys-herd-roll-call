@@ -11,23 +11,36 @@ export const usePigImage = (imagePath: string | null | undefined) => {
   const [imageLoading, setImageLoading] = useState(!!imagePath);
   const [imageReady, setImageReady] = useState(false);
 
+  // Reset state synchronously during render when the path changes, instead of
+  // in the effect — otherwise the card would briefly show the previous photo's
+  // loaded state before the effect runs.
+  const [loadedPath, setLoadedPath] = useState(imagePath);
+  if (imagePath !== loadedPath) {
+    setLoadedPath(imagePath);
+    setImageLoading(!!imagePath);
+    setImageReady(false);
+  }
+
   useEffect(() => {
     if (!imagePath) {
-      setImageLoading(false);
       return;
     }
-    setImageLoading(true);
-    setImageReady(false);
+    let alive = true;
     const load = async () => {
       try {
         const { signedUrl } = await getPigImageUrl(imagePath);
+        if (!alive) return;
         const img = new Image();
         img.onload = () => {
+          if (!alive) return;
           setImageUrl(signedUrl);
           setImageLoading(false);
-          requestAnimationFrame(() => setImageReady(true));
+          requestAnimationFrame(() => {
+            if (alive) setImageReady(true);
+          });
         };
         img.onerror = () => {
+          if (!alive) return;
           setImageUrl(signedUrl);
           setImageLoading(false);
           setImageReady(true);
@@ -35,10 +48,13 @@ export const usePigImage = (imagePath: string | null | undefined) => {
         img.src = signedUrl;
       } catch {
         // Signing failed — drop the spinner and fall back to the placeholder.
-        setImageLoading(false);
+        if (alive) setImageLoading(false);
       }
     };
     load();
+    return () => {
+      alive = false;
+    };
   }, [imagePath]);
 
   const setUrl = (url: string) => {

@@ -4,6 +4,7 @@ import {
   subscribeToPendingCandidates,
   type SightingCandidate,
 } from '../services/sighting-candidates.service';
+import { getErrorMessage } from '../lib/get-error-message';
 
 // Newest-first, matching getPendingCandidates' `order('created_at', desc)`.
 // A null created_at sorts last so it never jumps above real timestamps.
@@ -38,13 +39,13 @@ export const useReviewQueue = () => {
           const cands = await getPendingCandidates();
           if (alive) setCandidates(cands);
           break;
-        } catch (err: any) {
-          const isClockSkew = /issued at future/i.test(err?.message ?? '');
+        } catch (err) {
+          const isClockSkew = /issued at future/i.test(getErrorMessage(err, ''));
           if (isClockSkew && attempt === 0) {
             await new Promise((r) => setTimeout(r, 1500));
             continue;
           }
-          if (alive) setError(err.message);
+          if (alive) setError(getErrorMessage(err));
           break;
         }
       }

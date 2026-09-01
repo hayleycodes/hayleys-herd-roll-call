@@ -23,6 +23,7 @@ import Dialog from '../../components/ui/Dialog/Dialog';
 import Panel from '../../components/ui/Panel/Panel';
 import SocialGraph from './SocialGraph';
 import AlgorithmInfo from './AlgorithmInfo';
+import { getErrorMessage } from '../../lib/get-error-message';
 
 const SocialOrderPage = () => {
   const [socialOrder, setSocialOrder] = useState<SocialOrderItem[]>([]);
@@ -97,8 +98,8 @@ const SocialOrderPage = () => {
       ]);
       setSocialOrder(socialOrderData);
       setAllPigs(pigsData);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

@@ -10,6 +10,7 @@ import {
 } from '../../services/pig-moods.service';
 import { usePigImage } from '../../hooks/usePigImage';
 import type { Pig, MoodRecord } from '../../services/pigs.types';
+import { getErrorMessage } from '../../lib/get-error-message';
 
 const PigMoodRow = ({
   pig,
@@ -91,8 +92,8 @@ const MoodPage = () => {
         allPigs.forEach((p, i) => moodsMap.set(p.id, moodResults[i]));
         setPigs(allPigs);
         setMoodsByPig(moodsMap);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }

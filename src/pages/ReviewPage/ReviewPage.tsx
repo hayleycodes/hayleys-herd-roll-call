@@ -11,6 +11,7 @@ import { useReviewQueue } from '../../hooks/useReviewQueue';
 import { getAllPigsIncludingPassed } from '../../services/pigs.service';
 import type { Pig } from '../../services/pigs.types';
 import { getPigImageUrl } from '../../services/pig-images.service';
+import { getErrorMessage } from '../../lib/get-error-message';
 import Loading from '../../components/ui/Loading/Loading';
 import Panel from '../../components/ui/Panel/Panel';
 import Button from '../../components/ui/Button/Button';
@@ -179,7 +180,7 @@ const ReviewPage = () => {
   useEffect(() => {
     getAllPigsIncludingPassed()
       .then(setPigs)
-      .catch((err: any) => setError(err.message));
+      .catch((err) => setError(getErrorMessage(err)));
   }, [setError]);
 
   const pigsById = useMemo(() => {
@@ -233,8 +234,8 @@ const ReviewPage = () => {
     try {
       await confirmCandidate(candidateId, pigId);
       remove(candidateId);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setBusyId(null);
     }
@@ -245,8 +246,8 @@ const ReviewPage = () => {
     try {
       await rejectCandidate(candidateId);
       remove(candidateId);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setBusyId(null);
     }
@@ -257,8 +258,8 @@ const ReviewPage = () => {
     try {
       await markCandidateUnknown(candidateId);
       remove(candidateId);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setBusyId(null);
     }

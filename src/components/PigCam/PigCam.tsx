@@ -13,6 +13,8 @@ type PigCamProps = {
 
 const PigCam = ({ visible, rotated, onRotateToggle }: PigCamProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  // @cycjimmy/jsmpeg-player ships no types, so the player instance is untyped.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
 
   const connect = useCallback(() => {
@@ -20,7 +22,9 @@ const PigCam = ({ visible, rotated, onRotateToggle }: PigCamProps) => {
 
     try {
       playerRef.current?.destroy();
-    } catch {}
+    } catch {
+      // Ignore: destroy() throws if the player is already torn down.
+    }
 
     containerRef.current.innerHTML = '';
     playerRef.current = new JSMpeg.VideoElement(containerRef.current, WS_URL, {
@@ -36,7 +40,9 @@ const PigCam = ({ visible, rotated, onRotateToggle }: PigCamProps) => {
     return () => {
       try {
         playerRef.current?.destroy();
-      } catch {}
+      } catch {
+        // Ignore: destroy() throws if the player is already torn down.
+      }
     };
   }, [connect]);
 

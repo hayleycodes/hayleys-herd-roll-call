@@ -2,7 +2,6 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './HealthLogPage.css';
-import '../WeightsPage/WeightsPage.css';
 import '../../components/HealthPanel/HealthPanel.css';
 import {
   getAllHealth,
@@ -24,39 +23,21 @@ import type {
   WeightRecord,
   HealthRecord,
 } from '../../services/pigs.types';
-import { getPigImageUrl } from '../../services/pig-images.service';
 import {
   getLatestWeights,
   getAllWeights,
-  createPigWeight,
 } from '../../services/pig-weights.service';
 import Loading from '../../components/ui/Loading/Loading';
 import Dialog from '../../components/ui/Dialog/Dialog';
 import Panel from '../../components/ui/Panel/Panel';
 import HealthForm from '../../components/HealthForm/HealthForm';
 import CareTaskCard from '../../components/CareTaskCard/CareTaskCard';
-import Button from '../../components/ui/Button/Button';
+import PigThumb from '../../components/ui/PigThumb/PigThumb';
+import WeightList from '../../components/WeightList/WeightList';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
+import { getErrorMessage } from '../../lib/get-error-message';
 
 const PAGE_SIZE = 10;
-
-const PigThumbnail = ({ imagePath }: { imagePath: string | null }) => {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!imagePath) return;
-    getPigImageUrl(imagePath).then(({ signedUrl }) => setUrl(signedUrl));
-  }, [imagePath]);
-
-  if (!url)
-    return <div className="healthLogThumb healthLogThumbPlaceholder">🐹</div>;
-  return (
-    <div
-      className="healthLogThumb"
-      style={{ backgroundImage: `url(${url})` }}
-    />
-  );
-};
 
 const HealthLogPage = () => {
   const location = useLocation();
@@ -85,9 +66,6 @@ const HealthLogPage = () => {
   const [allWeights, setAllWeights] = useState<Map<number, WeightRecord[]>>(
     new Map()
   );
-  const [addingPigId, setAddingPigId] = useState<number | null>(null);
-  const [gramsInput, setGramsInput] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [confirmTask, setConfirmTask] = useState<
     (OverdueTask | UpcomingTask | PendingOneOff) | null
   >(null);
@@ -97,6 +75,15 @@ const HealthLogPage = () => {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Refs mirror the current paging state so the IntersectionObserver
+  // (created once) reads live values instead of a stale closure.
+  const recordCountRef = useRef(0);
+  const hasMoreRef = useRef(true);
+  const loadingMoreRef = useRef(false);
+  recordCountRef.current = records.length;
+  hasMoreRef.current = hasMore;
+  loadingMoreRef.current = loadingMore;
 
   const loadRecords = useCallback(async (offset: number) => {
     const data = await getAllHealth(offset, PAGE_SIZE);
@@ -132,8 +119,8 @@ const HealthLogPage = () => {
           allWeightMap.set(w.pig_id, list);
         }
         setAllWeights(allWeightMap);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
@@ -167,21 +154,6 @@ const HealthLogPage = () => {
       weightMap.set(w.pig_id, w);
     }
     setWeights(weightMap);
-  };
-
-  const handleAddWeight = async (pigId: number) => {
-    const value = Number(gramsInput);
-    if (!value || value <= 0) return;
-
-    setSubmitting(true);
-    try {
-      await createPigWeight(pigId, value);
-      await refreshWeights();
-      setAddingPigId(null);
-      setGramsInput('');
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const getWeightAtTime = (pigId: number, date: string): number | null => {
@@ -222,12 +194,12 @@ const HealthLogPage = () => {
       await createPigHealth({
         pig_id: task.pig_id,
         [healthFlag]: true,
-      } as unknown as HealthRecord);
+      });
     } else {
       await createPigHealth({
         pig_id: task.pig_id,
         notes: getTaskLabel(task.task_type),
-      } as unknown as HealthRecord);
+      });
       if (!isOneOff) await markTaskDone(task.pig_id, task.task_type);
     }
     if (isOneOff) await completeOneOffTask(task.id);
@@ -253,26 +225,34 @@ const HealthLogPage = () => {
   const livingPigs = pigs.filter((p) => !p.passed_away);
 
   useEffect(() => {
-    if (!sentinelRef.current || !hasMore) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        if (
+          entries[0].isIntersecting &&
+          hasMoreRef.current &&
+          !loadingMoreRef.current
+        ) {
+          loadingMoreRef.current = true;
           setLoadingMore(true);
-          loadRecords(records.length)
+          loadRecords(recordCountRef.current)
             .then((data) => {
               setRecords((prev) => [...prev, ...data]);
             })
-            .catch((err) => setError(err.message))
+            .catch((err) => setError(getErrorMessage(err)))
             .finally(() => setLoadingMore(false));
         }
       },
       { threshold: 0.1 }
     );
 
-    observer.observe(sentinelRef.current);
+    observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, loadingMore, records.length, loadRecords]);
+    // Re-run once initial load finishes (and the sentinel mounts) and when the
+    // active tab changes, since the sentinel only exists on the notes tab.
+  }, [loadRecords, loading, activeTab]);
 
   if (loading) return <Loading />;
   if (error) return <p>{error}</p>;
@@ -323,8 +303,10 @@ const HealthLogPage = () => {
                       to={`/pigs/${record.pig_id}`}
                       className="healthLogCardLink"
                     >
-                      <PigThumbnail
+                      <PigThumb
                         imagePath={record.pigs?.image_paths?.[0] ?? null}
+                        className="healthLogThumb"
+                        placeholderClassName="healthLogThumbPlaceholder"
                       />
 
                       <div className="healthLogCardBody">
@@ -395,66 +377,12 @@ const HealthLogPage = () => {
         )}
 
         {activeTab === 'weight' && (
-          <div className="weightsList">
-            {livingPigs.map((pig) => {
-              const record = weights.get(pig.id);
-              const isAdding = addingPigId === pig.id;
-              return (
-                <div key={pig.id} className="weightsCardWrapper">
-                  <div className="weightsCard">
-                    <Link to={`/pigs/${pig.id}`} className="weightsCardLink">
-                      <PigThumbnail imagePath={pig.image_paths?.[0] ?? null} />
-                      <div className="weightsCardInfo">
-                        <span className="weightsName">{pig.name}</span>
-                        <span
-                          className={`weightsValue ${!record ? 'muted' : ''}`}
-                        >
-                          {record
-                            ? `${record.weight_grams}g`
-                            : 'No weight recorded'}
-                        </span>
-                      </div>
-                    </Link>
-                    <EmojiButton
-                      className="weightsAddBtn"
-                      size="sm"
-                      shape="circle"
-                      onClick={() => {
-                        setAddingPigId(isAdding ? null : pig.id);
-                        setGramsInput('');
-                      }}
-                    >
-                      {isAdding ? '✕' : '+'}
-                    </EmojiButton>
-                  </div>
-                  {isAdding && (
-                    <form
-                      className="weightsInlineForm"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleAddWeight(pig.id);
-                      }}
-                    >
-                      <input
-                        type="number"
-                        placeholder="Grams"
-                        value={gramsInput}
-                        onChange={(e) => setGramsInput(e.target.value)}
-                        min="1"
-                        autoFocus
-                      />
-                      <Button
-                        type="submit"
-                        disabled={submitting || !gramsInput}
-                      >
-                        {submitting ? 'Saving...' : 'Save'}
-                      </Button>
-                    </form>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <WeightList
+            pigs={livingPigs}
+            weights={weights}
+            onWeightAdded={refreshWeights}
+            thumbPlaceholderClassName="healthLogThumbPlaceholder"
+          />
         )}
 
         {activeTab === 'care' && (

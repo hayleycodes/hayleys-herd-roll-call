@@ -20,14 +20,18 @@ const Modal = ({
   variant = 'sheet',
   showClose = false,
 }: ModalProps) => {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(isOpen);
   const [active, setActive] = useState(false);
+
+  // Sync mount/active state synchronously during render (mount on open, drop
+  // `active` on close to start the exit transition) rather than in the effect.
+  if (isOpen && !mounted) setMounted(true);
+  if (!isOpen && active) setActive(false);
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
 
     if (isOpen) {
-      setMounted(true);
       document.body.style.overflow = 'hidden';
       // A 10ms delay is usually enough to force the browser
       // to paint the 'hidden' state first
@@ -35,7 +39,6 @@ const Modal = ({
         setActive(true);
       }, 10);
     } else {
-      setActive(false);
       document.body.style.overflow = '';
       timeout = setTimeout(() => {
         setMounted(false);

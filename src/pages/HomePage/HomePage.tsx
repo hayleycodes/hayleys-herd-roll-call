@@ -10,6 +10,7 @@ import { getTopPigIds } from '../../services/pig-social-order.service';
 import type { Pig } from '../../services/pigs.types';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 import Loading from '../../components/ui/Loading/Loading';
+import { getErrorMessage } from '../../lib/get-error-message';
 
 type HomePageProps = {
   refreshKey?: number;
@@ -58,8 +59,8 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
       setPassedPigs(passed);
       setSickPigIds(sickIds);
       setTopPigIds(topIds);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

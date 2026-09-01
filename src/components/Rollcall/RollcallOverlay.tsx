@@ -17,8 +17,13 @@ type Props = {
 };
 
 const RollcallOverlay = ({ isOpen, onClose, onSighted }: Props) => {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(isOpen);
   const [active, setActive] = useState(false);
+
+  // Sync mount/active state during render (same pattern as Modal): mount on
+  // open, drop `active` on close to start the exit transition.
+  if (isOpen && !mounted) setMounted(true);
+  if (!isOpen && active) setActive(false);
   const [queue, setQueue] = useState<Pig[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sightedCount, setSightedCount] = useState(0);
@@ -32,10 +37,8 @@ const RollcallOverlay = ({ isOpen, onClose, onSighted }: Props) => {
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
     if (isOpen) {
-      setMounted(true);
       timeout = setTimeout(() => setActive(true), 10);
     } else {
-      setActive(false);
       timeout = setTimeout(() => {
         setMounted(false);
         setComplete(false);
