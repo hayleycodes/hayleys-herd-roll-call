@@ -1,15 +1,13 @@
 import { useState } from 'react';
-import { differenceInDays, formatDistanceToNow } from 'date-fns';
+import { differenceInDays } from 'date-fns';
 import './CareHealthPanel.css';
 import Panel from '../ui/Panel/Panel';
 import Button from '../ui/Button/Button';
-import EmojiButton from '../ui/EmojiButton/EmojiButton';
 import Dialog from '../ui/Dialog/Dialog';
 import CareTaskCard from '../CareTaskCard/CareTaskCard';
-import HealthForm from '../HealthForm/HealthForm';
+import HealthCardList from '../HealthCardList/HealthCardList';
 import {
   getPigHealth,
-  deletePigHealth,
   createPigHealth,
 } from '../../services/pig-health.service';
 import { createPigWeight } from '../../services/pig-weights.service';
@@ -75,7 +73,6 @@ const CareHealthPanel = ({
   latestWeight,
   onWeightAdded,
 }: Props) => {
-  const [editingRecord, setEditingRecord] = useState<HealthRecord | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedDefault, setSelectedDefault] = useState('');
   const [customLabel, setCustomLabel] = useState('');
@@ -84,7 +81,6 @@ const CareHealthPanel = ({
   const [savingWeight, setSavingWeight] = useState(false);
   const [confirmSkipTask, setConfirmSkipTask] =
     useState<PigRecurringTask | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const handleAddWeight = async () => {
     const grams = parseInt(weightInput, 10);
@@ -99,20 +95,6 @@ const CareHealthPanel = ({
     }
   };
 
-  const handleRecordAdded = async () => {
-    const updated = await getPigHealth(pig.id);
-    setHealth(updated);
-    onRecurringUpdate?.();
-  };
-
-  const handleConfirmDelete = async () => {
-    if (confirmDeleteId === null) return;
-    await deletePigHealth(confirmDeleteId);
-    const updated = await getPigHealth(pig.id);
-    setHealth(updated);
-    setConfirmDeleteId(null);
-  };
-
   const handleMarkCareDone = async (task: PigRecurringTask) => {
     const isOneOff = task.frequency_days_override === null;
 
@@ -121,12 +103,12 @@ const CareHealthPanel = ({
       await createPigHealth({
         pig_id: pig.id,
         [healthFlag]: true,
-      } as unknown as HealthRecord);
+      });
     } else {
       await createPigHealth({
         pig_id: pig.id,
         notes: getTaskLabel(task.task_type),
-      } as unknown as HealthRecord);
+      });
       if (!isOneOff) await markTaskDone(pig.id, task.task_type);
     }
     if (isOneOff) await completeOneOffTask(task.id);
@@ -360,78 +342,12 @@ const CareHealthPanel = ({
       <div className="careRecordsSection">
         <h3 className="careSectionHeading">Health Log</h3>
 
-        {!pig.passed_away && (
-          <HealthForm
-            pigId={pig.id}
-            onRecordAdded={handleRecordAdded}
-            editingRecord={editingRecord}
-            onCancelEdit={() => setEditingRecord(null)}
-          />
-        )}
-
-        {health.length === 0 ? (
-          <p className="muted">No health records yet</p>
-        ) : (
-          <div className="healthCardList">
-            {health.map((record) => (
-              <div
-                key={record.id}
-                className={`healthCard ${editingRecord?.id === record.id ? 'healthCardEditing' : ''}`}
-              >
-                <div className="healthCardHeader">
-                  {!record.passed_away && (
-                    <span className="muted">
-                      {formatDistanceToNow(new Date(record.created_at), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  )}
-
-                  <div className="healthCardIcons">
-                    {record.nail_clip && (
-                      <p className="healthBadge">💅 Nail clip</p>
-                    )}
-                    {record.haircut && (
-                      <p className="healthBadge">✂️ Haircut</p>
-                    )}
-                    {record.parasite_treatment && (
-                      <p className="healthBadge">🐛 Parasite treatment</p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  {record.passed_away ? (
-                    <p>
-                      💀 {new Date(record.passed_away).toLocaleDateString()}
-                    </p>
-                  ) : (
-                    record.notes && <p>{record.notes}</p>
-                  )}
-                </div>
-
-                {!record.passed_away && (
-                  <div className="healthCardActions">
-                    <EmojiButton
-                      className="healthCardBtn"
-                      size="sm"
-                      onClick={() => setEditingRecord(record)}
-                    >
-                      ✏️
-                    </EmojiButton>
-                    <EmojiButton
-                      className="healthCardBtn healthCardBtnDelete"
-                      size="sm"
-                      onClick={() => setConfirmDeleteId(record.id)}
-                    >
-                      🗑️
-                    </EmojiButton>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        <HealthCardList
+          pig={pig}
+          health={health}
+          setHealth={setHealth}
+          onChange={onRecurringUpdate}
+        />
       </div>
 
       <Dialog
@@ -444,16 +360,6 @@ const CareHealthPanel = ({
           </>
         }
         onConfirm={handleConfirmSkip}
-        cancelVariant="danger"
-        confirmVariant="success"
-      />
-
-      <Dialog
-        isOpen={confirmDeleteId !== null}
-        onClose={() => setConfirmDeleteId(null)}
-        message="Delete this health record?"
-        onConfirm={handleConfirmDelete}
-        confirmLabel="Delete"
         cancelVariant="danger"
         confirmVariant="success"
       />

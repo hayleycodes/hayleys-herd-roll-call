@@ -1,25 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { getPigImageUrl } from '../../services/pig-images.service';
 import type { Pig } from '../../services/pigs.types';
+import PigThumb from '../ui/PigThumb/PigThumb';
 import './PigPicker.css';
 
-export const PigThumb = ({ imagePath }: { imagePath: string | null }) => {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!imagePath) return;
-    getPigImageUrl(imagePath).then(({ signedUrl }) => setUrl(signedUrl));
-  }, [imagePath]);
-
-  if (!url)
-    return <div className="pigPickerThumb pigPickerThumbPlaceholder">🐹</div>;
-  return (
-    <div
-      className="pigPickerThumb"
-      style={{ backgroundImage: `url(${url})` }}
-    />
-  );
-};
+// Re-exported for the many callers that import PigThumb from here. New code
+// should import it from '../ui/PigThumb/PigThumb'.
+export { default as PigThumb } from '../ui/PigThumb/PigThumb';
 
 type Props = {
   pigs: Pig[];
@@ -67,6 +53,14 @@ const PigPicker = ({
   const [query, setQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Clear the search box when the dropdown closes, synchronously during render
+  // rather than in an effect.
+  const [wasOpen, setWasOpen] = useState(dropdownOpen);
+  if (dropdownOpen !== wasOpen) {
+    setWasOpen(dropdownOpen);
+    if (!dropdownOpen) setQuery('');
+  }
+
   const selectedPig = pigs.find((p) => p.id === selectedPigId) ?? null;
 
   const filteredPigs = query.trim()
@@ -76,10 +70,7 @@ const PigPicker = ({
     : pigs;
 
   useEffect(() => {
-    if (!dropdownOpen) {
-      setQuery('');
-      return;
-    }
+    if (!dropdownOpen) return;
     const handleClick = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -101,7 +92,7 @@ const PigPicker = ({
       document.removeEventListener('mousedown', handleClick);
       document.removeEventListener('keydown', handleKey);
     };
-  }, [dropdownOpen]);
+  }, [dropdownOpen, onClose]);
 
   // Keyboard-driven flow from the search box: Enter picks the top match
   // (single-select selects & closes; multi-select toggles it on and clears the

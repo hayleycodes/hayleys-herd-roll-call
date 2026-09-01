@@ -1,6 +1,6 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { getPigImageUrl } from '../../services/pig-images.service';
+import PigThumb from '../ui/PigThumb/PigThumb';
 import './CareTaskCard.css';
 
 interface Props {
@@ -14,21 +14,6 @@ interface Props {
   onDone?: () => void;
   variant?: 'default' | 'overdue' | 'oneoff';
 }
-
-const PigThumb = ({ imagePath }: { imagePath: string | null }) => {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!imagePath) return;
-    getPigImageUrl(imagePath).then(({ signedUrl }) => setUrl(signedUrl));
-  }, [imagePath]);
-
-  if (!url)
-    return <div className="careTaskThumb careTaskThumbPlaceholder">🐹</div>;
-  return (
-    <div className="careTaskThumb" style={{ backgroundImage: `url(${url})` }} />
-  );
-};
 
 const CareTaskCard = ({
   label,
@@ -52,7 +37,11 @@ const CareTaskCard = ({
     <div className={`careTaskCard${variantClass}`}>
       {pigName && pigId != null && (
         <Link to={`/pigs/${pigId}`} className="careTaskPig">
-          <PigThumb imagePath={pigImagePath ?? null} />
+          <PigThumb
+            imagePath={pigImagePath ?? null}
+            className="careTaskThumb"
+            placeholderClassName="careTaskThumbPlaceholder"
+          />
           <span className="careTaskPigName">{pigName}</span>
         </Link>
       )}

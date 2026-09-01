@@ -6,6 +6,7 @@ import {
 import type { Pig, HealthRecord } from '../../services/pigs.types';
 import PigPicker from '../PigPicker/PigPicker';
 import Button from '../ui/Button/Button';
+import { getErrorMessage } from '../../lib/get-error-message';
 import './HealthForm.css';
 
 type Props =
@@ -78,13 +79,13 @@ const HealthForm = (props: Props) => {
           nail_clip: nailClip,
           haircut,
           parasite_treatment: parasiteTreatment,
-        } as any);
+        });
       }
       resetForm();
       if (isEditing) onCancelEdit?.();
       onRecordAdded();
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to save');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to save'));
     } finally {
       setSubmitting(false);
     }
