@@ -9,6 +9,15 @@ export const PIG_COLOR_CLASSES = [
 ];
 
 export const PIG_COLOR_SICK = 'pig-color-sick';
+export const PIG_COLOR_STALE = 'pig-color-stale';
 
-export const getPigColorClass = (pigId: number, isSick = false): string =>
-  isSick ? PIG_COLOR_SICK : PIG_COLOR_CLASSES[pigId % PIG_COLOR_CLASSES.length];
+export const getPigColorClass = (
+  pigId: number,
+  isSick = false,
+  isStale = false
+): string =>
+  isSick
+    ? PIG_COLOR_SICK
+    : isStale
+      ? PIG_COLOR_STALE
+      : PIG_COLOR_CLASSES[pigId % PIG_COLOR_CLASSES.length];

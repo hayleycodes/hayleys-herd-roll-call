@@ -252,6 +252,19 @@
   box-shadow: 0 0 8px 2px rgba(230, 57, 70, 0.4);
 }
 
+/* ---- Stale pig style (unseen 2+ days) ---- */
+
+/* The orange comes from --pig-color (.pig-color-stale), so the circle border,
+   eye button and glow all pick it up. Just add the glow and orange name here. */
+.pigCardStale .pigCardCircle {
+  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--pig-color) 40%, transparent);
+}
+
+.pigCardStale .pigCardSighted span {
+  color: white;
+}
+
+
 .eyeButton {
   position: absolute;
   top: 6%;

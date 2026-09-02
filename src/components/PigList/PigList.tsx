@@ -16,6 +16,7 @@ import PassedPigList from './PassedPigList/PassedPigList';
 import Modal from '../ui/Modal/Modal';
 import Button from '../ui/Button/Button';
 import Confetti from '../ui/Confetti/Confetti';
+import { isPigStale } from '../../lib/is-pig-stale';
 
 // Stagger the cards in one at a time whenever the grid (re)mounts — on page
 // load and whenever the unseen filter toggles.
@@ -257,6 +258,7 @@ const PigList = ({
                 popPhase={i >= popFromIndex ? popPhase : null}
                 popIndex={i - popFromIndex}
                 sick={sickPigIds?.has(pig.id)}
+                stale={isPigStale(pig)}
                 notSightedToday={
                   !pig.last_sighted ||
                   new Date(pig.last_sighted).toDateString() !== today

@@ -12,6 +12,7 @@ type Props = {
   relationship?: string;
   passed?: boolean;
   sick?: boolean;
+  stale?: boolean;
   notSightedToday?: boolean;
   hideLastSeen?: boolean;
   sighted?: boolean;
@@ -30,6 +31,7 @@ const PigCard = ({
   relationship,
   passed,
   sick,
+  stale,
   notSightedToday,
   hideLastSeen,
   sighted,
@@ -54,7 +56,7 @@ const PigCard = ({
       })
     : '';
 
-  const pigColorClass = getPigColorClass(pig.id, sick);
+  const pigColorClass = getPigColorClass(pig.id, sick, stale);
   const eyeUnseen = notSightedToday && !sick;
   const popClass = popPhase
     ? popPhase === 'a'
@@ -68,7 +70,7 @@ const PigCard = ({
 
   return (
     <div
-      className={`pigCard ${pigColorClass}${popClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}${pinned ? ' pigCardPinned' : ''}`}
+      className={`pigCard ${pigColorClass}${popClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}${stale ? ' pigCardStale' : ''}${pinned ? ' pigCardPinned' : ''}`}
       style={
         popPhase
           ? ({
@@ -169,6 +171,7 @@ const PigCard = ({
         <div className="pigCardLabel">
           <h3 className="pigCardName">
             {sick && '🤒 '}
+            {stale && '🚩 '}
             {pig.name}
           </h3>
           {relationship && (

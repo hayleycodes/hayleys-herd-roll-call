@@ -114,6 +114,9 @@
 .pig-color-sick {
   --pig-color: #e63946;
 }
+.pig-color-stale {
+  --pig-color: #ff8c00;
+}
 
 .btn-outline {
   padding: var(--spacing-xs);
