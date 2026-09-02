@@ -474,16 +474,6 @@ const PigPage = () => {
             </EmojiButton>
             <EmojiButton
               variant="pig"
-              aria-label="Add photo"
-              disabled={pig.image_paths.length >= 3}
-              onClick={() =>
-                document.getElementById('pig-image-upload')?.click()
-              }
-            >
-              📸
-            </EmojiButton>
-            <EmojiButton
-              variant="pig"
               onClick={() => setShowTagPicker(!showTagPicker)}
               aria-label="Edit tags"
             >
