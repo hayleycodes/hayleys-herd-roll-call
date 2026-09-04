@@ -500,35 +500,33 @@ const PigPage = () => {
             )}
           </div>
 
-          {pig.image_paths.length >= 1 && (
-            <div className="detailExtraPhotos">
-              {pig.image_paths.map((path, i) =>
-                i === photoIndex ? null : (
-                  <button
-                    key={path}
-                    type="button"
-                    className="detailExtraPhoto"
-                    onClick={() => openLightboxAt(i)}
-                    aria-label="View photo"
-                  >
-                    <PigPhoto path={path} />
-                  </button>
-                )
-              )}
-              {pig.image_paths.length < 3 && (
+          <div className="detailExtraPhotos">
+            {pig.image_paths.map((path, i) =>
+              i === photoIndex ? null : (
                 <button
+                  key={path}
                   type="button"
-                  className="detailExtraPhoto detailExtraPhotoAdd"
-                  onClick={() =>
-                    document.getElementById('pig-image-upload')?.click()
-                  }
-                  aria-label="Add photo"
+                  className="detailExtraPhoto"
+                  onClick={() => openLightboxAt(i)}
+                  aria-label="View photo"
                 >
-                  +
+                  <PigPhoto path={path} />
                 </button>
-              )}
-            </div>
-          )}
+              )
+            )}
+            {pig.image_paths.length < 3 && (
+              <button
+                type="button"
+                className="detailExtraPhoto detailExtraPhotoAdd"
+                onClick={() =>
+                  document.getElementById('pig-image-upload')?.click()
+                }
+                aria-label="Add photo"
+              >
+                +
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="detailLabel">
