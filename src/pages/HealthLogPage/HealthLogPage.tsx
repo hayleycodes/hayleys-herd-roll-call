@@ -12,6 +12,7 @@ import type { HealthLogEntry } from '../../services/pig-health.service';
 import {
   getAllCareTasks,
   completeOneOffTask,
+  deletePigCareTask,
   markTaskDone,
   type OverdueTask,
   type UpcomingTask,
@@ -71,6 +72,9 @@ const HealthLogPage = () => {
   >(null);
   const [confirmSkipTask, setConfirmSkipTask] = useState<
     OverdueTask | UpcomingTask | null
+  >(null);
+  const [confirmCancelTask, setConfirmCancelTask] = useState<
+    (OverdueTask | UpcomingTask | PendingOneOff) | null
   >(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -220,6 +224,23 @@ const HealthLogPage = () => {
     setUpcomingTasks(careData.upcoming);
     setOneOffTasks(careData.oneOffs);
     setConfirmSkipTask(null);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!confirmCancelTask) return;
+    if (confirmCancelTask.frequency_days_override === null) {
+      await completeOneOffTask(confirmCancelTask.id);
+    } else {
+      await deletePigCareTask(
+        confirmCancelTask.pig_id,
+        confirmCancelTask.task_type
+      );
+    }
+    const careData = await getAllCareTasks();
+    setOverdueTasks(careData.overdue);
+    setUpcomingTasks(careData.upcoming);
+    setOneOffTasks(careData.oneOffs);
+    setConfirmCancelTask(null);
   };
 
   const livingPigs = pigs.filter((p) => !p.passed_away);
@@ -413,6 +434,7 @@ const HealthLogPage = () => {
                     pigId={task.pig_id}
                     onSkip={() => setConfirmSkipTask(task)}
                     onDone={() => setConfirmTask(task)}
+                    onCancel={() => setConfirmCancelTask(task)}
                   />
                 ))}
               </>
@@ -430,6 +452,7 @@ const HealthLogPage = () => {
                     pigImagePath={task.pigs?.image_paths?.[0] ?? null}
                     pigId={task.pig_id}
                     onDone={() => setConfirmTask(task)}
+                    onCancel={() => setConfirmCancelTask(task)}
                   />
                 ))}
               </>
@@ -452,6 +475,7 @@ const HealthLogPage = () => {
                     pigId={task.pig_id}
                     onSkip={() => setConfirmSkipTask(task)}
                     onDone={() => setConfirmTask(task)}
+                    onCancel={() => setConfirmCancelTask(task)}
                   />
                 ))}
               </>
@@ -484,6 +508,24 @@ const HealthLogPage = () => {
               onConfirm={handleConfirmSkip}
               cancelVariant="danger"
               confirmVariant="success"
+            />
+
+            <Dialog
+              isOpen={!!confirmCancelTask}
+              onClose={() => setConfirmCancelTask(null)}
+              message={
+                <>
+                  Cancel {confirmCancelTask?.pigs?.name}'s{' '}
+                  {getTaskLabel(
+                    confirmCancelTask?.task_type ?? ''
+                  ).toLowerCase()}
+                  ? This removes the task.
+                </>
+              }
+              onConfirm={handleConfirmCancel}
+              confirmLabel="Remove"
+              cancelLabel="Keep"
+              confirmVariant="danger"
             />
           </div>
         )}

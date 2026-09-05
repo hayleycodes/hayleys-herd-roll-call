@@ -15,6 +15,7 @@ import {
   createPigCareTask,
   createOneOffTask,
   completeOneOffTask,
+  deletePigCareTask,
   markTaskDone,
 } from '../../services/recurring-tasks.service';
 import type {
@@ -81,6 +82,8 @@ const CareHealthPanel = ({
   const [savingWeight, setSavingWeight] = useState(false);
   const [confirmSkipTask, setConfirmSkipTask] =
     useState<PigRecurringTask | null>(null);
+  const [confirmCancelTask, setConfirmCancelTask] =
+    useState<PigRecurringTask | null>(null);
 
   const handleAddWeight = async () => {
     const grams = parseInt(weightInput, 10);
@@ -121,6 +124,17 @@ const CareHealthPanel = ({
     if (!confirmSkipTask) return;
     await markTaskDone(pig.id, confirmSkipTask.task_type);
     setConfirmSkipTask(null);
+    onRecurringUpdate?.();
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!confirmCancelTask) return;
+    if (confirmCancelTask.frequency_days_override === null) {
+      await completeOneOffTask(confirmCancelTask.id);
+    } else {
+      await deletePigCareTask(pig.id, confirmCancelTask.task_type);
+    }
+    setConfirmCancelTask(null);
     onRecurringUpdate?.();
   };
 
@@ -206,6 +220,7 @@ const CareHealthPanel = ({
                     }
                     onSkip={() => setConfirmSkipTask(task)}
                     onDone={() => handleMarkCareDone(task)}
+                    onCancel={() => setConfirmCancelTask(task)}
                   />
                 );
               })}
@@ -216,6 +231,7 @@ const CareHealthPanel = ({
                   meta="One-off"
                   variant="oneoff"
                   onDone={() => handleMarkCareDone(task)}
+                  onCancel={() => setConfirmCancelTask(task)}
                 />
               ))}
             </div>
@@ -362,6 +378,22 @@ const CareHealthPanel = ({
         onConfirm={handleConfirmSkip}
         cancelVariant="danger"
         confirmVariant="success"
+      />
+
+      <Dialog
+        isOpen={!!confirmCancelTask}
+        onClose={() => setConfirmCancelTask(null)}
+        message={
+          <>
+            Cancel {pig.name}'s{' '}
+            {getTaskLabel(confirmCancelTask?.task_type ?? '').toLowerCase()}?
+            This removes the task.
+          </>
+        }
+        onConfirm={handleConfirmCancel}
+        confirmLabel="Remove"
+        cancelLabel="Keep"
+        confirmVariant="danger"
       />
     </Panel>
   );

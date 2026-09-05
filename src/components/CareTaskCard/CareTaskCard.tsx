@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import PigThumb from '../ui/PigThumb/PigThumb';
+import EmojiButton from '../ui/EmojiButton/EmojiButton';
 import './CareTaskCard.css';
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
   pigId?: number;
   onSkip?: () => void;
   onDone?: () => void;
+  onCancel?: () => void;
   variant?: 'default' | 'overdue' | 'oneoff';
 }
 
@@ -24,6 +26,7 @@ const CareTaskCard = ({
   pigId,
   onSkip,
   onDone,
+  onCancel,
   variant = 'default',
 }: Props) => {
   const variantClass =
@@ -59,6 +62,16 @@ const CareTaskCard = ({
         <button className="btn btn--outline" onClick={onDone}>
           Done
         </button>
+      )}
+      {onCancel && (
+        <EmojiButton
+          size="sm"
+          className="careTaskCancelBtn"
+          aria-label="Cancel task"
+          onClick={onCancel}
+        >
+          🗑️
+        </EmojiButton>
       )}
     </div>
   );

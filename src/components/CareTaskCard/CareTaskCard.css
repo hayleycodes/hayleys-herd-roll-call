@@ -4,7 +4,7 @@
   background-color: color-mix(in srgb, var(--panel-color, #a0caa2) 25%, white);
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }
 
 .careTaskCardOverdue {
@@ -12,14 +12,9 @@
   border: 2px dashed #e63946;
 }
 
-.careTaskCardOverdue .btn--outline {
-  border-color: #e63946;
-  color: #e63946;
-}
-
-.careTaskCard:not(.careTaskCardOverdue) .btn--outline {
+.careTaskCard .btn--outline {
   border-color: var(--panel-color, #a0caa2);
-  color: #1a4d1a;
+  color: var(--panel-color, #a0caa2);
 }
 
 .careTaskCardOneoff {
@@ -74,6 +69,10 @@
 .careTaskMeta {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
+}
+
+.careTaskCancelBtn {
+  border-color: var(--panel-color, #a0caa2);
 }
 
 .careOverdueBadge {
