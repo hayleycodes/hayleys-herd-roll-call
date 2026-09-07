@@ -275,15 +275,16 @@ const ReviewPage = () => {
           <p className="reviewAllCaughtUp">All caught up! 🎉</p>
         ) : (
           <div className="reviewCarousel">
-            <button
-              type="button"
-              className="reviewArrow reviewArrowPrev"
-              aria-label="Previous candidate"
-              disabled={index === 0}
-              onClick={goPrev}
-            >
-              ‹
-            </button>
+            {index > 0 && (
+              <button
+                type="button"
+                className="reviewArrow reviewArrowPrev"
+                aria-label="Previous candidate"
+                onClick={goPrev}
+              >
+                ‹
+              </button>
+            )}
 
             <div className="reviewViewport">
               <div
@@ -315,15 +316,16 @@ const ReviewPage = () => {
               </div>
             </div>
 
-            <button
-              type="button"
-              className="reviewArrow reviewArrowNext"
-              aria-label="Next candidate"
-              disabled={index >= candidates.length - 1}
-              onClick={goNext}
-            >
-              ›
-            </button>
+            {index < candidates.length - 1 && (
+              <button
+                type="button"
+                className="reviewArrow reviewArrowNext"
+                aria-label="Next candidate"
+                onClick={goNext}
+              >
+                ›
+              </button>
+            )}
           </div>
         )}
       </Panel>
