@@ -58,6 +58,9 @@ interface ReviewCardProps {
   position: number;
   total: number;
   busy: boolean;
+  isActive: boolean;
+  hasPrev: boolean;
+  hasNext: boolean;
   pigsById: Map<number, Pig>;
   livingPigs: Pig[];
   selectedPigId: number | undefined;
@@ -66,6 +69,8 @@ interface ReviewCardProps {
   onConfirm: (pigId: number) => void;
   onUnknown: () => void;
   onReject: () => void;
+  onPrev: () => void;
+  onNext: () => void;
 }
 
 const ReviewCard = ({
@@ -73,6 +78,9 @@ const ReviewCard = ({
   position,
   total,
   busy,
+  isActive,
+  hasPrev,
+  hasNext,
   pigsById,
   livingPigs,
   selectedPigId,
@@ -81,6 +89,8 @@ const ReviewCard = ({
   onConfirm,
   onUnknown,
   onReject,
+  onPrev,
+  onNext,
 }: ReviewCardProps) => {
   const guesses = (c.top_guesses ?? []).filter((g) => pigsById.has(g.pig_id));
   const selectedPig =
@@ -88,7 +98,29 @@ const ReviewCard = ({
 
   return (
     <div className={`reviewCard ${busy ? 'reviewCardBusy' : ''}`}>
-      <CropImage path={c.crop_path} />
+      <div className="reviewCropWrap">
+        <CropImage path={c.crop_path} />
+        {isActive && hasPrev && (
+          <button
+            type="button"
+            className="reviewArrow reviewArrowPrev"
+            aria-label="Previous candidate"
+            onClick={onPrev}
+          >
+            ‹
+          </button>
+        )}
+        {isActive && hasNext && (
+          <button
+            type="button"
+            className="reviewArrow reviewArrowNext"
+            aria-label="Next candidate"
+            onClick={onNext}
+          >
+            ›
+          </button>
+        )}
+      </div>
 
       <div className="reviewCardBody">
         <div className="reviewGuesses">
@@ -275,17 +307,6 @@ const ReviewPage = () => {
           <p className="reviewAllCaughtUp">All caught up! 🎉</p>
         ) : (
           <div className="reviewCarousel">
-            {index > 0 && (
-              <button
-                type="button"
-                className="reviewArrow reviewArrowPrev"
-                aria-label="Previous candidate"
-                onClick={goPrev}
-              >
-                ‹
-              </button>
-            )}
-
             <div className="reviewViewport">
               <div
                 className="reviewTrack"
@@ -302,6 +323,9 @@ const ReviewPage = () => {
                       position={i + 1}
                       total={candidates.length}
                       busy={busyId === c.id}
+                      isActive={i === index}
+                      hasPrev={index > 0}
+                      hasNext={index < candidates.length - 1}
                       pigsById={pigsById}
                       livingPigs={livingPigs}
                       selectedPigId={selection[c.id]}
@@ -310,22 +334,13 @@ const ReviewPage = () => {
                       onConfirm={(pigId) => handleConfirm(c.id, pigId)}
                       onUnknown={() => handleUnknown(c.id)}
                       onReject={() => handleReject(c.id)}
+                      onPrev={goPrev}
+                      onNext={goNext}
                     />
                   </div>
                 ))}
               </div>
             </div>
-
-            {index < candidates.length - 1 && (
-              <button
-                type="button"
-                className="reviewArrow reviewArrowNext"
-                aria-label="Next candidate"
-                onClick={goNext}
-              >
-                ›
-              </button>
-            )}
           </div>
         )}
       </Panel>

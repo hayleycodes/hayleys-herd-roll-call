@@ -75,12 +75,15 @@
   transition: 0.15s ease;
 }
 
+/* The wrapper sits --spacing-md inside the card border. Pulling out by exactly
+   that padding rests the arrow flush against the inside of the card's blue
+   edge — the card sits in an overflow:hidden viewport, so it can't overhang. */
 .reviewArrowPrev {
-  left: calc(-1 * var(--spacing-sm));
+  left: calc(-1 * var(--spacing-md));
 }
 
 .reviewArrowNext {
-  right: calc(-1 * var(--spacing-sm));
+  right: calc(-1 * var(--spacing-md));
 }
 
 .reviewArrow:hover:not(:disabled) {
@@ -110,6 +113,16 @@
 .reviewCardBusy {
   opacity: 0.5;
   pointer-events: none;
+}
+
+/* Spans the full card width (so the arrows can sit on the card's edges) while
+   centering the image inside it. Its height matches the image, so the arrows'
+   top: 50% lands on the photo rather than the much taller card. */
+.reviewCropWrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .reviewCrop {
@@ -307,14 +320,14 @@
     font-size: var(--font-size-xl);
   }
 
-  /* Sit the arrows just inside the card edges so they aren't clipped at the
-     viewport edge on narrow screens. */
+  /* On small screens the card sits close to the viewport edge, so keep the
+     arrows just inside the card border to avoid clipping. */
   .reviewArrowPrev {
-    left: var(--spacing-xs);
+    left: calc(-1 * var(--spacing-xs));
   }
 
   .reviewArrowNext {
-    right: var(--spacing-xs);
+    right: calc(-1 * var(--spacing-xs));
   }
 
   .reviewCard {
