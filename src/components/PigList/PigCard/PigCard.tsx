@@ -16,6 +16,7 @@ type Props = {
   notSightedToday?: boolean;
   hideLastSeen?: boolean;
   sighted?: boolean;
+  greyed?: boolean;
   highlightUnseen?: boolean;
   crowned?: boolean;
   pinned?: boolean;
@@ -35,6 +36,7 @@ const PigCard = ({
   notSightedToday,
   hideLastSeen,
   sighted,
+  greyed,
   highlightUnseen,
   crowned,
   pinned,
@@ -70,7 +72,7 @@ const PigCard = ({
 
   return (
     <div
-      className={`pigCard ${pigColorClass}${popClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}${stale ? ' pigCardStale' : ''}${pinned ? ' pigCardPinned' : ''}`}
+      className={`pigCard ${pigColorClass}${popClass}${passed ? ' pigCardPassed' : ''}${sick ? ' pigCardSick' : ''}${stale ? ' pigCardStale' : ''}${pinned ? ' pigCardPinned' : ''}${greyed ? ' pigCardGreyed' : ''}`}
       style={
         popPhase
           ? ({

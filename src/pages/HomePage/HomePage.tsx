@@ -11,6 +11,7 @@ import type { Pig } from '../../services/pigs.types';
 import EmojiButton from '../../components/ui/EmojiButton/EmojiButton';
 import Loading from '../../components/ui/Loading/Loading';
 import { getErrorMessage } from '../../lib/get-error-message';
+import { REMOVE_SIGHTED_FROM_UNSEEN } from '../../config/features';
 
 type HomePageProps = {
   refreshKey?: number;
@@ -24,6 +25,9 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
+  // Pigs that were unseen when the filter was turned on, so they stay listed
+  // (greyed) after being sighted.
+  const [unseenSnapshot, setUnseenSnapshot] = useState<Set<number>>(new Set());
   const [search, setSearch] = useState('');
   const [camVisible, setCamVisible] = useState(true);
   const [rotated, setRotated] = useState(false);
@@ -95,7 +99,9 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
 
   const filteredPigs = (
     filter === 'unseen'
-      ? unseenPigs
+      ? REMOVE_SIGHTED_FROM_UNSEEN
+        ? unseenPigs
+        : pigs.filter((p) => unseenSnapshot.has(p.id))
       : filter === 'sick'
         ? pigs.filter((p) => sickPigIds.has(p.id))
         : pigs
@@ -124,7 +130,12 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
             {unseenCount > 0 && (
               <button
                 className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}
-                onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
+                onClick={() => {
+                  if (filter !== 'unseen') {
+                    setUnseenSnapshot(new Set(unseenPigs.map((p) => p.id)));
+                  }
+                  setFilter(filter === 'unseen' ? null : 'unseen');
+                }}
               >
                 👀 {unseenCount}
               </button>

@@ -11,7 +11,11 @@ import {
 } from '../../services/pigs.service';
 import { addPigMood, MOOD_OPTIONS } from '../../services/pig-moods.service';
 import '../../components/MoodPanel/MoodPanel.css';
-import { FEATURE_MOOD, FEATURE_PIN } from '../../config/features';
+import {
+  FEATURE_MOOD,
+  FEATURE_PIN,
+  REMOVE_SIGHTED_FROM_UNSEEN,
+} from '../../config/features';
 import PassedPigList from './PassedPigList/PassedPigList';
 import Modal from '../ui/Modal/Modal';
 import Button from '../ui/Button/Button';
@@ -160,7 +164,8 @@ const PigList = ({
     // right away — just confetti, no reshuffle. With the filter active, defer it
     // until the confetti has played (below): dropping last_sighted removes the
     // card from the filtered list, and the cards below pop up to fill the gap.
-    if (!unseenFilterActive) markSighted();
+    const removeFromList = unseenFilterActive && REMOVE_SIGHTED_FROM_UNSEEN;
+    if (!removeFromList) markSighted();
 
     try {
       await createPigSighting(pig.id);
@@ -187,7 +192,7 @@ const PigList = ({
     // Let the confetti play, then drop the pig from the filtered list. Her card
     // fades out (AnimatePresence exit) while the cards below pop up to fill the
     // gap (popPhase toggle re-runs the pigCardPop keyframe on them).
-    if (unseenFilterActive) {
+    if (removeFromList) {
       setTimeout(() => {
         markSighted();
         setPopFromIndex(oldIndex);
@@ -247,34 +252,41 @@ const PigList = ({
         animate="show"
       >
         <AnimatePresence mode="popLayout">
-          {pigs.map((pig, i) => (
-            <motion.div
-              key={pig.id}
-              variants={listItemVariants}
-              exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.3 } }}
-            >
-              <PigCard
-                pig={pig}
-                popPhase={i >= popFromIndex ? popPhase : null}
-                popIndex={i - popFromIndex}
-                sick={sickPigIds?.has(pig.id)}
-                stale={isPigStale(pig)}
-                notSightedToday={
-                  !pig.last_sighted ||
-                  new Date(pig.last_sighted).toDateString() !== today
-                }
-                sighted={sightedPigs.has(pig.id)}
-                crowned={topPigIds?.has(pig.id)}
-                highlightUnseen={unseenFilterActive}
-                pinned={pig.pinned}
-                onEyeClick={(origin) => handleSighting(pig, origin)}
-                onUndoClick={() => handleUndo(pig)}
-                onPinClick={
-                  FEATURE_PIN ? () => handleTogglePin(pig) : undefined
-                }
-              />
-            </motion.div>
-          ))}
+          {pigs.map((pig, i) => {
+            const notSightedToday =
+              !pig.last_sighted ||
+              new Date(pig.last_sighted).toDateString() !== today;
+            return (
+              <motion.div
+                key={pig.id}
+                variants={listItemVariants}
+                exit={{
+                  opacity: 0,
+                  scale: 0.85,
+                  transition: { duration: 0.3 },
+                }}
+              >
+                <PigCard
+                  pig={pig}
+                  popPhase={i >= popFromIndex ? popPhase : null}
+                  popIndex={i - popFromIndex}
+                  sick={sickPigIds?.has(pig.id)}
+                  stale={isPigStale(pig)}
+                  notSightedToday={notSightedToday}
+                  greyed={unseenFilterActive && !notSightedToday}
+                  sighted={sightedPigs.has(pig.id)}
+                  crowned={topPigIds?.has(pig.id)}
+                  highlightUnseen={unseenFilterActive}
+                  pinned={pig.pinned}
+                  onEyeClick={(origin) => handleSighting(pig, origin)}
+                  onUndoClick={() => handleUndo(pig)}
+                  onPinClick={
+                    FEATURE_PIN ? () => handleTogglePin(pig) : undefined
+                  }
+                />
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       </motion.div>
 
