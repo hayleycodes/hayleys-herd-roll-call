@@ -25,9 +25,6 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
-  // Pigs that were unseen when the filter was turned on, so they stay listed
-  // (greyed) after being sighted.
-  const [unseenSnapshot, setUnseenSnapshot] = useState<Set<number>>(new Set());
   const [search, setSearch] = useState('');
   const [camVisible, setCamVisible] = useState(true);
   const [rotated, setRotated] = useState(false);
@@ -101,7 +98,7 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
     filter === 'unseen'
       ? REMOVE_SIGHTED_FROM_UNSEEN
         ? unseenPigs
-        : pigs.filter((p) => unseenSnapshot.has(p.id))
+        : pigs // seen pigs stay listed, greyed out
       : filter === 'sick'
         ? pigs.filter((p) => sickPigIds.has(p.id))
         : pigs
@@ -130,12 +127,7 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
             {unseenCount > 0 && (
               <button
                 className={`homePageFilter filterBtn${filter === 'unseen' ? ' filterBtnActive' : ''}`}
-                onClick={() => {
-                  if (filter !== 'unseen') {
-                    setUnseenSnapshot(new Set(unseenPigs.map((p) => p.id)));
-                  }
-                  setFilter(filter === 'unseen' ? null : 'unseen');
-                }}
+                onClick={() => setFilter(filter === 'unseen' ? null : 'unseen')}
               >
                 👀 {unseenCount}
               </button>
