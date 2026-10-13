@@ -129,6 +129,11 @@
   flex: 0 0 auto;
   width: 100%;
   max-width: 380px;
+  /* Fix the crop's box so every card is the same height regardless of the
+     review image's aspect ratio — otherwise the card jumps around as you
+     navigate between differently-shaped detections. */
+  aspect-ratio: 4 / 3;
+  max-height: 285px;
   padding: 0;
   border: none;
   border-radius: var(--border-radius-md);
@@ -138,12 +143,14 @@
   cursor: zoom-in;
 }
 
-/* Show the whole review image (and its full detection box) at natural aspect,
-   rather than cropping it to a square. */
+/* Fill the fixed crop box, cropping to cover so the box (and the pig) stays
+   framed at a consistent size across all cards. */
 .reviewCrop img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 /* On small screens let the crop fill the card edge-to-edge (cancelling the
@@ -181,7 +188,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;
   font-size: var(--font-size-2xl);
 }
 
