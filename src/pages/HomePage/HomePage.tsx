@@ -26,7 +26,7 @@ const HomePage = ({ refreshKey }: HomePageProps) => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'unseen' | 'sick' | null>(null);
   const [search, setSearch] = useState('');
-  const [camVisible, setCamVisible] = useState(true);
+  const [camVisible, setCamVisible] = useState(false);
   const [rotated, setRotated] = useState(false);
   const modalContainerRef = useRef<HTMLDivElement>(null);
   const loadPigs = async () => {
