@@ -541,14 +541,20 @@ const PigPage = () => {
           ) : (
             <h1 className="pigName">{pig.name}</h1>
           )}
-          {pig.last_sighted && (
-            <span className="detailSighted">
-              Last sighted:{' '}
-              {formatDistanceToNow(new Date(pig.last_sighted), {
-                addSuffix: true,
-              })}
-            </span>
-          )}
+          {pig.passed_away
+            ? !isNaN(new Date(pig.passed_away).getTime()) && (
+                <span className="detailSighted">
+                  Passed on {new Date(pig.passed_away).toLocaleDateString()}
+                </span>
+              )
+            : pig.last_sighted && (
+                <span className="detailSighted">
+                  Last sighted:{' '}
+                  {formatDistanceToNow(new Date(pig.last_sighted), {
+                    addSuffix: true,
+                  })}
+                </span>
+              )}
         </div>
 
         <div className="detailBody">

@@ -52,11 +52,17 @@ const PigCard = ({
   const [wiggling, setWiggling] = useState(false);
   const circleRef = useRef<HTMLDivElement>(null);
 
-  const lastSighted = pig.last_sighted
-    ? formatDistanceToNow(new Date(pig.last_sighted), {
-        addSuffix: true,
-      })
-    : '';
+  const passedDate = pig.passed_away ? new Date(pig.passed_away) : null;
+  const sightedText =
+    passed || pig.passed_away
+      ? passedDate && !isNaN(passedDate.getTime())
+        ? `Passed on ${passedDate.toLocaleDateString()}`
+        : ''
+      : pig.last_sighted
+        ? formatDistanceToNow(new Date(pig.last_sighted), {
+            addSuffix: true,
+          })
+        : '';
 
   const pigColorClass = getPigColorClass(pig.id, sick, stale);
   const eyeUnseen = notSightedToday && !sick;
@@ -181,7 +187,7 @@ const PigCard = ({
           )}
           {!hideLastSeen && (
             <div className="pigCardSighted">
-              <span>{lastSighted}</span>
+              <span>{sightedText}</span>
             </div>
           )}
         </div>
